@@ -53,7 +53,7 @@ def save_svgs(concept: str, svgs: list, output_dir: str):
 
 
 def main():
-    concept = "dog"
+    concept = "cow"
     examples = collect_examples(concept, "examples")
 
     svgs = generate_svg_multiple(concept, examples, 10)

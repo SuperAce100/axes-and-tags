@@ -10,7 +10,7 @@ import shutil
 
 
 class SVGViewer:
-    def __init__(self, root, svg_path, save_path=None):
+    def __init__(self, root, svg_path, save_path=None, concept=None):
         self.root = root
         self.root.title("SVG Viewer")
         self.root.geometry("800x600")
@@ -20,7 +20,7 @@ class SVGViewer:
         self.save_path = Path(save_path) if save_path else None
         self.svg_files = list(self.svg_path.glob("*.svg"))
         self.current_index = 0
-
+        self.concept = concept
         self.setup_ui()
         self.setup_keyboard_shortcuts()
         # Wait for window to be ready
@@ -125,7 +125,7 @@ class SVGViewer:
 
         if save_dir:
             current_svg = self.svg_files[self.current_index]
-            save_path = Path(save_dir) / current_svg.name
+            save_path = Path(save_dir) / f"{self.concept}.svg"
             os.makedirs(save_path.parent, exist_ok=True)
 
             try:
@@ -139,7 +139,8 @@ def main():
 
     svg_path = sys.argv[1] if len(sys.argv) > 1 else "."
     save_path = sys.argv[2] if len(sys.argv) > 2 else None
-    SVGViewer(root, svg_path, save_path)
+    concept = sys.argv[3] if len(sys.argv) > 3 else "example"
+    SVGViewer(root, svg_path, save_path, concept)
     root.mainloop()
 
 
