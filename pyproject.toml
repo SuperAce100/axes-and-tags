@@ -1,0 +1,13 @@
+[project]
+name = "svgrl"
+version = "0.1.0"
+description = "In context reinforcement learning to generate SVGs"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "cairosvg>=2.7.1",
+    "openai>=1.72.0",
+    "pillow>=11.1.0",
+    "python-dotenv>=1.1.0",
+    "tiktoken>=0.9.0",
+]

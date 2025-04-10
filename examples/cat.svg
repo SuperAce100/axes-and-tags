@@ -1,0 +1,273 @@
+<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- 
+    Main cat body structure
+    Using a simple ellipse to create the cat's body
+    The fill is set to "none" to create just an outline
+  -->
+  <ellipse 
+    id="body" 
+    cx="150" 
+    cy="200" 
+    rx="70" 
+    ry="60" 
+    stroke="black" 
+    stroke-width="2" 
+    fill="none"
+  />
+  
+  <!-- 
+    Cat's head
+    Created with a circle that's slightly smaller than the body
+    Positioned above the body to create proper proportions
+  -->
+  <circle 
+    id="head" 
+    cx="150" 
+    cy="100" 
+    r="50" 
+    stroke="black" 
+    stroke-width="2" 
+    fill="none"
+  />
+  
+  <!-- 
+    Left ear
+    Using a triangular path to create a pointed ear
+    Positioned on the upper left side of the head
+  -->
+  <path 
+    id="left-ear" 
+    d="M120,70 L100,30 L130,50 Z" 
+    stroke="black" 
+    stroke-width="2" 
+    fill="none"
+  />
+  
+  <!-- 
+    Right ear
+    Mirror of the left ear, positioned on the upper right side
+    Using the same triangular shape for symmetry
+  -->
+  <path 
+    id="right-ear" 
+    d="M180,70 L200,30 L170,50 Z" 
+    stroke="black" 
+    stroke-width="2" 
+    fill="none"
+  />
+  
+  <!-- 
+    Left eye
+    Simple circular shape for the eye
+    Positioned on the left side of the face
+  -->
+  <circle 
+    id="left-eye" 
+    cx="130" 
+    cy="90" 
+    r="8" 
+    stroke="black" 
+    stroke-width="2" 
+    fill="none"
+  />
+  
+  <!-- 
+    Left pupil
+    Small filled circle inside the eye
+    Creates the appearance of a pupil
+  -->
+  <circle 
+    id="left-pupil" 
+    cx="130" 
+    cy="90" 
+    r="3" 
+    stroke="black" 
+    stroke-width="1" 
+    fill="black"
+  />
+  
+  <!-- 
+    Right eye
+    Matching the left eye for symmetry
+    Positioned on the right side of the face
+  -->
+  <circle 
+    id="right-eye" 
+    cx="170" 
+    cy="90" 
+    r="8" 
+    stroke="black" 
+    stroke-width="2" 
+    fill="none"
+  />
+  
+  <!-- 
+    Right pupil
+    Matching the left pupil
+    Creates balanced facial features
+  -->
+  <circle 
+    id="right-pupil" 
+    cx="170" 
+    cy="90" 
+    r="3" 
+    stroke="black" 
+    stroke-width="1" 
+    fill="black"
+  />
+  
+  <!-- 
+    Nose
+    Small triangular shape for the cat's nose
+    Positioned in the center of the face
+  -->
+  <path 
+    id="nose" 
+    d="M145,105 L155,105 L150,115 Z" 
+    stroke="black" 
+    stroke-width="2" 
+    fill="none"
+  />
+  
+  <!-- 
+    Mouth
+    Simple curved line for the cat's mouth
+    Positioned below the nose
+  -->
+  <path 
+    id="mouth" 
+    d="M140,125 Q150,135 160,125" 
+    stroke="black" 
+    stroke-width="2" 
+    fill="none"
+  />
+  
+  <!-- 
+    Left whiskers (3 lines)
+    These create the characteristic cat whiskers
+    Extending from the left side of the face
+  -->
+  <line 
+    id="left-whisker-1" 
+    x1="135" 
+    y1="110" 
+    x2="90" 
+    y2="100" 
+    stroke="black" 
+    stroke-width="1.5"
+  />
+  <line 
+    id="left-whisker-2" 
+    x1="135" 
+    y1="115" 
+    x2="85" 
+    y2="115" 
+    stroke="black" 
+    stroke-width="1.5"
+  />
+  <line 
+    id="left-whisker-3" 
+    x1="135" 
+    y1="120" 
+    x2="90" 
+    y2="130" 
+    stroke="black" 
+    stroke-width="1.5"
+  />
+  
+  <!-- 
+    Right whiskers (3 lines)
+    Mirror of the left whiskers
+    Extending from the right side of the face
+  -->
+  <line 
+    id="right-whisker-1" 
+    x1="165" 
+    y1="110" 
+    x2="210" 
+    y2="100" 
+    stroke="black" 
+    stroke-width="1.5"
+  />
+  <line 
+    id="right-whisker-2" 
+    x1="165" 
+    y1="115" 
+    x2="215" 
+    y2="115" 
+    stroke="black" 
+    stroke-width="1.5"
+  />
+  <line 
+    id="right-whisker-3" 
+    x1="165" 
+    y1="120" 
+    x2="210" 
+    y2="130" 
+    stroke="black" 
+    stroke-width="1.5"
+  />
+  
+  <!-- 
+    Left front leg
+    Simple line for the leg and an ellipse for the paw
+    Positioned on the lower left side of the body
+  -->
+  <line 
+    id="left-front-leg" 
+    x1="110" 
+    y1="230" 
+    x2="100" 
+    y2="260" 
+    stroke="black" 
+    stroke-width="2"
+  />
+  <ellipse 
+    id="left-front-paw" 
+    cx="100" 
+    cy="265" 
+    rx="10" 
+    ry="7" 
+    stroke="black" 
+    stroke-width="2" 
+    fill="none"
+  />
+  
+  <!-- 
+    Right front leg
+    Matching the left leg for symmetry
+    Positioned on the lower right side of the body
+  -->
+  <line 
+    id="right-front-leg" 
+    x1="190" 
+    y1="230" 
+    x2="200" 
+    y2="260" 
+    stroke="black" 
+    stroke-width="2"
+  />
+  <ellipse 
+    id="right-front-paw" 
+    cx="200" 
+    cy="265" 
+    rx="10" 
+    ry="7" 
+    stroke="black" 
+    stroke-width="2" 
+    fill="none"
+  />
+  
+  <!-- 
+    Tail
+    Curved path that creates a typical cat tail shape
+    Extending from the rear of the body
+  -->
+  <path 
+    id="tail" 
+    d="M210,180 Q240,150 260,190 Q270,210 250,220" 
+    stroke="black" 
+    stroke-width="2" 
+    fill="none"
+  />
+</svg>
