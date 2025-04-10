@@ -9,7 +9,6 @@ import os
 import shutil
 
 
-
 class SVGViewer:
     def __init__(self, root, svg_path, save_path=None):
         self.root = root
@@ -137,7 +136,6 @@ class SVGViewer:
 
 def main():
     root = tk.Tk()
-
 
     svg_path = sys.argv[1] if len(sys.argv) > 1 else "."
     save_path = sys.argv[2] if len(sys.argv) > 2 else None
