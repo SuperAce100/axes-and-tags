@@ -3,12 +3,29 @@ from models.models import llm_call
 from lib.utils import parse_svg
 import os
 import concurrent.futures
+from sentence_transformers import SentenceTransformer
+import numpy as np
 
 
-def collect_examples(concept: str, examples_dir: str):
+def collect_examples(concept: str, examples_dir: str, n: int = 10):
     examples = ""
 
-    svg_files = [f for f in os.listdir(examples_dir) if f.endswith(".svg")]
+    if n > len(os.listdir(examples_dir)):
+        n = len(os.listdir(examples_dir))
+        
+    
+    
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    all_files = [f for f in os.listdir(examples_dir) if f.endswith(".svg")]
+    file_names = [os.path.splitext(f)[0] for f in all_files]
+    
+    concept_embedding = model.encode([concept])[0]
+    filename_embeddings = model.encode(file_names)
+    
+    similarities = np.dot(filename_embeddings, concept_embedding)
+    top_indices = np.argsort(similarities)[-n:][::-1]
+    svg_files = [all_files[i] for i in top_indices]
+    example_names = [file_names[i] for i in top_indices]
 
     for svg_file in svg_files:
         with open(os.path.join(examples_dir, svg_file), "r") as file:
@@ -22,7 +39,7 @@ def collect_examples(concept: str, examples_dir: str):
 
         examples += formatted_example
 
-    return examples
+    return examples, example_names
 
 
 def generate_svg(concept: str, examples: str):
@@ -54,7 +71,7 @@ def save_svgs(concept: str, svgs: list, output_dir: str):
 
 def main():
     concept = "cow"
-    examples = collect_examples(concept, "examples")
+    examples, example_names = collect_examples(concept, "examples")
 
     svgs = generate_svg_multiple(concept, examples, 10)
     save_svgs(concept, svgs, "results/test-3")
