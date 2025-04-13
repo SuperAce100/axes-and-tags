@@ -1,0 +1,159 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!--
+    COMPASS OUTLINE SVG
+
+    Concept: Classic magnetic compass, outline style.
+    - Main compass body is a large, centered circle.
+    - Cardinal point marks (N/E/S/W) as short, non-overlapping lines.
+    - Distinct "needle" as a long, symmetric diamond (so no tip overlaps center spindle or body).
+    - Center spindle: outlined circle.
+    - Subtle ring for degree scale (inner ring, thinner).
+    - No fills, all strokes are 2px solid black. No overlaps.
+
+    Composition:
+    - Compass face centered at (200,200), radius chosen for balanced margins.
+    - All visuals inside 2px stroke perimeter, no elements intersect or overlap stroke outlines.
+  -->
+
+  <!--
+    MAIN BODY
+    Large circle as the compass housing.
+    Center: (200,200), main radius: 160px
+  -->
+  <circle
+    id="compass-body"
+    cx="200"
+    cy="200"
+    r="160"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!--
+    DEGREE SCALE RING
+    Inner circle slightly smaller than main to suggest scale ring.
+    Radius: 140 (visually balanced inside body).
+  -->
+  <circle
+    id="scale-ring"
+    cx="200"
+    cy="200"
+    r="140"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!--
+    CARDINAL MARKS (N, E, S, W)
+    Four straight lines, slightly longer than minor marks.
+    Don't overlap circle outlines or needle.
+    Start at inner radius (125), end at outer ring (140).
+    Calculated for each cardinal direction.
+  -->
+  <!-- North -->
+  <line
+    x1="200" y1="60"
+    x2="200" y2="85"
+    stroke="black"
+    stroke-width="2"
+  />
+  <!-- East -->
+  <line
+    x1="340" y1="200"
+    x2="315" y2="200"
+    stroke="black"
+    stroke-width="2"
+  />
+  <!-- South -->
+  <line
+    x1="200" y1="340"
+    x2="200" y2="315"
+    stroke="black"
+    stroke-width="2"
+  />
+  <!-- West -->
+  <line
+    x1="60" y1="200"
+    x2="85" y2="200"
+    stroke="black"
+    stroke-width="2"
+  />
+
+  <!--
+    ORDINAL TICK MARKS (NE/SE/SW/NW)
+    Shorter lines at 45, 135, 225, 315 degrees.
+    Start at inner radius (130), end at outer ring (140).
+  -->
+  <!-- NE (45deg) -->
+  <line
+    x1="295.7" y1="104.3"
+    x2="288.28" y2="111.72"
+    stroke="black"
+    stroke-width="2"
+  />
+  <!-- SE (135deg) -->
+  <line
+    x1="295.7" y1="295.7"
+    x2="288.28" y2="288.28"
+    stroke="black"
+    stroke-width="2"
+  />
+  <!-- SW (225deg) -->
+  <line
+    x1="104.3" y1="295.7"
+    x2="111.72" y2="288.28"
+    stroke="black"
+    stroke-width="2"
+  />
+  <!-- NW (315deg) -->
+  <line
+    x1="104.3" y1="104.3"
+    x2="111.72" y2="111.72"
+    stroke="black"
+    stroke-width="2"
+  />
+
+  <!--
+    COMPASS NEEDLE
+    Long symmetric diamond shape, aligned N/S,
+    with slightly different tips for "magnetic north" (slightly sharper at top).
+
+    Four points:
+    - North tip:      (200, 105) (15 below outer circle, avoids overlap, very close to N mark)
+    - East/West:      (215, 200) / (185, 200) (10 px off-center, short width)
+    - South tip:      (200, 295) (15 above outer circle)
+    - (Closed back to North)
+
+    Drawn as a path in outline (polygon).
+    All points carefully placed to not overlap scale ring or spindle.
+  -->
+  <polygon
+    id="needle"
+    points="
+      200,110
+      212,200
+      200,290
+      188,200
+    "
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!--
+    CENTER SPINDLE
+    Solid circle at center, as outline.
+    Radius: 16 (needle clears, visually centered).
+  -->
+  <circle
+    id="center-spindle"
+    cx="200"
+    cy="200"
+    r="16"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+</svg>

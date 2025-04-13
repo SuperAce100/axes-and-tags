@@ -9,6 +9,8 @@ import numpy as np
 
 def collect_examples(concept: str, examples_dir: str, n: int = 10):
     examples = ""
+    if n == 0:
+        return examples, []
 
     if n > len(os.listdir(examples_dir)):
         n = len(os.listdir(examples_dir))

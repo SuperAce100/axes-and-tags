@@ -1,0 +1,40 @@
+<svg width="200" height="200" viewBox="0 0 200 200" stroke="black" stroke-width="2" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 
+    MAIN CUP BODY:
+    Draw an ellipse to represent the open top of the cup, then 
+    an arc below to form the side/body. 
+  -->
+  <ellipse cx="100" cy="100" rx="45" ry="15" />
+  <!-- Cup body: U-shape arc under the ellipse -->
+  <path d="M55 100 
+           Q50 145 100 150 
+           Q150 145 145 100" />
+  <!-- Cup base (bottom arc): Small ellipse at the bottom to indicate base -->
+  <ellipse cx="100" cy="148" rx="25" ry="6" />
+  
+  <!-- 
+    HANDLE: 
+    Use a semi-oval on the right of the cup. 
+  -->
+  <path d="M145 112 
+           Q170 125 140 140" />
+  
+  <!-- 
+    TEA LIQUID:
+    Indicate the tea surface inside the cup as a slightly smaller ellipse within main ellipse.
+  -->
+  <ellipse cx="100" cy="104" rx="34" ry="8" />
+
+  <!-- 
+    STEAM:
+    Draw two wavy lines above the cup to represent steam.
+  -->
+  <!-- First steam line -->
+  <path d="M92 80 
+           Q90 70 100 65 
+           Q110 60 108 55" />
+  <!-- Second steam line -->
+  <path d="M108 84
+           Q115 75 105 70 
+           Q95 65 97 58" />
+</svg>

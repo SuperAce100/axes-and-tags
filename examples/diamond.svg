@@ -1,0 +1,92 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!--
+    DIAMOND OUTLINE SVG
+
+    Concept: Simple, classic gemstone diamond in outline.
+    - Uses only 2px black stroke, no fill.
+    - Multiple lines/paths to represent facets, crown, and pavilion.
+    - All elements are non-overlapping and readable.
+    - No fill anywhere.
+    - Centered and as large as possible within the viewBox.
+
+    Construction plan:
+    - Top is a wide flat line (table).
+    - Two sloped lines from each table end downward (crown facets).
+    - Four more outward and downward lines forming the sides.
+    - Bottom converges in a sharp tip ("culet").
+    - Facet lines across for geometry.
+    - All joins are corners, not overlapping.
+  -->
+
+  <!--
+    OUTER SHAPE
+    7 key points (going from top left to bottom and up again):
+      - A: left table (80,80)
+      - B: right table (320,80)
+      - C: far right shoulder (370,180)
+      - D: tip/culet (200,360)
+      - E: far left shoulder (30,180)
+      - (back to A to close)
+    The actual outline is open (not closed at the top), so top is a straight table.
+  -->
+
+  <!-- Table/top -->
+  <line x1="80" y1="80" x2="320" y2="80" stroke="black" stroke-width="2"/>
+
+  <!-- Left crown facet -->
+  <line x1="80" y1="80" x2="30" y2="180" stroke="black" stroke-width="2"/>
+
+  <!-- Left pavilion facet -->
+  <line x1="30" y1="180" x2="200" y2="360" stroke="black" stroke-width="2"/>
+
+  <!-- Right pavilion facet -->
+  <line x1="200" y1="360" x2="370" y2="180" stroke="black" stroke-width="2"/>
+
+  <!-- Right crown facet -->
+  <line x1="370" y1="180" x2="320" y2="80" stroke="black" stroke-width="2"/>
+
+  <!--
+    INTERNAL FACET LINES
+
+    Top of table has three points:
+      - A: (80,80)
+      - F: (200,80)  [center of table]
+      - B: (320,80)
+
+    Shoulders (sides) have two more points for faceting:
+      - G: (120,180)  [left shoulder]
+      - H: (280,180)  [right shoulder]
+
+    Lines drawn to make basic internal facets:
+  -->
+
+  <!-- Vertical center line: Table center to tip -->
+  <line x1="200" y1="80" x2="200" y2="360" stroke="black" stroke-width="2"/>
+
+  <!-- Left table edge to left shoulder -->
+  <line x1="80" y1="80" x2="120" y2="180" stroke="black" stroke-width="2"/>
+
+  <!-- Right table edge to right shoulder -->
+  <line x1="320" y1="80" x2="280" y2="180" stroke="black" stroke-width="2"/>
+
+  <!-- Left shoulder to tip -->
+  <line x1="120" y1="180" x2="200" y2="360" stroke="black" stroke-width="2"/>
+
+  <!-- Right shoulder to tip -->
+  <line x1="280" y1="180" x2="200" y2="360" stroke="black" stroke-width="2"/>
+
+  <!-- Table center to left shoulder -->
+  <line x1="200" y1="80" x2="120" y2="180" stroke="black" stroke-width="2"/>
+
+  <!-- Table center to right shoulder -->
+  <line x1="200" y1="80" x2="280" y2="180" stroke="black" stroke-width="2"/>
+
+  <!-- Left outer shoulder to right outer shoulder -->
+  <line x1="30" y1="180" x2="370" y2="180" stroke="black" stroke-width="2"/>
+
+  <!-- Left inner shoulder to right inner shoulder -->
+  <line x1="120" y1="180" x2="280" y2="180" stroke="black" stroke-width="2"/>
+
+  <!-- Additional facet lines (optional, skip for clarity since there's no overlap and main shape is clear) -->
+  
+</svg>

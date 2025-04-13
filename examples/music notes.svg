@@ -1,0 +1,117 @@
+<svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">
+  <!--
+    MUSIC NOTES OUTLINE SVG
+
+    Concept: Musical notes (eighth note + beamed pair) in outline style.
+    - Eighth note (single stem and flag) and a beamed pair (two notes joined by a beam).
+    - No overlapping elements, moderate separation and balance.
+    - All elements outlined with 2px solid black stroke, no fill.
+
+    Composition Plan:
+    - Place a single eighth note on the left, and a beamed eighth note pair on the right.
+    - Each note: oval head, stem, flag (for single) or horizontal beam (for pair).
+    - Stems are vertical and to the right for all notes.
+    - No fill anywhere.
+    - Sufficient spacing vertically and horizontally.
+  -->
+
+  <!--
+    LEFT: Single Eighth Note
+    - Note head: ellipse (30,160), rx=16, ry=11
+    - Stem: vertical line from (45,160) up to (45,90)
+    - Flag: curved path from top of stem (45,90) out and down.
+  -->
+  <!-- Note head (left) -->
+  <ellipse
+    id="single-note-head"
+    cx="30"
+    cy="160"
+    rx="16"
+    ry="11"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  <!-- Stem (left) -->
+  <line
+    id="single-note-stem"
+    x1="45"
+    y1="160"
+    x2="45"
+    y2="90"
+    stroke="black"
+    stroke-width="2"
+  />
+  <!-- Flag (left) -->
+  <path
+    id="single-note-flag"
+    d="M45,90 Q65,100 55,120"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!--
+    RIGHT: Beamed Eighth Note Pair
+    - First note head: (120,120), rx=16, ry=11
+    - Second note head: (180,140), rx=16, ry=11 (slightly lower for realism)
+    - Stems: Both on right of their heads, up. First (135,120) to (135,60), Second (195,140) to (195,80)
+    - Beam: horizontal rectangle/path connecting the tops, slightly sloped (from (135,60) to (195,80))
+  -->
+  <!-- First beamed note head -->
+  <ellipse
+    id="beam-note-head-1"
+    cx="120"
+    cy="120"
+    rx="16"
+    ry="11"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  <!-- First beamed note stem -->
+  <line
+    id="beam-note-stem-1"
+    x1="135"
+    y1="120"
+    x2="135"
+    y2="60"
+    stroke="black"
+    stroke-width="2"
+  />
+  <!-- Second beamed note head -->
+  <ellipse
+    id="beam-note-head-2"
+    cx="180"
+    cy="140"
+    rx="16"
+    ry="11"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  <!-- Second beamed note stem -->
+  <line
+    id="beam-note-stem-2"
+    x1="195"
+    y1="140"
+    x2="195"
+    y2="80"
+    stroke="black"
+    stroke-width="2"
+  />
+  <!-- Beam (connects top of both stems, slightly angled) -->
+  <polygon
+    id="beam"
+    points="135,60 195,80 195,86 135,66"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!--
+    Visual alignment and separation
+    - Notes do not overlap.
+    - Ample empty space for clarity of the outline concept.
+  -->
+</svg>

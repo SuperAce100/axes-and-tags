@@ -1,0 +1,96 @@
+<svg width="240" height="160" viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outline style: 2px solid black strokes, no fill everywhere -->
+
+  <!-- Boat hull: a curved bottom (arc) and a straight deck (line) -->
+  <!-- The hull is a "U" shaped path with flat top -->
+  <path
+    d="M40 120
+       Q70 140 120 140
+       Q170 140 200 120
+       L40 120Z"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  <!-- Deck (top straight line) -->
+  <line
+    x1="40"
+    y1="120"
+    x2="200"
+    y2="120"
+    stroke="black"
+    stroke-width="2"
+  />
+
+  <!-- Mast: a vertical line rising from the center of the hull -->
+  <line
+    x1="120"
+    y1="120"
+    x2="120"
+    y2="45"
+    stroke="black"
+    stroke-width="2"
+  />
+
+  <!-- Mainsail: a triangle outlined to the right of the mast -->
+  <!-- Points: mast top, slightly right of mast at deck, mast at deck -->
+  <polygon
+    points="120,45 170,120 120,120"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!-- Jib: A small triangle in front of the mast -->
+  <polygon
+    points="120,60 120,120 85,120"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!-- Boom: a horizontal line from mast base to mainsail foot -->
+  <line
+    x1="120"
+    y1="120"
+    x2="170"
+    y2="120"
+    stroke="black"
+    stroke-width="2"
+  />
+
+  <!-- Water line: a simple wavy line under the hull, not touching the boat -->
+  <path
+    d="M30 145
+       Q35 142, 40 145
+       Q45 148, 50 145
+       Q55 142, 60 145
+       Q65 148, 70 145
+       Q75 142, 80 145
+       Q85 148, 90 145
+       Q95 142, 100 145
+       Q105 148, 110 145
+       Q115 142, 120 145
+       Q125 148, 130 145
+       Q135 142, 140 145
+       Q145 148, 150 145
+       Q155 142, 160 145
+       Q165 148, 170 145
+       Q175 142, 180 145
+       Q185 148, 190 145
+       Q195 142, 200 145
+       Q205 148, 210 145"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!-- Flag at mast top: a tiny triangle -->
+  <polygon
+    points="120,45 120,53 130,49"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+</svg>

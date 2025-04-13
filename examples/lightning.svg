@@ -1,0 +1,15 @@
+<svg width="104" height="160" viewBox="0 0 104 160" xmlns="http://www.w3.org/2000/svg">
+  <!--
+    The lightning bolt is made with a single <polyline> element.
+    Points chosen for a classic zig-zag shape, filling the canvas.
+    Outline style: black stroke, 2px width, no fill.
+  -->
+  <polyline
+    points="52,8   20,88   46,88   32,152   84,68   58,68   92,8"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+    stroke-linejoin="miter"
+    stroke-linecap="round"
+  />
+</svg>

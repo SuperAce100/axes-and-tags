@@ -78,7 +78,11 @@ class SVGViewer:
 
         svg_file = self.svg_files[self.current_index]
 
-        png_data = cairosvg.svg2png(url=str(svg_file))
+        try:
+            png_data = cairosvg.svg2png(url=str(svg_file))
+        except Exception as e:
+            print(f"Failed to convert SVG {svg_file} to PNG: {e}")
+            return
 
         image = Image.open(io.BytesIO(png_data))
 

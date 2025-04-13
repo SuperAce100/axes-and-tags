@@ -1,0 +1,132 @@
+<svg viewBox="0 0 320 340" xmlns="http://www.w3.org/2000/svg">
+  <!-- 
+    COFFEE OUTLINE SVG
+    - All elements are stroked in 2px solid black and have no fill.
+    - Main objects: cup (body, handle, base), coffee surface, and steam.
+    - All elements carefully spaced to avoid overlap.
+  -->
+  
+  <!--
+    Cup Body
+    - A gently tapered ellipse (top) for the rim.
+    - An oval at the top and a larger arc at the bottom for base.
+    - Sides are rendered with curves to suggest depth.
+  -->
+  <!-- Cup Rim (Ellipse) -->
+  <ellipse
+    id="cup-rim"
+    cx="160"
+    cy="100"
+    rx="70"
+    ry="29"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!-- Cup Sides and Base (main body outline path) -->
+  <path
+    id="cup-body"
+    d="M90 100
+       Q80 200, 160 260
+       Q240 200, 230 100"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!-- Cup Base (ellipse suggested at the bottom) -->
+  <ellipse
+    id="cup-base"
+    cx="160"
+    cy="260"
+    rx="34"
+    ry="11"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  
+  <!--
+    Coffee Surface
+    - An inset ellipse within the rim for the inner "coffee liquid" surface.
+    - Only the top half visible for an outline style, suggests the plane.
+  -->
+  <ellipse
+    id="coffee-surface"
+    cx="160"
+    cy="105"
+    rx="54"
+    ry="21"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  
+  <!--
+    Handle
+    - Outlined as an arc-shaped path on right.
+    - Designed as a C-curve, space from cup side.
+  -->
+  <path
+    id="handle"
+    d="M230 125
+       Q275 170 210 200"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  <!-- Inner handle curve for outline look -->
+  <path
+    id="handle-inner"
+    d="M227 134
+       Q255 170 213 193"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  
+  <!--
+    Saucer (Optional: subtle base, placed under the cup, non-overlapping)
+  -->
+  <ellipse
+    id="saucer"
+    cx="160"
+    cy="278"
+    rx="75"
+    ry="18"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  
+  <!--
+    Steam
+    - Three wavy lines rising from the cup, suggestive, spaced apart.
+    - Do not overlap each other or cup rim.
+  -->
+  <!-- Left steam -->
+  <path
+    id="steam-left"
+    d="M122 73 Q117 59 133 49 Q141 42 134 32"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  <!-- Center steam -->
+  <path
+    id="steam-center"
+    d="M160 67 Q160 52 175 44 Q186 38 175 26"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  <!-- Right steam -->
+  <path
+    id="steam-right"
+    d="M195 81 Q212 61 191 48 Q182 40 192 28"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+</svg>

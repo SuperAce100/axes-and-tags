@@ -1,0 +1,157 @@
+<svg viewBox="0 0 320 600" xmlns="http://www.w3.org/2000/svg">
+  <!--
+    iPHONE OUTLINE SVG
+    
+    Concept: Modern iPhone in outline style (2px solid black, no fill). 
+    Clean, simple, visually recognizable design.
+    Key elements:
+      - Main rounded rectangle body, large screen area inset, earpiece, 
+        side buttons (power & volume), camera circle, home indicator (if applicable).
+      - No element overlaps any other.
+      - No filling; only black outlines.
+      - Proportions loosely modeled after current iPhones.
+  -->
+  
+  <!--
+    Main device body:
+    - Large vertical rounded rectangle.
+    - iPhone aspect (typical "tall" rectangle)
+    - Corners: rx=46 for smooth modern style
+    - Margin inside viewBox
+  -->
+  <rect
+    id="iphone-body"
+    x="30"
+    y="30"
+    width="260"
+    height="540"
+    rx="46"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!--
+    Screen area:
+    - Smaller rounded rectangle inset well inside body (10px all sides for margin)
+    - Corners: rx=36 for screen blending
+    - No overlap with main body
+  -->
+  <rect
+    id="iphone-screen"
+    x="40"
+    y="60"
+    width="240"
+    height="480"
+    rx="36"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!-- 
+    Top earpiece speaker:
+    - Thin horizontal rounded rectangle, centered horizontally.
+    - Placed near top of screen, but below the body edge.
+  -->
+  <rect
+    id="earpiece"
+    x="130"
+    y="76"
+    width="60"
+    height="8"
+    rx="4"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!-- 
+    Front camera (selfie):
+    - Small circle, right of earpiece, above screen midpoint
+  -->
+  <circle
+    id="front-camera"
+    cx="220"
+    cy="80"
+    r="5"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!-- 
+    Left-side volume buttons:
+    - Three short vertical rounded rectangles, well clear of corners and not overlapping body
+    - Left edge (x = 22), y positions below earpiece but above home
+    - All the same shape and size for simplicity
+  -->
+  <rect
+    id="volume-up"
+    x="22"
+    y="110"
+    width="6"
+    height="32"
+    rx="3"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  <rect
+    id="volume-down"
+    x="22"
+    y="160"
+    width="6"
+    height="32"
+    rx="3"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  <rect
+    id="mute-switch"
+    x="22"
+    y="210"
+    width="6"
+    height="18"
+    rx="3"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!-- 
+    Right-side power button:
+    - One long vertical rounded rectangle, right side
+    - x = 292, avoids corner and above midline
+  -->
+  <rect
+    id="power-button"
+    x="292"
+    y="140"
+    width="6"
+    height="60"
+    rx="3"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!-- 
+    Bottom home indicator (rounded modern style, not a button):
+    - Short horizontal rounded rectangle, centered on screen bottom edge
+    - Like the "home bar" on recent iPhones
+    - y is well above edge and screen/inset
+  -->
+  <rect
+    id="home-indicator"
+    x="120"
+    y="522"
+    width="80"
+    height="8"
+    rx="4"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+</svg>

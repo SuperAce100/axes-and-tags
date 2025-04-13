@@ -1,0 +1,171 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- 
+    FLOWER OUTLINE SVG
+
+    This illustration uses only black, 2px stroke, no fills.
+    Elements: central circle (flower center), several petals (elliptical), 
+    a long curved stem, and a pair of simple leaves.
+  -->
+
+  <!-- 
+    Flower center
+    Small circle placed at center of canvas as the core of the flower.
+  -->
+  <circle
+    id="flower-center"
+    cx="200"
+    cy="140"
+    r="22"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!-- 
+    Petals (8 total, arranged radially)
+    Each petal is an ellipse rotated around the flower center.
+    Spacing/petals are deliberately somewhat "hand-drawn" in spirit for charm.
+  -->
+
+  <!-- Top petal -->
+  <ellipse
+    id="petal-top"
+    cx="200"
+    cy="90"
+    rx="18"
+    ry="46"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  <!-- Top-right petal -->
+  <ellipse
+    id="petal-top-right"
+    cx="244"
+    cy="104"
+    rx="18"
+    ry="46"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+    transform="rotate(45 244 104)"
+  />
+  <!-- Right petal -->
+  <ellipse
+    id="petal-right"
+    cx="266"
+    cy="146"
+    rx="18"
+    ry="46"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+    transform="rotate(90 266 146)"
+  />
+  <!-- Bottom-right petal -->
+  <ellipse
+    id="petal-bottom-right"
+    cx="245"
+    cy="190"
+    rx="18"
+    ry="46"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+    transform="rotate(135 245 190)"
+  />
+  <!-- Bottom petal -->
+  <ellipse
+    id="petal-bottom"
+    cx="200"
+    cy="210"
+    rx="18"
+    ry="46"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+    transform="rotate(180 200 210)"
+  />
+  <!-- Bottom-left petal -->
+  <ellipse
+    id="petal-bottom-left"
+    cx="156"
+    cy="191"
+    rx="18"
+    ry="46"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+    transform="rotate(-135 156 191)"
+  />
+  <!-- Left petal -->
+  <ellipse
+    id="petal-left"
+    cx="134"
+    cy="147"
+    rx="18"
+    ry="46"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+    transform="rotate(-90 134 147)"
+  />
+  <!-- Top-left petal -->
+  <ellipse
+    id="petal-top-left"
+    cx="155"
+    cy="104"
+    rx="18"
+    ry="46"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+    transform="rotate(-45 155 104)"
+  />
+
+  <!-- 
+    Stem
+    A single long, gently curved path extending down from the flower center
+    Slight S-curve for an organic look.
+  -->
+  <path
+    id="stem"
+    d="M200 162 Q200 250 190 360"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!-- 
+    Left leaf
+    An ellipse, rotated and positioned on the left side of the stem
+  -->
+  <ellipse
+    id="leaf-left"
+    cx="170"
+    cy="250"
+    rx="16"
+    ry="36"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+    transform="rotate(-30 170 250)"
+  />
+
+  <!-- 
+    Right leaf
+    An ellipse, rotated and positioned on the right side of the stem
+  -->
+  <ellipse
+    id="leaf-right"
+    cx="210"
+    cy="280"
+    rx="16"
+    ry="36"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+    transform="rotate(25 210 280)"
+  />
+
+</svg>

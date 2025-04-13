@@ -34,6 +34,8 @@ def main():
 
     root = tk.Tk()
 
+    print(f"Saved {len(svgs)} SVGs to {output_dir}")
+
     svg_viewer = SVGViewer(root, output_dir, args.examples_dir, concept)
     root.mainloop()
 

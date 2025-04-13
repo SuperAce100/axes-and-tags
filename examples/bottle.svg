@@ -1,0 +1,95 @@
+<svg viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
+  <!--
+    BOTTLE OUTLINE SVG
+
+    Concept: Classic bottle with a neck, shoulders, main body, and base.
+    All elements are drawn with 2px solid black stroke, no fill.
+    Clean, clear, and readable outline style.
+  -->
+
+  <!--
+    BOTTLE BODY
+    Main elongated oval/rounded rectangle shape for the lower part of the bottle. 
+    Using a path to give the body symmetric sloped shoulders, vertical sides, and a rounded base.
+    The body extends from just below the neck down to the bottom.
+    Positioned centrally in the SVG canvas.
+  -->
+  <path
+    id="bottle-body"
+    d="M60 100
+       Q60 85 80 75
+       L80 75
+       L80 50
+       Q80 30 100 30
+       Q120 30 120 50
+       L120 75
+       L120 75
+       Q140 85 140 100
+       L140 320
+       Q140 350 100 350
+       Q60 350 60 320
+       Z"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!--
+    BOTTLE NECK
+    Vertical rectangle above the body. 
+    Sits on top, shows the transition from neck to body as a narrower segment.
+  -->
+  <rect
+    id="bottle-neck"
+    x="80"
+    y="50"
+    width="40"
+    height="40"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+    rx="10"
+  />
+
+  <!--
+    BOTTLE LIP
+    A short oval on top (ellipse here) to represent the lip/opening of the bottle.
+    Slightly wider than the neck for a realistic bottle opening.
+  -->
+  <ellipse
+    id="bottle-lip"
+    cx="100"
+    cy="50"
+    rx="18"
+    ry="7"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!--
+    BASE LINE
+    Flat slightly curved line to suggest the ground/base of the bottle.
+    Drawn as a subtle curve, not perfectly straight, for some style.
+  -->
+  <path
+    id="bottle-base"
+    d="M66 347 Q100 360 134 347"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!--
+    SUGGESTED REFLECTION LINE
+    A subtle vertical curve inside the bottle body to visually indicate that the bottle is glass.
+    Does not overlap any other element; placed off-center.
+  -->
+  <path
+    id="reflection"
+    d="M90 120 Q85 180 90 320"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+</svg>

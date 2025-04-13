@@ -1,0 +1,169 @@
+<svg viewBox="0 0 420 320" xmlns="http://www.w3.org/2000/svg">
+  <!-- 
+    COMPUTER OUTLINE SVG
+    Concept: Classic desktop computer with monitor, base, keyboard and mouse, 
+    in a clean 2px black-outline style, no fills. 
+  -->
+  
+  <!-- 
+    Monitor body 
+    Large rectangle, rounded corners for the screen enclosure. 
+    Slightly offset from the top for space.
+  -->
+  <rect
+    id="monitor-body"
+    x="70"
+    y="35"
+    width="280"
+    height="150"
+    rx="18"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  
+  <!-- 
+    Screen area 
+    Inner rectangle to suggest the screen, inset from the monitor body.
+  -->
+  <rect
+    id="screen"
+    x="87"
+    y="55"
+    width="246"
+    height="110"
+    rx="6"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  
+  <!-- 
+    Monitor stand neck
+    A short vertical rectangle connecting the monitor to its base.
+  -->
+  <rect
+    id="stand-neck"
+    x="193"
+    y="185"
+    width="34"
+    height="24"
+    rx="8"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  
+  <!-- 
+    Monitor stand base
+    Flat oval under the neck suggesting a base plate.
+  -->
+  <ellipse
+    id="stand-base"
+    cx="210"
+    cy="215"
+    rx="56"
+    ry="14"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  
+  <!-- 
+    Keyboard body
+    Large, flat rounded rectangle below the monitor.
+    Placed wider than the monitor to add realism.
+  -->
+  <rect
+    id="keyboard-body"
+    x="95"
+    y="240"
+    width="230"
+    height="36"
+    rx="9"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  
+  <!-- 
+    Keyboard key rows
+    Three thin rectangles to indicate rows of keys.
+    Inset inside the keyboard body.
+  -->
+  <rect
+    id="key-row-1"
+    x="110"
+    y="249"
+    width="200"
+    height="4"
+    rx="2"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  <rect
+    id="key-row-2"
+    x="110"
+    y="259"
+    width="200"
+    height="4"
+    rx="2"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+  <rect
+    id="key-row-3"
+    x="110"
+    y="269"
+    width="200"
+    height="4"
+    rx="2"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!-- 
+    Mouse body
+    Small, ovoid shape to the right of the keyboard.
+  -->
+  <ellipse
+    id="mouse"
+    cx="350"
+    cy="265"
+    rx="16"
+    ry="10"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+
+  <!-- 
+    Mouse button divider
+    Short vertical line to represent left/right button split.
+  -->
+  <line
+    id="mouse-divider"
+    x1="350"
+    y1="259"
+    x2="350"
+    y2="271"
+    stroke="black"
+    stroke-width="2"
+  />
+
+  <!-- 
+    Mouse cord
+    Curved path coming from the front left of mouse.
+    Suggests a classic wired mouse.
+  -->
+  <path
+    id="mouse-cord"
+    d="M338 270 Q325 280 315 285"
+    stroke="black"
+    stroke-width="2"
+    fill="none"
+  />
+</svg>
