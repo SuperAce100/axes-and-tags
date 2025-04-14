@@ -10,7 +10,7 @@ import shutil
 
 
 class SVGViewer:
-    def __init__(self, root, svg_path, save_path=None, concept=None):
+    def __init__(self, root, svg_path, save_path=None, concept=None, label=None):
         self.root = root
         self.root.title("SVG Viewer")
         self.root.geometry("800x600")
@@ -21,6 +21,7 @@ class SVGViewer:
         self.svg_files = list(self.svg_path.glob("*.svg"))
         self.current_index = 0
         self.concept = concept
+        self.label = label
         self.setup_ui()
         self.setup_keyboard_shortcuts()
         # Wait for window to be ready
@@ -51,6 +52,11 @@ class SVGViewer:
 
         self.counter_label = ttk.Label(self.main_frame, text="")
         self.counter_label.grid(row=2, column=0, columnspan=3, pady=5)
+        
+        # Add custom label if provided
+        if self.label:
+            self.custom_label = ttk.Label(self.main_frame, text=self.label, font=("Helvetica", 14, "bold"))
+            self.custom_label.grid(row=3, column=0, columnspan=3, pady=5)
 
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
@@ -144,7 +150,8 @@ def main():
     svg_path = sys.argv[1] if len(sys.argv) > 1 else "."
     save_path = sys.argv[2] if len(sys.argv) > 2 else None
     concept = sys.argv[3] if len(sys.argv) > 3 else "example"
-    SVGViewer(root, svg_path, save_path, concept)
+    label = sys.argv[4] if len(sys.argv) > 4 else None
+    SVGViewer(root, svg_path, save_path, concept, label)
     root.mainloop()
 
 
