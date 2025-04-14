@@ -36,7 +36,7 @@ def main():
 
     print(f"Saved {len(svgs)} SVGs to {output_dir}")
 
-    svg_viewer = SVGViewer(root, output_dir, args.examples_dir, concept)
+    svg_viewer = SVGViewer(root, output_dir, args.examples_dir, concept, f"{concept.capitalize()} made with {args.n_examples} examples")
     root.mainloop()
 
 
