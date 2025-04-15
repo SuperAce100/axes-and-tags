@@ -1,5 +1,5 @@
 from generate_svg import generate_svg_multiple, collect_examples, save_svgs
-from lib.svg_viewer import SVGViewer
+from lib.viewer.svg_viewer import SVGViewer
 import argparse
 import random
 import time
