@@ -1,4 +1,4 @@
-from generate_svg import generate_svg_multiple, collect_examples, save_svgs
+from generate_svg import generate_svg_multiple, collect_examples, save_svgs, load_svgs_from_feedback
 from lib.viewer.svg_viewer import SVGViewer
 import argparse
 import random
@@ -48,7 +48,23 @@ def main():
     viewer = SVGViewer(output_dir, examples_dir, concept, f"{concept.capitalize()} made with {args.n_examples} examples")
     feedback_data = viewer.run()
 
-    print(f"Feedback data: {feedback_data}")
+    if not feedback_data: return
+
+    feedback_examples = load_svgs_from_feedback(concept, feedback_data, output_dir)
+
+    print(f"Feedback examples: {feedback_examples}")
+
+    svgs = generate_svg_multiple(concept, feedback_examples, args.n)
+
+    output_dir = os.path.join(output_dir, "feedback")
+
+    save_svgs(concept, svgs, output_dir)
+
+    print(f"Saved {len(svgs)} SVGs after reflection to {output_dir}")
+
+    viewer = SVGViewer(output_dir, examples_dir, concept, f"{concept.capitalize()} made with {args.n_examples} examples post reflection", port=8002)
+    feedback_data = viewer.run()
+    
 
 if __name__ == "__main__":
     main()

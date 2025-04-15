@@ -1,4 +1,5 @@
-from models.prompts import svg_system_prompt, svg_user_prompt, examples_format
+from tqdm import tqdm
+from models.prompts import svg_system_prompt, svg_user_prompt, examples_format, feedback_example_format
 from models.models import llm_call
 from lib.utils import parse_svg
 import os
@@ -59,9 +60,18 @@ def generate_svg_multiple(concept: str, examples: str, n: int = 10):
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(generate_one) for _ in range(n)]
-        svgs = [future.result() for future in concurrent.futures.as_completed(futures)]
+        svgs = [future.result() for future in tqdm(concurrent.futures.as_completed(futures), total=n, desc="Generating SVGs")]
 
     return svgs
+
+
+def load_svgs_from_feedback(concept: str, feedback_data: dict[str, list], examples_dir: str):
+    examples_str = ""
+    for filename, feedbacks in feedback_data.items():
+        with open(os.path.join(examples_dir, filename), "r") as f:
+            svg = f.read()
+            examples_str += feedback_example_format.format(concept=concept, example=svg, feedback=feedbacks)
+    return examples_str
 
 
 def save_svgs(concept: str, svgs: list, output_dir: str):
