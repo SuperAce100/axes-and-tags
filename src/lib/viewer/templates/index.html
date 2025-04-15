@@ -3,41 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SVG Viewer</title>
+    <title>{{ title }}</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>SVG Viewer</h1>
         
-        <div class="global-feedback-form">
-            <h3>Feedback</h3>
-            <input type="text" id="feedbackInput" class="feedback-input" placeholder="Add feedback for selected SVG">
-            <button id="saveFeedbackBtn">Save Feedback</button>
-            <div id="feedbackList" class="feedback-list">
-                <!-- Feedback items will be displayed here -->
-            </div>
-        </div>
         
-        <div class="controls">
-            <button id="saveSelectedBtn">Save Selected SVG</button>
-            <button id="closeBtn" class="close-btn">Close Viewer</button>
-        </div>
-        
+        <h1>{{ title }}</h1>
+
         <div id="status" class="status" style="display: none;"></div>
         
         <div class="svg-grid" id="svgGrid">
             <!-- SVGs will be loaded here -->
         </div>
+
+        <div class="global-feedback-form">
+            <div class="feedback-header">
+                <h3>Feedback</h3>
+                <div class="feedback-input-group">
+                    <input type="text" id="feedbackInput" class="feedback-input" placeholder="Type your feedback here...">
+                    <button id="saveFeedbackBtn" class="feedback-submit">
+                        <span>Save</span>
+                    </button>
+                </div>
+            </div>
+            <div id="feedbackList" class="feedback-list">
+                <div class="feedback-empty-state">Select an SVG to save feedback</div>
+            </div>
+        </div>
+
+
     </div>
+    
+    
     
     <div class="keyboard-shortcuts">
         <h3>Keyboard Shortcuts</h3>
-        <div class="shortcut"><span class="key">←</span> <span>Previous SVG</span></div>
-        <div class="shortcut"><span class="key">→</span> <span>Next SVG</span></div>
-        <div class="shortcut"><span class="key">Enter</span> <span>Select SVG / Save Feedback</span></div>
+        <div class="shortcut"><span class="key">←</span> <span>Previous</span></div>
+        <div class="shortcut"><span class="key">→</span> <span>Next</span></div>
+        <div class="shortcut"><span class="key">Enter</span> <span>Select / Save Feedback</span></div>
         <div class="shortcut"><span class="key">Esc</span> <span>Close Viewer</span></div>
-        <div class="shortcut"><span class="key">S</span> <span>Save Selected SVG</span></div>
+        <div class="shortcut"><span class="key">S</span> or  <span class="key">Double Click</span> <span>Save Selected as Example</span></div>
     </div>
 
     <script src="/static/scripts.js"></script>

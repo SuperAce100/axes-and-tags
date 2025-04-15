@@ -46,6 +46,10 @@ function renderSvgs() {
         item.addEventListener('click', () => {
             selectSvg(svgName);
         });
+
+        item.addEventListener('dblclick', () => {
+            saveSelected();
+        });
         
         grid.appendChild(item);
     });
@@ -93,7 +97,7 @@ function renderFeedbackList() {
     list.innerHTML = '';
     
     if (!selectedSvg || !feedbackData[selectedSvg] || feedbackData[selectedSvg].length === 0) {
-        list.innerHTML = '<div class="feedback-item">No feedback yet</div>';
+        list.innerHTML = '<div class="feedback-empty-state">No feedback yet</div>';
         return;
     }
     
@@ -160,7 +164,7 @@ async function saveSelected() {
         
         if (response.ok) {
             const data = await response.json();
-            showStatus(`SVG saved to ${data.path}`, 'success');
+            showStatus(`SVG ${selectedSvg} saved to ${data.path}`, 'success');
         } else {
             showStatus('Error saving SVG', 'error');
         }
@@ -265,9 +269,7 @@ function handleKeyDown(e) {
 }
 
 // Event listeners
-document.getElementById('saveSelectedBtn').addEventListener('click', saveSelected);
 document.getElementById('saveFeedbackBtn').addEventListener('click', saveFeedback);
-document.getElementById('closeBtn').addEventListener('click', closeViewer);
 document.addEventListener('keydown', handleKeyDown);
 
 // Add beforeunload event handler

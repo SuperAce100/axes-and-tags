@@ -14,7 +14,7 @@ from fastapi.templating import Jinja2Templates
 import uvicorn
 
 class SVGViewer:
-    def __init__(self, svg_folder, output_path=None, port=8001, concept=None):
+    def __init__(self, svg_folder, output_path=None, port=8001, concept=None, title="SVG Viewer"):
         """
         Initialize the SVG viewer.
         
@@ -32,7 +32,7 @@ class SVGViewer:
         self.server_running = False
         self.server_thread = None
         self.concept = concept
-        
+        self.title = title
         # Create FastAPI app
         self.app = FastAPI(title="SVG Viewer")
         
@@ -57,7 +57,7 @@ class SVGViewer:
     
     async def index(self, request: Request):
         """Render the main page."""
-        return self.templates.TemplateResponse("index.html", {"request": request, "concept": self.concept})
+        return self.templates.TemplateResponse("index.html", {"request": request, "concept": self.concept, "title": self.title})
     
     async def serve_svg(self, filename: str):
         """Serve an SVG file."""
@@ -182,6 +182,6 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    viewer = SVGViewer(args.folder, args.output, args.port, args.concept)
+    viewer = SVGViewer(args.folder, args.output, args.port, args.concept, f"{args.concept.capitalize()} in a flat style")
     feedback_data = viewer.run()
     print(f"Feedback data: {json.dumps(feedback_data, indent=2)}")

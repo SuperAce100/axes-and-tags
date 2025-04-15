@@ -43,13 +43,12 @@ def main():
 
     save_svgs(concept, svgs, output_dir)
 
-    root = tk.Tk()
-
     print(f"Saved {len(svgs)} SVGs to {output_dir}")
 
-    svg_viewer = SVGViewer(root, output_dir, examples_dir, concept, f"{concept.capitalize()} made with {args.n_examples} examples")
-    root.mainloop()
+    viewer = SVGViewer(output_dir, examples_dir, concept, f"{concept.capitalize()} made with {args.n_examples} examples")
+    feedback_data = viewer.run()
 
+    print(f"Feedback data: {feedback_data}")
 
 if __name__ == "__main__":
     main()
