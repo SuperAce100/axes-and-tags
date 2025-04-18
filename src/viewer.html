@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3D Object Viewer</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        select {
+            padding: 5px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="controls">
+            <select id="objectSelect">
+                <option value="">Select an object...</option>
+            </select>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        let scene, camera, renderer, controls;
+        let currentObject = null;
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('container').appendChild(renderer.domElement);
+
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight.position.set(0, 1, 0);
+            scene.add(directionalLight);
+
+            // Add orbit controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            camera.position.z = 5;
+
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function loadObject(objectName) {
+            if (currentObject) {
+                scene.remove(currentObject);
+            }
+
+            // Load the object's JavaScript file
+            const script = document.createElement('script');
+            script.src = `results/test-3/${objectName}.js`;
+            script.onload = () => {
+                // The loaded script should define a function that returns a Three.js object
+                if (typeof window.createObject === 'function') {
+                    currentObject = window.createObject();
+                    scene.add(currentObject);
+                    
+                    // Center the object
+                    const box = new THREE.Box3().setFromObject(currentObject);
+                    const center = box.getCenter(new THREE.Vector3());
+                    currentObject.position.sub(center);
+                    
+                    // Adjust camera to fit object
+                    const size = box.getSize(new THREE.Vector3());
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    camera.position.z = maxDim * 2;
+                }
+            };
+            document.body.appendChild(script);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Initialize the scene
+        init();
+        animate();
+
+        // Populate object select
+        fetch('results/test-3/')
+            .then(response => response.text())
+            .then(text => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const files = Array.from(doc.querySelectorAll('a'))
+                    .map(a => a.href)
+                    .filter(href => href.endsWith('.js'))
+                    .map(href => href.split('/').pop().replace('.js', ''));
+
+                const select = document.getElementById('objectSelect');
+                files.forEach(file => {
+                    const option = document.createElement('option');
+                    option.value = file;
+                    option.textContent = file;
+                    select.appendChild(option);
+                });
+            });
+
+        // Handle object selection
+        document.getElementById('objectSelect').addEventListener('change', (e) => {
+            if (e.target.value) {
+                loadObject(e.target.value);
+            }
+        });
+    </script>
+</body>
+</html> 

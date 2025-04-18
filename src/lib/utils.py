@@ -1,20 +1,22 @@
-def parse_svg(llm_response: str) -> str:
-    """
-    Parse the SVG code from the LLM response.
-    """
+import re
 
-    start_tag_index = llm_response.find("<svg")
-    if start_tag_index != -1:
-        end_tag_index = llm_response.find("</svg>", start_tag_index)
-        if end_tag_index != -1:
-            return llm_response[start_tag_index : end_tag_index + 6]
+def parse_svg(response: str) -> str:
+    # Extract SVG content between <svg> tags
+    svg_match = re.search(r'<svg.*?</svg>', response, re.DOTALL)
+    if svg_match:
+        return svg_match.group(0)
+    return response
 
-    return None
-
+def parse_threejs(response: str) -> str:
+    # Extract JavaScript code between ```js or ```javascript blocks
+    js_match = re.search(r'```(?:js|javascript)\n(.*?)\n```', response, re.DOTALL)
+    if js_match:
+        return js_match.group(1)
+    return response
 
 if __name__ == "__main__":
     example_response = """
-    Here’s a simple and cute SVG of a cartoon-style cat:
+    Here's a simple and cute SVG of a cartoon-style cat:
 
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
     <!-- Body -->

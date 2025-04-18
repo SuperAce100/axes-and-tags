@@ -1,5 +1,5 @@
-from generate_svg import generate_svg_multiple, collect_examples, save_svgs, load_svgs_from_feedback
-from lib.viewer.svg_viewer import SVGViewer
+from generate_threejs import generate_threejs_multiple, collect_examples, save_threejs, load_threejs_from_feedback
+from lib.viewer.threejs_viewer import ThreeJSViewer
 import argparse
 import random
 import time
@@ -12,13 +12,13 @@ def name_output_dir(concept: str, output_dir: str):
     return f"{output_dir}/{concept}_{timestamp}_{random_suffix}"
 
 def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--concept", type=str, default="cow")
-    parser.add_argument("--style", type=str, default="flat")
-    parser.add_argument("--examples_dir", type=str, default="examples")
-    parser.add_argument("--n", type=int, default=10)
-    parser.add_argument("--output_dir", type=str, default="results/")
-    parser.add_argument("--n_examples", type=int, default=10)
+    parser = argparse.ArgumentParser(description='Generate 3D objects using Three.js')
+    parser.add_argument('--concept', type=str, required=True, help='Concept to generate')
+    parser.add_argument('--style', type=str, default='blocky', help='Style of the objects')
+    parser.add_argument('--examples-dir', type=str, default='examples', help='Directory containing examples')
+    parser.add_argument('--output-dir', type=str, default='results', help='Directory to save results')
+    parser.add_argument('--n', type=int, default=10, help='Number of objects to generate')
+    parser.add_argument('--n-examples', type=int, default=10, help='Number of examples to use')
     return parser.parse_args()
 
 def main():
@@ -35,36 +35,35 @@ def main():
     examples, example_names = collect_examples(concept, examples_dir, args.n_examples)
     print(f"Collected {len(example_names)} examples for concept: {concept}: {', '.join(example_names)}")
 
-    print(f"Generating {args.n} SVGs for concept: {args.concept}")
+    print(f"Generating {args.n} 3D objects for concept: {args.concept}")
 
-    svgs = generate_svg_multiple(concept, examples, args.n)
+    threejs_objects = generate_threejs_multiple(concept, examples, args.n)
 
     output_dir = name_output_dir(concept, results_dir)
 
-    save_svgs(concept, svgs, output_dir)
+    save_threejs(concept, threejs_objects, output_dir)
 
-    print(f"Saved {len(svgs)} SVGs to {output_dir}")
+    print(f"Saved {len(threejs_objects)} 3D objects to {output_dir}")
 
-    viewer = SVGViewer(output_dir, examples_dir, concept, f"{concept.capitalize()} made with {args.n_examples} examples")
+    viewer = ThreeJSViewer(output_dir, examples_dir, concept, f"{concept.capitalize()} made with {args.n_examples} examples")
     feedback_data = viewer.run()
 
     if not feedback_data: return
 
-    feedback_examples = load_svgs_from_feedback(concept, feedback_data, output_dir)
+    feedback_examples = load_threejs_from_feedback(concept, feedback_data, output_dir)
 
     print(f"Feedback examples: {feedback_examples}")
 
-    svgs = generate_svg_multiple(concept, feedback_examples, args.n)
+    threejs_objects = generate_threejs_multiple(concept, feedback_examples, args.n)
 
     output_dir = os.path.join(output_dir, "feedback")
 
-    save_svgs(concept, svgs, output_dir)
+    save_threejs(concept, threejs_objects, output_dir)
 
-    print(f"Saved {len(svgs)} SVGs after reflection to {output_dir}")
+    print(f"Saved {len(threejs_objects)} 3D objects after reflection to {output_dir}")
 
-    viewer = SVGViewer(output_dir, examples_dir, concept, f"{concept.capitalize()} made with {args.n_examples} examples post reflection", port=8002)
+    viewer = ThreeJSViewer(output_dir, examples_dir, concept, f"{concept.capitalize()} made with {args.n_examples} examples post reflection", port=8002)
     feedback_data = viewer.run()
-    
 
 if __name__ == "__main__":
     main()
