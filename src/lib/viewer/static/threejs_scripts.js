@@ -135,10 +135,10 @@ async function initThreeJsScene(index, jsContent) {
         document.head.removeChild(script);
         
         // Get the createObject function
-        const createObject = window.createObject;
+        const createObject = window.createDormRoom;
         
         if (typeof createObject === 'function') {
-            const object = createObject(container);
+            const object = createDormRoom();
             if (object) {
                 scene.add(object);
                 objects[index] = object;
@@ -153,8 +153,17 @@ async function initThreeJsScene(index, jsContent) {
                 
                 // Scale the object to fit the view
                 const maxDim = Math.max(size.x, size.y, size.z);
-                const scale = 4 / maxDim;
+                const scale = 6 / maxDim;
                 object.scale.multiplyScalar(scale);
+                
+                // Position camera to better view the object
+                const distance = Math.max(size.x, size.y, size.z) * 1.5;
+                camera.position.set(distance, distance, distance);
+                camera.lookAt(0, 0, 0);
+                
+                // Update controls to target the center
+                controls[index].target.set(0, 0, 0);
+                controls[index].update();
             }
         }
     } catch (error) {

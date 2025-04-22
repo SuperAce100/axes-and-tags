@@ -82,6 +82,7 @@ class ThreeJSViewer:
                     })
                 except Exception as e:
                     print(f"Error reading {file}: {e}")
+        print(f"Found {len(js_files)} JavaScript files")
         return js_files
     
     async def select_js(self, data: Dict[str, Any]):
@@ -171,6 +172,6 @@ class ThreeJSViewer:
         return self.feedback_data 
     
 if __name__ == "__main__":
-    viewer = ThreeJSViewer(".data/blocky/examples", ".data/blocky/examples", "cow", "Cow in a blocky style", 8001)
+    viewer = ThreeJSViewer("src/lib/viewer/examples", "src/lib/viewer/examples", "dorm", "Dorm Room Viewer", 8001)
     feedback_data = viewer.run()
     print(feedback_data)
