@@ -142,7 +142,7 @@ class ThreeJSViewer:
         
         # Copy selected JavaScript file to the output path with concept.js name
         src_path = self.js_folder / js
-        dst_path = Path(self.output_path) / f"{self.concept}.js"
+        dst_path = Path(self.output_path) / f"{self.concept.replace(' ', '_')}.dsl"
         
         if src_path.exists():
             shutil.copy2(src_path, dst_path)
@@ -180,6 +180,6 @@ class ThreeJSViewer:
         return self.feedback_data 
     
 if __name__ == "__main__":
-    viewer = ThreeJSViewer(".data/dormroom/test/", ".data/dormroom/test/", "dorm", "Dorm Room Viewer", 8001)
+    viewer = ThreeJSViewer(".data/dormroom/examples/", ".data/dormroom/examples/", "dorm", "Dorm Room Viewer", 8001)
     feedback_data = viewer.run()
     print(feedback_data)

@@ -23,6 +23,8 @@ def collect_examples(concept: str, examples_dir: str, n: int = 10):
     all_files = [f for f in os.listdir(examples_dir) if f.endswith(".dsl")]
     file_names = [os.path.splitext(f)[0] for f in all_files]
     
+    print(file_names)
+    
     concept_embedding = model.encode([concept])[0]
     filename_embeddings = model.encode(file_names)
     
@@ -46,18 +48,18 @@ def collect_examples(concept: str, examples_dir: str, n: int = 10):
     return examples, example_names
 
 
-def generate_dsl(examples: str, model: str = text_model):
+def generate_dsl(examples: str, model: str = text_model, prompt: str = "Generate a layout for a single dorm room"):
     system_prompt = dsl_system_prompt.format(examples=examples)
-    user_prompt = "Generate a layout for a single dorm room"
+    user_prompt = prompt
     response = llm_call(system_prompt, user_prompt, model=model)
     return parse_dsl(response)
 
 
-def generate_dsl_multiple(examples: str, n: int = 10, model: str = text_model):
+def generate_dsl_multiple(examples: str, n: int = 10, model: str = text_model, prompt: str = "Generate a layout for a single dorm room"):
     dsl_objects = []
 
     def generate_one():
-        return generate_dsl(examples, model)
+        return generate_dsl(examples, model, prompt)
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(generate_one) for _ in range(n)]
