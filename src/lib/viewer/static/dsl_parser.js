@@ -1,15 +1,3 @@
-let jsFiles = [];
-let selectedJs = null;
-let feedbackData = {};
-let isClosing = false;
-let selectedIndex = -1;
-let isTyping = false;
-let scenes = {};
-let cameras = {};
-let renderers = {};
-let controls = {};
-let objects = {};
-
 /**
  * Creates the dorm room scene with furniture based on the DSL layout
  * @param {THREE.Scene} scene - The Three.js scene to add objects to
@@ -24,9 +12,6 @@ function createDormRoom(scene, roomData, furnitureData) {
   const roomWidth = roomData.width / 100; // Convert to meters
   const roomLength = roomData.length / 100;
   const roomHeight = roomData.height / 100;
-
-  console.log('Creating dorm room with dimensions:', { roomWidth, roomLength, roomHeight });
-  console.log('Furniture data:', furnitureData);
   
   // Create room
   const room = utils.createRoom(roomData.name, roomWidth, roomLength, roomHeight, roomData.type);
@@ -34,58 +19,26 @@ function createDormRoom(scene, roomData, furnitureData) {
 
   // Process furniture
   furnitureData.forEach(item => {
-    // Check if item has required properties
-    if (!item || !item.item) {
-      console.warn('Invalid furniture item:', item);
-      return; // Skip this item
-    }
-    
-    console.log(`Processing furniture item: ${item.item}`);
-    
     // Get position and convert to meters
-    let x = 0, z = 0, y = 0;
-    
-    // Check if position exists and is an array with at least 2 elements
-    if (item.position && Array.isArray(item.position) && item.position.length >= 2) {
-      x = item.position[0] / 100;
-      z = item.position[1] / 100;
-      console.log(`Position from array: [${item.position[0]}, ${item.position[1]}] -> [${x}, ${z}] meters`);
-    } else if (item.position && typeof item.position === 'string') {
-      // Try to parse position string if it's not already an array
-      console.log(`Position as string: "${item.position}"`);
-      const posParts = item.position.split(/[,\s]+/).filter(p => p.trim() !== '');
-      console.log(`Split position parts:`, posParts);
-      
-      if (posParts.length >= 2) {
-        x = parseFloat(posParts[0]) / 100;
-        z = parseFloat(posParts[1]) / 100;
-        console.log(`Parsed position from string: [${x}, ${z}] meters`);
-      } else {
-        console.warn(`Invalid position format for item ${item.item}: ${item.position}`);
-      }
-    } else {
-      console.warn(`Missing or invalid position for item ${item.item}:`, item.position);
-    }
+    let x = item.position[0] / 100;
+    let z = item.position[1] / 100;
+    let y = 0;
     
     // Get rotation in radians
-    const rotation = item.rotation ? item.rotation * (Math.PI / 180) : 0;
-    console.log(`Rotation: ${item.rotation} degrees -> ${rotation} radians`);
+    const rotation = item.rotation * (Math.PI / 180);
     
     // Check if item should be placed on top of another item
     if (item.ontop) {
-      console.log(`Item ${item.item} should be placed on top of ${item.ontop}`);
       // Find the base item
       const baseItem = furnitureData.find(i => i.item === item.ontop);
-      if (baseItem && baseItem.position && Array.isArray(baseItem.position) && baseItem.position.length >= 2) {
+      if (baseItem) {
         // Get base position
         const baseX = baseItem.position[0] / 100;
         const baseZ = baseItem.position[1] / 100;
-        console.log(`Base item position: [${baseX}, ${baseZ}] meters`);
         
         // Add relative position to base position
         x = baseX + x / 100;
         z = baseZ + z / 100;
-        console.log(`Adjusted position for item on top: [${x}, ${z}] meters`);
         
         // Set Y position based on furniture type
         switch(item.ontop) {
@@ -105,9 +58,6 @@ function createDormRoom(scene, roomData, furnitureData) {
           default:
             y = 0;
         }
-        console.log(`Y position for item on top: ${y} meters`);
-      } else {
-        console.warn(`Base item ${item.ontop} not found or has invalid position for item ${item.item}`);
       }
     }
     
@@ -144,18 +94,13 @@ function createDormRoom(scene, roomData, furnitureData) {
       case 'bulletin_board':
         furniture = utils.createBulletinBoard();
         break;
-      default:
-        console.warn(`Unknown furniture type: ${item.item}`);
-        return; // Skip this item
     }
     
     // Position and rotate furniture
     if (furniture) {
-      console.log(`Setting position for ${item.item} to [${x}, ${y}, ${z}]`);
       furniture.position.set(x, y, z);
       furniture.rotation.y = rotation;
       scene.add(furniture);
-      console.log(`Added ${item.item} to scene`);
     }
   });
 
@@ -410,8 +355,7 @@ function createDormRoomUtils() {
       // Create 4 drawers
       for (let i = 0; i < 4; i++) {
         const drawer = new THREE.Mesh(drawerGeometry, drawerMaterial);
-        // Center the drawers vertically and horizontally
-        drawer.position.set(0, -0.3 + i*0.2, 0.2);
+        drawer.position.set(0, 0.15 + i*0.2, 0.2);
         body.add(drawer);
         
         // Drawer handle
@@ -434,7 +378,7 @@ function createDormRoomUtils() {
       const group = new THREE.Group();
       
       // Body
-      const bodyGeometry = new THREE.BoxGeometry(0.8, 1.8, 0.02);
+      const bodyGeometry = new THREE.BoxGeometry(0.8, 1.8, 0.3);
       const bodyMaterial = new THREE.MeshPhongMaterial({ 
         color: 0x8b4513, // Brown
         flatShading: true
@@ -455,7 +399,7 @@ function createDormRoomUtils() {
       // Create 5 shelves
       for (let i = 0; i < 5; i++) {
         const shelf = new THREE.Mesh(shelfGeometry, shelfMaterial);
-        shelf.position.set(0, -0.7 + i*0.4, 0);
+        shelf.position.set(0, 0.2 + i*0.4, 0);
         body.add(shelf);
       }
       
@@ -477,7 +421,7 @@ function createDormRoomUtils() {
           });
           
           const book = new THREE.Mesh(bookGeometry, bookMaterial);
-          book.position.set(offset - 0.3, -0.5 + shelf*0.4, 0);
+          book.position.set(offset - 0.3, 0.4 + shelf*0.4, 0);
           offset += width + 0.02;
           body.add(book);
         }
@@ -623,7 +567,7 @@ function createDormRoomUtils() {
       });
       const shade = new THREE.Mesh(shadeGeometry, shadeMaterial);
       shade.position.y = 0.4;
-      shade.rotation.x = 0; // Changed from Math.PI to 0 to flip the cone
+      shade.rotation.x = Math.PI;
       shade.castShadow = true;
       group.add(shade);
       
@@ -751,626 +695,87 @@ function createDormRoomUtils() {
  * @param {string} dslContent - The DSL content as a string
  * @returns {Object} Object with room and furniture data
  */
-function parseDormRoomDSL(dslString) {
-  // Trim the input and split by lines
-  const lines = dslString.trim().split('\n').map(line => line.trim());
-  
-  // Initialize result object
-  const result = {
-    room: {
-      name: "Default Room",
-      width: 0,
-      length: 0,
-      height: 0,
-      type: "single"
-    },
-    furniture: []
-  };
-  
-  // Current parsing state
-  let currentSection = null;
-  let currentItem = null;
-  let indentLevel = 0;
-  
-  // Helper to get indent level of a line
-  function getIndent(line) {
-    const match = line.match(/^(\s*)/);
-    return match ? match[1].length : 0;
-  }
-  
-  // Process each line
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (line === '') continue; // Skip empty lines
+function parseDormRoomDSL(dslContent) {
+  // Simple YAML-like parser (for demo purposes - in production use a proper YAML parser)
+  try {
+    const lines = dslContent.split('\n');
+    let inRoom = false;
+    let inLayout = false;
+    let currentItem = null;
     
-    // Determine current section based on line content
-    if (line.startsWith('room:')) {
-      currentSection = 'room';
-      continue;
-    } else if (line.startsWith('layout:')) {
-      currentSection = 'layout';
-      continue;
-    }
+    const result = {
+      room: {},
+      furniture: []
+    };
     
-    // Process room section
-    if (currentSection === 'room') {
-      const colonIndex = line.indexOf(':');
-      if (colonIndex > 0) {
-        const key = line.substring(0, colonIndex).trim();
-        let value = line.substring(colonIndex + 1).trim();
-        
-        // Remove quotes from string values
-        if (value.startsWith('"') && value.endsWith('"')) {
-          value = value.slice(1, -1);
-        }
-        
-        // Convert numeric values
-        if (!isNaN(value) && value !== '') {
-          value = Number(value);
-        }
-        
-        // Store the value in the result object
-        if (key !== 'unit') { // Skip 'unit' property as it's not in the output format
+    lines.forEach(line => {
+      const trimmedLine = line.trim();
+      
+      // Skip empty lines and comments
+      if (trimmedLine === '' || trimmedLine.startsWith('#')) {
+        return;
+      }
+      
+      // Check section headers
+      if (trimmedLine === 'room:') {
+        inRoom = true;
+        inLayout = false;
+        return;
+      } else if (trimmedLine === 'layout:') {
+        inRoom = false;
+        inLayout = true;
+        return;
+      }
+      
+      // Process room properties
+      if (inRoom && !inLayout) {
+        const match = trimmedLine.match(/^\s*([a-zA-Z_]+):\s*(.+)$/);
+        if (match) {
+          const key = match[1];
+          let value = match[2].replace(/"/g, ''); // Remove quotes
+          
+          // Handle numeric values
+          if (!isNaN(value)) {
+            value = parseFloat(value);
+          }
+          
           result.room[key] = value;
         }
       }
-    }
-    
-    // Process layout section
-    else if (currentSection === 'layout') {
-      // Check for a new item
-      if (line.startsWith('-')) {
-        // Create a new item and push it to the furniture array
-        currentItem = {};
-        result.furniture.push(currentItem);
-      }
       
-      // Process item properties
-      const colonIndex = line.indexOf(':');
-      if (colonIndex > 0) {
-        const key = line.substring(line.indexOf('item:') !== -1 ? line.indexOf('item:') : 0, colonIndex).trim();
-        let value = line.substring(colonIndex + 1).trim();
-        
-        // Handle different property types
-        if (key === 'item') {
-          currentItem.item = value;
-        } else if (key === 'position') {
-          // Parse position array
-          value = value.replace('[', '').replace(']', '');
-          const positions = value.split(',').map(pos => Number(pos.trim()));
-          currentItem.position = positions;
-        } else if (key === 'rotation') {
-          currentItem.rotation = Number(value);
-        } else if (key === 'ontop') {
-          currentItem.ontop = value;
+      // Process layout items
+      if (inLayout) {
+        if (trimmedLine === '- item:' || trimmedLine.startsWith('- item: ')) {
+          // Start a new item
+          currentItem = {
+            item: trimmedLine.split(':')[1]?.trim() || null
+          };
+          result.furniture.push(currentItem);
+        } else if (trimmedLine.startsWith('  ') && currentItem) {
+          // Process item properties
+          const match = trimmedLine.match(/^\s*([a-zA-Z_]+):\s*(.+)$/);
+          if (match) {
+            const key = match[1];
+            let value = match[2];
+            
+            // Handle position array
+            if (key === 'position' && value.startsWith('[') && value.endsWith(']')) {
+              value = value.substring(1, value.length - 1).split(',').map(v => parseFloat(v.trim()));
+            } 
+            // Handle rotation
+            else if (key === 'rotation') {
+              value = parseFloat(value);
+            }
+            
+            currentItem[key] = value;
+          }
         }
       }
-    }
+    });
+    
+    return result;
+  } catch (error) {
+    console.error('Error parsing DSL:', error);
+    return null;
   }
-  
-  // Return the structured result
-  return result;
 }
-
-// Fetch JavaScript files from the server
-async function fetchJsFiles() {
-    try {
-        const response = await fetch('/api/js');
-        jsFiles = await response.json();
-        
-        // Check if each JS file has a corresponding DSL file
-        for (let i = 0; i < jsFiles.length; i++) {
-            const jsName = jsFiles[i].name;
-            const dslName = jsName.replace('.js', '.dsl');
-            
-            try {
-                // Try to fetch the corresponding DSL file
-                const dslResponse = await fetch(`/api/dsl/${dslName}`);
-                if (dslResponse.ok) {
-                    const dslContent = await dslResponse.text();
-                    jsFiles[i].dslContent = dslContent;
-                }
-            } catch (error) {
-                console.warn(`No DSL file found for ${jsName}: ${error.message}`);
-            }
-        }
-        
-        renderJsFiles();
-    } catch (error) {
-        showStatus('Error loading JavaScript files: ' + error.message, 'error');
-    }
-}
-
-// Render JavaScript files in the grid
-function renderJsFiles() {
-    const grid = document.getElementById('threejsGrid');
-    grid.innerHTML = '';
-    
-    jsFiles.forEach((jsData, index) => {
-        const jsName = jsData.name;
-        const jsContent = jsData.content;
-        
-        const item = document.createElement('div');
-        item.className = 'threejs-item';
-        if (selectedJs === jsName) {
-            item.classList.add('selected');
-            selectedIndex = index;
-        }
-        
-        // Add feedback badge if there's feedback
-        const hasFeedback = feedbackData[jsName] && feedbackData[jsName].length > 0;
-        
-        item.innerHTML = `
-            <div class="js-number">${index + 1}</div>
-            ${hasFeedback ? `<div class="feedback-badge">${feedbackData[jsName].length}</div>` : ''}
-            <div class="threejs-preview" id="preview-${index}"></div>
-        `;
-        
-        item.addEventListener('click', () => {
-            selectJs(jsName);
-        });
-
-        item.addEventListener('dblclick', () => {
-            saveSelected();
-        });
-        
-        grid.appendChild(item);
-        
-        // Default DSL content for dorm room
-        const defaultDslContent = `
-room:
-  name: "Jones Hall 101"
-  width: 300
-  length: 250
-  height: 240
-  unit: cm
-  type: single
-    
-layout:
-  - item: bed
-    position: [30, 30]
-    rotation: 0
-    
-  - item: desk
-    position: [30, 150]
-    rotation: 0
-    
-  - item: chair
-    position: [30, 200]
-    rotation: 180
-    
-  - item: dresser
-    position: [200, 30]
-    rotation: 270
-    
-  - item: bookshelf
-    position: [200, 150]
-    rotation: 270
-    
-  - item: minifridge
-    position: [200, 220]
-    rotation: 270
-    
-  - item: microwave
-    ontop: minifridge
-    position: [10, 10]
-    
-  - item: lamp
-    ontop: desk
-    position: [50, 20]
-    
-  - item: storage_bin
-    position: [30, 100]
-    rotation: 0
-    
-  - item: bulletin_board
-    position: [30, 240]
-    rotation: 0
-`;
-        
-        // Use DSL content from server if available, otherwise use default
-        const dslContent = jsData.dslContent || defaultDslContent;
-        
-        // Initialize Three.js scene for this preview with DSL content
-        initThreeJsScene(index, jsContent, dslContent);
-    });
-}
-
-// Initialize Three.js scene for a preview
-// Initialize Three.js scene for a dorm room preview
-async function initThreeJsScene(index, jsContent, dslContent) {
-    const container = document.getElementById(`preview-${index}`);
-    if (!container) return;
-
-    const width = container.clientWidth;
-    const height = container.clientHeight;
-    
-    // Create scene
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf0f0f0);
-    scenes[index] = scene;
-    
-    // Create camera
-    const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-    cameras[index] = camera;
-    camera.position.set(5, 5, 5);
-    camera.lookAt(0, 0, 0);
-    
-    // Create renderer
-    const renderer = new THREE.WebGLRenderer({ 
-        antialias: true,
-        alpha: true
-    });
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(width, height);
-    renderer.shadowMap.enabled = true;
-    renderers[index] = renderer;
-    container.appendChild(renderer.domElement);
-    
-    // Add lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
-    
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(5, 5, 5);
-    directionalLight.castShadow = true;
-    scene.add(directionalLight);
-
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
-    fillLight.position.set(-5, 0, -5);
-    scene.add(fillLight);
-    
-    // Add orbit controls
-    const orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
-    orbitControls.enableDamping = false;
-    orbitControls.enableZoom = true;
-    orbitControls.enablePan = true;
-    orbitControls.autoRotate = true;
-    orbitControls.autoRotateSpeed = 1.3;
-    controls[index] = orbitControls;
-    
-    try {
-        // Create a blob URL from the JavaScript content
-        const blob = new Blob([jsContent], { type: 'application/javascript' });
-        const blobUrl = URL.createObjectURL(blob);
-        
-        // Load the script
-        const script = document.createElement('script');
-        script.src = blobUrl;
-        
-        // Wait for script to load
-        await new Promise((resolve, reject) => {
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
-        
-        // Clean up
-        URL.revokeObjectURL(blobUrl);
-        document.head.removeChild(script);
-        
-        // Parse the DSL content if provided
-        let dslData = null;
-        if (dslContent) {
-            dslData = parseDormRoomDSL(dslContent);
-            if (!dslData) {
-                console.warn('Failed to parse DSL content, using default scene');
-                // Create default DSL data
-                dslData = {
-                    room: {
-                        name: "Default Room",
-                        width: 300,
-                        length: 250,
-                        height: 240,
-                        type: "single"
-                    },
-                    furniture: [
-                        { item: 'bed', position: [30, 30], rotation: 0 },
-                        { item: 'desk', position: [30, 150], rotation: 0 }
-                    ]
-                };
-            }
-        } else {
-            console.warn('No DSL content provided, using default scene');
-            // Create default DSL data
-            dslData = {
-                room: {
-                    name: "Default Room",
-                    width: 300,
-                    length: 250,
-                    height: 240,
-                    type: "single"
-                },
-                furniture: [
-                    { item: 'bed', position: [30, 30], rotation: 0 },
-                    { item: 'desk', position: [30, 150], rotation: 0 }
-                ]
-            };
-        }
-        
-        // Check if the required functions are available
-        if (typeof createDormRoom === 'function' && typeof createDormRoomUtils === 'function') {
-            // Create a dorm room with the parsed DSL data
-            const roomObj = createDormRoom(scene, dslData.room, dslData.furniture);
-            objects[index] = roomObj || scene;
-            
-            // Create a bounding box from all objects in the scene
-            const box = new THREE.Box3();
-            scene.traverse(object => {
-                if (object.isMesh) {
-                    box.expandByObject(object);
-                }
-            });
-            
-            const center = box.getCenter(new THREE.Vector3());
-            const size = box.getSize(new THREE.Vector3());
-            
-            // Position camera to better view the scene
-            const maxDim = Math.max(size.x, size.y, size.z);
-            const distance = maxDim * 2;
-            
-            // Position camera to see the room from a good viewpoint
-            camera.position.set(
-                center.x + distance * 0.6, 
-                center.y + distance * 0.5, 
-                center.z + distance * 0.6
-            );
-            camera.lookAt(center);
-            
-            // Update controls to target the center
-            controls[index].target.set(center.x, center.y, center.z);
-            controls[index].update();
-        } else {
-            throw new Error('Required functions not found in the JavaScript code');
-        }
-    } catch (error) {
-        console.error('Error creating dorm room:', error);
-        showStatus('Error creating dorm room: ' + error.message, 'error');
-    }
-    
-    // Animate
-    function animate() {
-        requestAnimationFrame(animate);
-        controls[index].update();
-        renderer.render(scene, camera);
-    }
-    animate();
-}
-
-// Select a JavaScript file
-async function selectJs(js) {
-    try {
-        const response = await fetch('/api/select', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ js })
-        });
-        
-        if (response.ok) {
-            selectedJs = js;
-            renderJsFiles();
-            loadFeedback(js);
-        } else {
-            showStatus('Error selecting JavaScript file', 'error');
-        }
-    } catch (error) {
-        showStatus('Error selecting JavaScript file: ' + error.message, 'error');
-    }
-}
-
-// Load feedback for a specific JavaScript file
-async function loadFeedback(js) {
-    try {
-        const response = await fetch(`/api/feedback/${js}`);
-        const data = await response.json();
-        
-        feedbackData[js] = data.feedback;
-        renderFeedbackList();
-    } catch (error) {
-        console.error('Error loading feedback:', error);
-    }
-}
-
-// Render feedback list
-function renderFeedbackList() {
-    const list = document.getElementById('feedbackList');
-    list.innerHTML = '';
-    
-    if (!selectedJs || !feedbackData[selectedJs] || feedbackData[selectedJs].length === 0) {
-        list.innerHTML = '<div class="feedback-empty-state">No feedback yet</div>';
-        return;
-    }
-    
-    feedbackData[selectedJs].forEach((feedback, index) => {
-        const feedbackItem = document.createElement('div');
-        feedbackItem.className = 'feedback-item';
-        feedbackItem.textContent = feedback;
-        list.appendChild(feedbackItem);
-    });
-}
-
-// Save feedback for selected JavaScript file
-async function saveFeedback() {
-    const feedback = document.getElementById('feedbackInput').value.trim();
-    
-    if (!feedback) {
-        showStatus('Please enter feedback', 'error');
-        return;
-    }
-    
-    if (!selectedJs) {
-        showStatus('Please select an object first', 'error');
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/feedback', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ js: selectedJs, feedback })
-        });
-        
-        if (response.ok) {
-            showStatus(`Feedback saved for ${selectedJs}`, 'success');
-            document.getElementById('feedbackInput').value = '';
-            
-            // Reload feedback for the selected JavaScript file
-            await loadFeedback(selectedJs);
-        } else {
-            showStatus('Error saving feedback', 'error');
-        }
-    } catch (error) {
-        showStatus('Error saving feedback: ' + error.message, 'error');
-    }
-}
-
-// Save selected JavaScript file
-async function saveSelected() {
-    if (!selectedJs) {
-        showStatus('No object selected', 'error');
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/save-selected', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({})
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            showStatus(`Object ${selectedJs} saved to ${data.path}`, 'success');
-        } else {
-            showStatus('Error saving object', 'error');
-        }
-    } catch (error) {
-        showStatus('Error saving object: ' + error.message, 'error');
-    }
-}
-
-// Close the viewer
-async function closeViewer() {
-    if (isClosing) return;
-    
-    isClosing = true;
-    try {
-        const response = await fetch('/api/close', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (response.ok) {
-            window.close();
-        } else {
-            showStatus('Error closing viewer', 'error');
-            isClosing = false;
-        }
-    } catch (error) {
-        showStatus('Error closing viewer: ' + error.message, 'error');
-        isClosing = false;
-    }
-}
-
-// Show status message
-function showStatus(message, type = 'info') {
-    const status = document.getElementById('status');
-    status.textContent = message;
-    status.className = `status ${type}`;
-    status.style.display = 'block';
-    
-    setTimeout(() => {
-        status.style.display = 'none';
-    }, 3000);
-}
-
-// Navigate to previous JavaScript file
-function navigatePrevious() {
-    if (jsFiles.length === 0) return;
-    
-    let newIndex = selectedIndex - 1;
-    if (newIndex < 0) newIndex = jsFiles.length - 1;
-    
-    selectJs(jsFiles[newIndex].name);
-}
-
-// Navigate to next JavaScript file
-function navigateNext() {
-    if (jsFiles.length === 0) return;
-    
-    let newIndex = selectedIndex + 1;
-    if (newIndex >= jsFiles.length) newIndex = 0;
-    
-    selectJs(jsFiles[newIndex].name);
-}
-
-// Handle keyboard shortcuts
-function handleKeyDown(e) {
-    // If user is typing in the feedback input, don't handle navigation keys
-    if (e.target.id === 'feedbackInput') {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            saveFeedback();
-        }
-        return;
-    }
-    
-    switch (e.key) {
-        case 'ArrowLeft':
-            e.preventDefault();
-            navigatePrevious();
-            break;
-        case 'ArrowRight':
-            e.preventDefault();
-            navigateNext();
-            break;
-        case 'Enter':
-            e.preventDefault();
-            if (selectedJs) {
-                document.getElementById('feedbackInput').focus();
-            }
-            break;
-        case 'Escape':
-            e.preventDefault();
-            closeViewer();
-            break;
-        case 's':
-        case 'S':
-            e.preventDefault();
-            saveSelected();
-            break;
-    }
-}
-
-// Handle window resize
-function handleResize() {
-    jsFiles.forEach((_, index) => {
-        const container = document.getElementById(`preview-${index}`);
-        if (container && renderers[index] && cameras[index]) {
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-            
-            cameras[index].aspect = width / height;
-            cameras[index].updateProjectionMatrix();
-            
-            renderers[index].setSize(width, height, true);
-        }
-    });
-}
-
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    fetchJsFiles();
-    document.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('resize', handleResize);
-    
-    document.getElementById('saveFeedbackBtn').addEventListener('click', saveFeedback);
-}); 

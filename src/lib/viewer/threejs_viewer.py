@@ -50,6 +50,7 @@ class ThreeJSViewer:
         self.app.get("/")(self.index)
         self.app.get("/js/{filename}")(self.serve_js)
         self.app.get("/api/js")(self.get_js_files)
+        self.app.get("/api/dsl/{filename}")(self.serve_dsl)
         self.app.post("/api/select")(self.select_js)
         self.app.post("/api/feedback")(self.save_feedback)
         self.app.get("/api/feedback/{js}")(self.get_feedback)
@@ -67,11 +68,18 @@ class ThreeJSViewer:
             raise HTTPException(status_code=404, detail="JavaScript file not found")
         return FileResponse(str(file_path))
     
+    async def serve_dsl(self, filename: str):
+        """Serve a DSL file."""
+        file_path = self.js_folder / filename
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="DSL file not found")
+        return FileResponse(str(file_path))
+    
     async def get_js_files(self):
         """Get a list of all JavaScript files in the folder with their content."""
         js_files = []
         for file in os.listdir(self.js_folder):
-            if file.lower().endswith('.js'):
+            if file.lower().endswith('.dsl'):
                 file_path = self.js_folder / file
                 try:
                     with open(file_path, 'r') as f:
@@ -172,6 +180,6 @@ class ThreeJSViewer:
         return self.feedback_data 
     
 if __name__ == "__main__":
-    viewer = ThreeJSViewer("src/lib/viewer/examples", "src/lib/viewer/examples", "dorm", "Dorm Room Viewer", 8001)
+    viewer = ThreeJSViewer(".data/dormroom/test/", ".data/dormroom/test/", "dorm", "Dorm Room Viewer", 8001)
     feedback_data = viewer.run()
     print(feedback_data)
