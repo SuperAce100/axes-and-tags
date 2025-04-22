@@ -50,20 +50,26 @@ def main():
 
     if not feedback_data: return
 
-    feedback_examples = load_threejs_from_feedback(concept, feedback_data, output_dir)
+    iteration = 1
+    while True:
+        feedback_examples = load_threejs_from_feedback(concept, feedback_data, output_dir)
+        print(f"Feedback examples: {feedback_examples}")
 
-    print(f"Feedback examples: {feedback_examples}")
+        threejs_objects = generate_threejs_multiple(concept, feedback_examples, args.n)
+        output_dir = os.path.join(output_dir, f"feedback_{iteration}")
 
-    threejs_objects = generate_threejs_multiple(concept, feedback_examples, args.n)
+        save_threejs(concept, threejs_objects, output_dir)
+        print(f"Saved {len(threejs_objects)} 3D objects after reflection to {output_dir}")
 
-    output_dir = os.path.join(output_dir, "feedback")
-
-    save_threejs(concept, threejs_objects, output_dir)
-
-    print(f"Saved {len(threejs_objects)} 3D objects after reflection to {output_dir}")
-
-    viewer = ThreeJSViewer(output_dir, examples_dir, concept, f"{concept.capitalize()} made with {args.n_examples} examples post reflection", port=8002)
-    feedback_data = viewer.run()
+        viewer = ThreeJSViewer(output_dir, examples_dir, concept, 
+            f"{concept.capitalize()} made with {args.n_examples} examples post reflection (iteration {iteration})", 
+            port=8002 + iteration)
+        feedback_data = viewer.run()
+        
+        if not feedback_data:
+            break
+            
+        iteration += 1
 
 if __name__ == "__main__":
     main()

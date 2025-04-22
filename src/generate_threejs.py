@@ -20,7 +20,7 @@ def collect_examples(concept: str, examples_dir: str, n: int = 10):
         return examples, []
     
     model = SentenceTransformer('all-MiniLM-L6-v2')
-    all_files = [f for f in os.listdir(examples_dir) if f.endswith(".svg")]
+    all_files = [f for f in os.listdir(examples_dir) if f.endswith(".js")]
     file_names = [os.path.splitext(f)[0] for f in all_files]
     
     concept_embedding = model.encode([concept])[0]

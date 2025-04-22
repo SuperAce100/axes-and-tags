@@ -106,12 +106,12 @@ async function initThreeJsScene(index, jsContent) {
     
     // Add orbit controls
     const orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
-    orbitControls.enableDamping = true;
-    orbitControls.dampingFactor = 0.05;
+    orbitControls.enableDamping = false;
+    // orbitControls.dampingFactor = 0.05;
     orbitControls.enableZoom = true;
     orbitControls.enablePan = true;
     orbitControls.autoRotate = true;
-    orbitControls.autoRotateSpeed = 2.0;
+    orbitControls.autoRotateSpeed = 1.3;
     controls[index] = orbitControls;
     
     try {

@@ -171,6 +171,6 @@ class ThreeJSViewer:
         return self.feedback_data 
     
 if __name__ == "__main__":
-    viewer = ThreeJSViewer(".data/blocky/results/cow_1745009415_1583", ".data/blocky/examples", "cow", "Cow in a blocky style", 8001)
+    viewer = ThreeJSViewer(".data/blocky/examples", ".data/blocky/examples", "cow", "Cow in a blocky style", 8001)
     feedback_data = viewer.run()
     print(feedback_data)
