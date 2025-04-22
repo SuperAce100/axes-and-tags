@@ -78,7 +78,7 @@ def load_threejs_from_feedback(concept: str, feedback_data: dict[str, list], exa
 def save_threejs(concept: str, threejs_objects: list, output_dir: str):
     for i, js in enumerate(threejs_objects):
         os.makedirs(output_dir, exist_ok=True)
-        with open(os.path.join(output_dir, f"{concept}_{i}.js"), "w") as f:
+        with open(os.path.join(output_dir, f"{concept}_{i}.dsl"), "w") as f:
             f.write(js)
 
 

@@ -14,6 +14,13 @@ def parse_threejs(response: str) -> str:
         return js_match.group(1)
     return response
 
+def parse_dsl(response: str) -> str:
+    # Extract code between <response> tags
+    dsl_match = re.search(r'<response>\n(.*?)\n</response>', response, re.DOTALL)
+    if dsl_match:
+        return dsl_match.group(1)
+    return response
+
 if __name__ == "__main__":
     example_response = """
     Here's a simple and cute SVG of a cartoon-style cat:

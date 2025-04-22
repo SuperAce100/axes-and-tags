@@ -7,7 +7,7 @@ import dotenv
 
 dotenv.load_dotenv()
 
-text_model = "openai/gpt-4.1"
+text_model = "openai/gpt-4.1-mini"
 # text_model = "anthropic/claude-3.7-sonnet"
 
 client = OpenAI(
