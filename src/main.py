@@ -15,7 +15,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Generate dorm room layouts using DSL')
     parser.add_argument('--examples-dir', type=str, default='dormroom/examples', help='Directory containing examples')
     parser.add_argument('--output-dir', type=str, default='dormroom/results', help='Directory to save results')
-    parser.add_argument('--n', type=int, default=6, help='Number of layouts to generate')
+    parser.add_argument('--n', type=int, default=3, help='Number of layouts to generate')
     parser.add_argument('--n-examples', type=int, default=10, help='Number of examples to use')
     parser.add_argument('--model', type=str, default='openai/gpt-4.1-mini', help='Model to use')
     parser.add_argument('--prompt', type=str, default='dorm room', help='Prompt to use')
