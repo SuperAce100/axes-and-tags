@@ -46,8 +46,6 @@ def llm_call(
     ]
     messages = [msg for msg in messages if msg is not None]
 
-    print(messages)
-
     new_kwargs = {**kwargs, "model": model, "messages": messages}
 
     if "cerebras" in model:
@@ -62,12 +60,4 @@ def llm_call(
 
 if __name__ == "__main__":
     print(llm_call("What is the capital of the moon?"))
-    # prompt = "What is the capital of the moon?"
-    # response = llm_call(prompt)
-    # print(response)
-
-    # messages = [
-    #     {"role": "user", "content": prompt}
-    # ]
-    # response = llm_call_messages(messages)
-    # print(response)
+    

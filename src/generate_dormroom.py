@@ -19,19 +19,16 @@ def collect_examples(concept: str, examples_dir: str, n: int = 10):
     if len(os.listdir(examples_dir)) == 0:
         return examples, []
     
-    model = SentenceTransformer('all-MiniLM-L6-v2')
     all_files = [f for f in os.listdir(examples_dir) if f.endswith(".dsl")]
     file_names = [os.path.splitext(f)[0] for f in all_files]
     
-    print(file_names)
+    # Sort files by modification time, most recent first
+    file_times = [(f, os.path.getmtime(os.path.join(examples_dir, f))) for f in all_files]
+    file_times.sort(key=lambda x: x[1], reverse=True)
     
-    concept_embedding = model.encode([concept])[0]
-    filename_embeddings = model.encode(file_names)
-    
-    similarities = np.dot(filename_embeddings, concept_embedding)
-    top_indices = np.argsort(similarities)[-n:][::-1]
-    yaml_files = [all_files[i] for i in top_indices]
-    example_names = [file_names[i] for i in top_indices]
+    # Take the n most recent files
+    yaml_files = [f[0] for f in file_times[:n]]
+    example_names = [os.path.splitext(f)[0] for f in yaml_files]
 
     for yaml_file in yaml_files:
         with open(os.path.join(examples_dir, yaml_file), "r") as file:
