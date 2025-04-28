@@ -55,7 +55,7 @@ def generate_dsl(examples: str, model: str = text_model, prompt: str = "Generate
     return parse_dsl(response)
 
 
-def generate_dsl_multiple(examples: str, n: int = 10, model: str = text_model, prompt: str = "Generate a layout for a single dorm room", temperature: float = 0.8):
+def generate_dsl_multiple(examples: str, n: int = 10, model: str = text_model, prompt: str = "Generate a layout for a single dorm room", temperature: float = 1.5):
     dsl_objects = []
 
     def generate_one():

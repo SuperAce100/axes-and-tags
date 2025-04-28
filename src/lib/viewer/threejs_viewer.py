@@ -143,7 +143,7 @@ class ThreeJSViewer:
         
         # Copy selected JavaScript file to the output path with concept.js name
         src_path = self.js_folder / js
-        dst_path = Path(self.output_path) / f"{self.concept.replace(' ', '_') + random.randint(1000, 9999)}.dsl"
+        dst_path = Path(self.output_path) / f"{self.concept.replace(' ', '_') + str(random.randint(1000, 9999))}.dsl"
         
         if src_path.exists():
             shutil.copy2(src_path, dst_path)

@@ -88,6 +88,9 @@ VALID_FURNITURE_PIECES:
 When generating layouts, ensure items don't overlap and maintain realistic spacing. For example, a bulletin board should be placed precisely on the wall, not on top of a desk.
 
 The room has dimensions as follows. Do not repeat these in your response: {room_dimensions}
+
+Here are some examples:
+{examples}
 """
 
 dsl_example_format = """
@@ -100,12 +103,12 @@ Here is an example of a {concept}
 
 example_room = """
 room:
-  name: "Standard Dorm Room"
+  name: "Dorm Room"
   width: 300
   length: 400
   height: 250
 """
 
 dsl_user_prompt = """
-Generate a layout for a {concept}. Inspire your layout heavily from the examples provided.
+Generate a layout for a {concept}.
 """

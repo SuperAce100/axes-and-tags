@@ -46,6 +46,8 @@ def llm_call(
     ]
     messages = [msg for msg in messages if msg is not None]
 
+    print(messages)
+
     new_kwargs = {**kwargs, "model": model, "messages": messages}
 
     if "cerebras" in model:
