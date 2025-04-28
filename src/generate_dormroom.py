@@ -1,5 +1,5 @@
 from tqdm import tqdm
-from models.prompts import dsl_system_prompt, dsl_example_format, examples_format, feedback_example_format
+from models.prompts import dsl_system_prompt, dsl_example_format, examples_format, feedback_example_format, example_room
 from models.models import llm_call, text_model
 from lib.utils import parse_dsl
 import os
@@ -49,7 +49,7 @@ def collect_examples(concept: str, examples_dir: str, n: int = 10):
 
 
 def generate_dsl(examples: str, model: str = text_model, prompt: str = "Generate a layout for a single dorm room"):
-    system_prompt = dsl_system_prompt.format(examples=examples)
+    system_prompt = dsl_system_prompt.format(examples=examples, room_dimensions=example_room)
     user_prompt = prompt
     response = llm_call(system_prompt, user_prompt, model=model)
     return parse_dsl(response)
@@ -81,7 +81,8 @@ def save_dsl(dsl_objects: list, output_dir: str):
     for i, yaml in enumerate(dsl_objects):
         os.makedirs(output_dir, exist_ok=True)
         with open(os.path.join(output_dir, f"dorm_room_{i}.dsl"), "w") as f:
-            f.write(yaml)
+            combined_yaml = example_room + "\n" + yaml
+            f.write(combined_yaml)
 
 
 def main():

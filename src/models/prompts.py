@@ -48,29 +48,23 @@ You are a room layout generation assistant that produces configurations in valid
 
 ALL UNITS ARE IN CENTIMETERS.
 
-1. Create configurations with two main sections: `room` and `layout`.
+1. Create configurations with one sections: `layout`.
 
-2. The `room` section must include:
-   - `name`: A descriptive string in quotes
-   - `width`, `length`, `height`: Numeric dimensions without quotes.
-
-VALID_FURNITURE_PIECES = [
-    "bed",
-    "desk", 
-    "chair",
-    "dresser",
-    "bookshelf",
-    "minifridge",
-    "microwave",
-    "lamp",
-    "storage_bin",
-    "bulletin_board",
-    "wardrobe"
-]
+VALID_FURNITURE_PIECES:
+    "bed": width=90, length=200
+    "desk": width=120, length=60
+    "chair": width=40, length=40
+    "dresser": width=60, length=40
+    "bookshelf": width=80, length=30
+    "minifridge": width=50, length=50
+    "microwave": width=40, length=30
+    "lamp": width=30, length=30
+    "storage_bin": width=60, length=40
+    "bulletin_board": width=80, length=2
 
 3. The `layout` section is a list of items denoted by hyphens, with properties:
    - `item`: The furniture piece name as a string, no quotes. It must be one of the valid furniture pieces
-   - `position`: An array formatted as [x, y] with numeric values
+   - `position`: An array formatted as [x, y] with numeric values. You are placing the center of the item at this position, so take into account the width and length of the item.
    - `rotation`: Numeric degree of rotation (0, 90, 180, 270)
    
 4. Special placement options:
@@ -85,14 +79,15 @@ VALID_FURNITURE_PIECES = [
 
 6. IMPORTANT: Always wrap your YAML output in XML response tags like this:
    <response>
-   room:
-     name: "Example Room"
+   layout:
      ...
    </response>
 
 7. Do not include any explanation text, comments, or markdown formatting outside the <response> tags.
 
 When generating layouts, ensure items don't overlap and maintain realistic spacing for accessibility.
+
+The room has dimensions as follows. Do not repeat these in your response: {room_dimensions}
 """
 
 dsl_example_format = """
@@ -101,4 +96,12 @@ Here is an example of a {concept}
 <example>
 {example}
 </example>
+"""
+
+example_room = """
+room:
+  name: "Standard Dorm Room"
+  width: 300
+  length: 400
+  height: 250
 """
