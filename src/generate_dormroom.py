@@ -1,5 +1,5 @@
 from tqdm import tqdm
-from models.prompts import dsl_system_prompt, dsl_example_format, examples_format, feedback_example_format, example_room
+from models.prompts import dsl_system_prompt, dsl_example_format, examples_format, feedback_example_format, example_room, dsl_user_prompt
 from models.models import llm_call, text_model
 from lib.utils import parse_dsl
 import os
@@ -48,18 +48,18 @@ def collect_examples(concept: str, examples_dir: str, n: int = 10):
     return examples, example_names
 
 
-def generate_dsl(examples: str, model: str = text_model, prompt: str = "Generate a layout for a single dorm room"):
+def generate_dsl(examples: str, model: str = text_model, prompt: str = "Generate a layout for a single dorm room", temperature: float = 1):
     system_prompt = dsl_system_prompt.format(examples=examples, room_dimensions=example_room)
-    user_prompt = prompt
-    response = llm_call(system_prompt, user_prompt, model=model)
+    user_prompt = dsl_user_prompt.format(concept=prompt)
+    response = llm_call(system_prompt, user_prompt, model=model, temperature=temperature)
     return parse_dsl(response)
 
 
-def generate_dsl_multiple(examples: str, n: int = 10, model: str = text_model, prompt: str = "Generate a layout for a single dorm room"):
+def generate_dsl_multiple(examples: str, n: int = 10, model: str = text_model, prompt: str = "Generate a layout for a single dorm room", temperature: float = 0.8):
     dsl_objects = []
 
     def generate_one():
-        return generate_dsl(examples, model, prompt)
+        return generate_dsl(examples, model, prompt, temperature=temperature)
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(generate_one) for _ in range(n)]
@@ -73,7 +73,10 @@ def load_dsl_from_feedback(feedback_data: dict[str, list], examples_dir: str):
     for filename, feedbacks in feedback_data.items():
         with open(os.path.join(examples_dir, filename), "r") as f:
             yaml = f.read()
-            examples_str += feedback_example_format.format(concept="dorm room", example=yaml, feedback=feedbacks)
+            yaml = "layout:" + yaml.split("layout:")[1] if "layout:" in yaml else yaml
+            examples_str += feedback_example_format.format(concept="Dorm Room", example=yaml, feedback="\n".join(feedbacks))
+
+    print(examples_str)
     return examples_str
 
 
@@ -88,7 +91,7 @@ def save_dsl(dsl_objects: list, output_dir: str):
 def main():
     examples, example_names = collect_examples("dorm room", "examples")
 
-    dsl_objects = generate_dsl_multiple(examples, 10, text_model)
+    dsl_objects = generate_dsl_multiple(examples, 10, text_model, temperature=0.5)
     save_dsl(dsl_objects, "results/test-3")
 
 

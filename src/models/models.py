@@ -20,7 +20,7 @@ cerebras_client = OpenAI(
     api_key=os.getenv("CEREBRAS_API_KEY")
 )
     
-cerebras_model = "llama-4-scout-17b-16e-instruct"
+cerebras_model = "llama-3.3-70b"
 
 
 def llm_call(

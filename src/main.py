@@ -15,14 +15,19 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Generate dorm room layouts using DSL')
     parser.add_argument('--examples-dir', type=str, default='dormroom/examples', help='Directory containing examples')
     parser.add_argument('--output-dir', type=str, default='dormroom/results', help='Directory to save results')
-    parser.add_argument('--n', type=int, default=3, help='Number of layouts to generate')
+    parser.add_argument('--n', type=int, default=6, help='Number of layouts to generate')
     parser.add_argument('--n-examples', type=int, default=10, help='Number of examples to use')
-    parser.add_argument('--model', type=str, default='openai/gpt-4.1-mini', help='Model to use')
-    parser.add_argument('--prompt', type=str, default='dorm room', help='Prompt to use')
+    parser.add_argument('--model', type=str, default='openai/gpt-4.1', help='Model to use')
+    parser.add_argument('--prompt', type=str, default='Dorm Room', help='Prompt to use')
+    parser.add_argument('--cerebras', action='store_true', help='Use Cerebras model')
     return parser.parse_args()
 
 def main():
     args = parse_args()
+
+    if args.cerebras:
+        args.model = "cerebras"
+        args.n = 3
 
     examples_dir = os.path.join(".data", args.examples_dir)
     results_dir = os.path.join(".data", args.output_dir)
@@ -51,16 +56,16 @@ def main():
     iteration = 1
     while True:
         feedback_examples = load_dsl_from_feedback(feedback_data, output_dir)
-        print(f"Feedback examples: {feedback_examples}")
+        print(f"Feedback examples: {'\n'.join([f'{i}. {name}: {"\n".join(feedback_data[name])}' for i, name in enumerate(feedback_data.keys())])}")
 
-        dsl_objects = generate_dsl_multiple(feedback_examples, args.n, args.model, args.prompt)
+        dsl_objects = generate_dsl_multiple(feedback_examples, args.n, args.model, args.prompt, temperature=0.3)
         output_dir = os.path.join(output_dir, f"feedback_{iteration}")
 
         save_dsl(dsl_objects, output_dir)
         print(f"Saved {len(dsl_objects)} {args.prompt} layouts after reflection to {output_dir}")
 
         viewer = ThreeJSViewer(output_dir, examples_dir, f"{args.prompt} Layouts", 
-            f"{args.prompt}  made with {args.n_examples} examples post reflection (iteration {iteration})", 
+            f"{args.prompt} made with {args.n_examples} examples post reflection (iteration {iteration})", 
             port=8002 + iteration)
         feedback_data = viewer.run()
         

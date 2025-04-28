@@ -1,5 +1,6 @@
 import os
 import json
+import random
 import webbrowser
 from pathlib import Path
 import threading
@@ -76,22 +77,22 @@ class ThreeJSViewer:
         return FileResponse(str(file_path))
     
     async def get_js_files(self):
-        """Get a list of all JavaScript files in the folder with their content."""
-        js_files = []
-        for file in os.listdir(self.js_folder):
+        """Get a list of all DSL files in the folder with their content."""
+        dsl_files = []
+        for file in sorted(os.listdir(self.js_folder)):
             if file.lower().endswith('.dsl'):
                 file_path = self.js_folder / file
                 try:
                     with open(file_path, 'r') as f:
                         content = f.read()
-                    js_files.append({
+                    dsl_files.append({
                         'name': file,
                         'content': content
                     })
                 except Exception as e:
                     print(f"Error reading {file}: {e}")
-        print(f"Found {len(js_files)} JavaScript files")
-        return js_files
+        print(f"Found {len(dsl_files)} DSL files")
+        return dsl_files
     
     async def select_js(self, data: Dict[str, Any]):
         """Select a JavaScript file (only one at a time)."""
@@ -142,7 +143,7 @@ class ThreeJSViewer:
         
         # Copy selected JavaScript file to the output path with concept.js name
         src_path = self.js_folder / js
-        dst_path = Path(self.output_path) / f"{self.concept.replace(' ', '_')}.dsl"
+        dst_path = Path(self.output_path) / f"{self.concept.replace(' ', '_') + random.randint(1000, 9999)}.dsl"
         
         if src_path.exists():
             shutil.copy2(src_path, dst_path)

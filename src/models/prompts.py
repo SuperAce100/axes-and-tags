@@ -78,9 +78,6 @@ VALID_FURNITURE_PIECES:
    - No trailing commas
 
 6. IMPORTANT: Always wrap your YAML output in XML response tags like this:
-   <thinking>
-   ...
-   </thinking>
    <response>
    layout:
      ...
@@ -88,7 +85,7 @@ VALID_FURNITURE_PIECES:
 
 7. Do not include any explanation text, comments, or markdown formatting outside the <response> tags.
 
-When generating layouts, ensure items don't overlap and maintain realistic spacing. Visualize your response before outputting it.
+When generating layouts, ensure items don't overlap and maintain realistic spacing. For example, a bulletin board should be placed precisely on the wall, not on top of a desk.
 
 The room has dimensions as follows. Do not repeat these in your response: {room_dimensions}
 """
@@ -107,4 +104,8 @@ room:
   width: 300
   length: 400
   height: 250
+"""
+
+dsl_user_prompt = """
+Generate a layout for a {concept}. Inspire your layout heavily from the examples provided.
 """
