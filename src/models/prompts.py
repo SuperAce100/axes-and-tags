@@ -1,3 +1,6 @@
+import random
+
+
 examples_format = """
 Here is an example of a {concept}
 
@@ -104,11 +107,11 @@ Here is an example of a {concept}
 </example>
 """
 
-example_room = """
+example_room = f"""
 room:
   name: "Dorm Room"
-  width: 300
-  length: 400
+  width: {random.randint(200, 500)}
+  length: {random.randint(200, 500)}
   height: 250
 """
 

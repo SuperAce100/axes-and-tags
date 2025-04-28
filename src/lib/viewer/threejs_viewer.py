@@ -13,9 +13,13 @@ from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import uvicorn
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
+from rich.rule import Rule
 
 class ThreeJSViewer:
-    def __init__(self, js_folder, output_path=None, concept=None, title="3D Object Viewer", port=8001):
+    def __init__(self, js_folder, output_path=None, concept=None, title="3D Object Viewer", port=8001, console=None):
         """
         Initialize the Three.js viewer.
         
@@ -24,6 +28,7 @@ class ThreeJSViewer:
             output_path (str, optional): Path to save the selected object
             port (int, optional): Port to run the server on
             concept (str, optional): Concept name for the output file
+            console (Console, optional): Rich console for output
         """
         self.js_folder = Path(js_folder)
         self.output_path = output_path
@@ -34,6 +39,7 @@ class ThreeJSViewer:
         self.server_thread = None
         self.concept = concept
         self.title = title
+        self.console = console or Console()
         
         # Create FastAPI app
         self.app = FastAPI(title="Three.js Viewer")
@@ -57,6 +63,8 @@ class ThreeJSViewer:
         self.app.get("/api/feedback/{js}")(self.get_feedback)
         self.app.post("/api/save-selected")(self.save_selected)
         self.app.post("/api/close")(self.close_viewer)
+        
+        self.console.print(f"[grey11]Initialized ThreeJS Viewer for [bold cyan]{self.concept or 'objects'}[/bold cyan][/grey11]")
     
     async def index(self, request: Request):
         """Render the main page."""
@@ -66,6 +74,7 @@ class ThreeJSViewer:
         """Serve a JavaScript file."""
         file_path = self.js_folder / filename
         if not file_path.exists():
+            self.console.print(f"[bold red]JavaScript file not found: {filename}[/bold red]")
             raise HTTPException(status_code=404, detail="JavaScript file not found")
         return FileResponse(str(file_path))
     
@@ -73,6 +82,7 @@ class ThreeJSViewer:
         """Serve a DSL file."""
         file_path = self.js_folder / filename
         if not file_path.exists():
+            self.console.print(f"[bold red]DSL file not found: {filename}[/bold red]")
             raise HTTPException(status_code=404, detail="DSL file not found")
         return FileResponse(str(file_path))
     
@@ -90,8 +100,8 @@ class ThreeJSViewer:
                         'content': content
                     })
                 except Exception as e:
-                    print(f"Error reading {file}: {e}")
-        print(f"Found {len(dsl_files)} DSL files")
+                    self.console.print(f"[bold red]Error reading {file}: {e}[/bold red]")
+        self.console.print(f"[grey11]Found [bold cyan]{len(dsl_files)}[/bold cyan] DSL files[/grey11]")
         return dsl_files
     
     async def select_js(self, data: Dict[str, Any]):
@@ -99,6 +109,7 @@ class ThreeJSViewer:
         js = data.get('js')
         
         if not js:
+            self.console.print("[bold red]No JavaScript file specified[/bold red]")
             raise HTTPException(status_code=400, detail="No JavaScript file specified")
         
         self.selected_js = js
@@ -110,6 +121,7 @@ class ThreeJSViewer:
         feedback = data.get('feedback')
         
         if not js or not feedback:
+            self.console.print("[bold red]JavaScript file and feedback required[/bold red]")
             raise HTTPException(status_code=400, detail="JavaScript file and feedback required")
         
         # Store feedback in memory
@@ -117,6 +129,7 @@ class ThreeJSViewer:
             self.feedback_data[js] = []
         
         self.feedback_data[js].append(feedback)
+        self.console.print(f"[grey11]Saved feedback for [bold cyan]{js}[/bold cyan]: [grey11]{feedback[:50]}...[/grey11]")
         
         return {"success": True}
     
@@ -132,9 +145,11 @@ class ThreeJSViewer:
         js = self.selected_js
         
         if not js:
+            self.console.print("[bold red]No JavaScript file selected[/bold red]")
             raise HTTPException(status_code=400, detail="No JavaScript file selected")
         
         if not self.output_path:
+            self.console.print("[bold red]No output path specified[/bold red]")
             raise HTTPException(status_code=400, detail="No output path specified")
         
         # Create output directory if it doesn't exist
@@ -148,13 +163,16 @@ class ThreeJSViewer:
         
         if src_path.exists():
             shutil.copy2(src_path, dst_path)
+            self.console.print(f"[green]✓[/green] [grey11]Saved selected file to [bold cyan]{dst_path}[/bold cyan][/grey11]")
             return {"success": True, "path": str(dst_path)}
         else:
+            self.console.print(f"[bold red]JavaScript file not found: {src_path}[/bold red]")
             raise HTTPException(status_code=404, detail="JavaScript file not found")
     
     async def close_viewer(self):
         """Close the viewer and return the feedback."""
         self.server_running = False
+        self.console.print("[yellow]Viewer closed[/yellow]")
         return {"success": True}
     
     def run(self, open_browser=True):
@@ -163,6 +181,7 @@ class ThreeJSViewer:
         
         # Start server in a separate thread
         def run_server():
+            self.console.print(f"[grey11]Starting server on port [bold cyan]{self.port}[/bold cyan]...[/grey11]")
             uvicorn.run(self.app, host="0.0.0.0", port=self.port, log_level="warning")
         
         self.server_thread = threading.Thread(target=run_server)
@@ -172,13 +191,22 @@ class ThreeJSViewer:
         # Open browser if requested
         if open_browser:
             time.sleep(1.5)  # Give the server time to start
-            webbrowser.open(f'http://localhost:{self.port}/')
+            url = f'http://localhost:{self.port}/'
+            self.console.print(f"[grey11]Opening browser at [/grey11][link={url}]{url}[/link]")
+            webbrowser.open(url)
+        
+        self.console.print("[green]Viewer is running. Close the browser window to continue.[/green]")
         
         # Wait for the server to stop
         while self.server_running:
             time.sleep(0.1)
         
         # Return the feedback data
+        if self.feedback_data:
+            self.console.print(f"[grey11]Collected feedback for [bold cyan]{len(self.feedback_data)}[/bold cyan] files[/grey11]")
+        else:
+            self.console.print("[red]No feedback collected[/red]")
+        
         return self.feedback_data 
     
 if __name__ == "__main__":

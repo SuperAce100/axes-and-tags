@@ -1,11 +1,9 @@
-from tqdm import tqdm
+from rich.progress import track
 from models.prompts import dsl_system_prompt, dsl_example_format, examples_format, feedback_example_format, example_room, dsl_user_prompt
 from models.models import llm_call, text_model
 from lib.utils import parse_dsl
 import os
 import concurrent.futures
-from sentence_transformers import SentenceTransformer
-import numpy as np
 
 
 def collect_examples(concept: str, examples_dir: str, n: int = 10):
@@ -60,7 +58,7 @@ def generate_dsl_multiple(examples: str, n: int = 10, model: str = text_model, p
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(generate_one) for _ in range(n)]
-        dsl_objects = [future.result() for future in tqdm(concurrent.futures.as_completed(futures), total=n, desc="Generating Room Layouts")]
+        dsl_objects = [future.result() for future in track(concurrent.futures.as_completed(futures), total=n, description=f"[blue]Generating [bold cyan]{n}[/bold cyan] {prompt} Layouts[/blue]", style="grey15")]
 
     return dsl_objects
 
@@ -73,7 +71,6 @@ def load_dsl_from_feedback(feedback_data: dict[str, list], examples_dir: str):
             yaml = "layout:" + yaml.split("layout:")[1] if "layout:" in yaml else yaml
             examples_str += feedback_example_format.format(concept="Dorm Room", example=yaml, feedback="\n".join(feedbacks))
 
-    print(examples_str)
     return examples_str
 
 

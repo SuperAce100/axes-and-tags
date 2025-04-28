@@ -5,6 +5,13 @@ import random
 import time
 import os
 import tkinter as tk
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
+from rich.rule import Rule
+
+# Initialize rich console
+console = Console()
 
 def name_output_dir(output_dir: str):
     timestamp = int(time.time())
@@ -35,10 +42,11 @@ def main():
     os.makedirs(examples_dir, exist_ok=True)
     os.makedirs(results_dir, exist_ok=True)
 
+    print("\n\n")
+    console.print(Rule(f"[bold blue]Starting Initial {args.prompt} Generation[/bold blue]", style="grey11", align="left"))
+    
     examples, example_names = collect_examples(args.prompt, examples_dir, args.n_examples)
-    print(f"Collected {len(example_names)} examples for {args.prompt}: {', '.join(example_names)}")
-
-    print(f"Generating {args.n} {args.prompt} layouts")
+    console.print(f"[green]✓[/green] Collected {len(example_names)} examples for {args.prompt}: [grey11]{', '.join(example_names)}[/grey11]")
 
     dsl_objects = generate_dsl_multiple(examples, args.n, args.model, args.prompt)
 
@@ -46,33 +54,44 @@ def main():
 
     save_dsl(dsl_objects, output_dir)
 
-    print(f"Saved {len(dsl_objects)} {args.prompt} layouts to {output_dir}")
+    console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(dsl_objects)}[/bold] {args.prompt} layouts to {output_dir}[/grey11]")
 
-    viewer = ThreeJSViewer(output_dir, examples_dir, f"{args.prompt}", f"{args.prompt} layouts made with {args.n_examples} examples")
+    viewer = ThreeJSViewer(output_dir, examples_dir, f"{args.prompt}", f"{args.prompt} layouts made with {args.n_examples} examples", console=console)
     feedback_data = viewer.run()
-
-    if not feedback_data: return
 
     iteration = 1
     while True:
-        feedback_examples = load_dsl_from_feedback(feedback_data, output_dir)
-        print(f"Feedback examples: {'\n'.join([f'{i}. {name}: {"\n".join(feedback_data[name])}' for i, name in enumerate(feedback_data.keys())])}")
 
+        if not feedback_data:
+            break
+
+
+        
+        feedback_examples = load_dsl_from_feedback(feedback_data, output_dir)
+        
+        feedback_text = Text()
+        for i, name in enumerate(feedback_data.keys()):
+            feedback_text.append(f"{i}. {name}: ", style="white")
+            feedback_text.append("\n".join(feedback_data[name]) + "\n", style="grey11")
+        
+        console.print(Panel(feedback_text, title=f"[blue]Feedback for iteration {iteration}[/blue]", border_style="blue"))
+
+        console.print(f"[grey11]Generating new layouts based on feedback...[/grey11]")
         dsl_objects = generate_dsl_multiple(feedback_examples, args.n, args.model, args.prompt, temperature=0.3)
         output_dir = os.path.join(output_dir, f"feedback_{iteration}")
 
         save_dsl(dsl_objects, output_dir)
-        print(f"Saved {len(dsl_objects)} {args.prompt} layouts after reflection to {output_dir}")
+        console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(dsl_objects)}[/bold] {args.prompt} layouts after reflection {iteration} to {output_dir}[/grey11]")
 
         viewer = ThreeJSViewer(output_dir, examples_dir, f"{args.prompt} Layouts", 
             f"{args.prompt} made with {args.n_examples} examples post reflection (iteration {iteration})", 
-            port=8002 + iteration)
+            port=8002 + iteration, console=console)
         feedback_data = viewer.run()
         
-        if not feedback_data:
-            break
             
         iteration += 1
+    
+    console.print(Rule(f"[bold green]Process Complete[/bold green]", style="green", align="left"))
 
 if __name__ == "__main__":
     main()
