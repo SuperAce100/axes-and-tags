@@ -1,4 +1,4 @@
-from generate_dormroom import generate_dsl_multiple, collect_examples, save_dsl, load_dsl_from_feedback
+from domains.dormroom.generate_dormroom import generate_dsl_multiple, collect_examples, save_dsl, load_dsl_from_feedback
 from lib.viewer.threejs_viewer import ThreeJSViewer
 import argparse
 import random

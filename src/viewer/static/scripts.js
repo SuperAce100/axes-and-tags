@@ -1,90 +1,42 @@
-let svgs = [];
-let selectedSvg = null;
+// Global variables
+let files = [];
+let selectedFile = null;
+let selectedIndex = -1;
 let feedbackData = {};
 let isClosing = false;
-let selectedIndex = -1;
-let isTyping = false;
 
-// Fetch SVGs from the server
-async function fetchSvgs() {
-    try {
-        const response = await fetch('/api/svgs');
-        svgs = await response.json();
-        renderSvgs();
-    } catch (error) {
-        showStatus('Error loading SVGs: ' + error.message, 'error');
-    }
-}
-
-// Render SVGs in the grid
-function renderSvgs() {
-    const grid = document.getElementById('svgGrid');
-    grid.innerHTML = '';
-    
-    svgs.forEach((svgData, index) => {
-        const svgName = svgData.name;
-        const svgContent = svgData.content;
-        
-        const item = document.createElement('div');
-        item.className = 'svg-item';
-        if (selectedSvg === svgName) {
-            item.classList.add('selected');
-            selectedIndex = index;
-        }
-        
-        // Add feedback badge if there's feedback
-        const hasFeedback = feedbackData[svgName] && feedbackData[svgName].length > 0;
-        
-        item.innerHTML = `
-            <div class="svg-number">${index + 1}</div>
-            ${hasFeedback ? `<div class="feedback-badge">${feedbackData[svgName].length}</div>` : ''}
-            <div class="svg-preview">
-                ${svgContent}
-            </div>
-        `;
-        
-        item.addEventListener('click', () => {
-            selectSvg(svgName);
-        });
-
-        item.addEventListener('dblclick', () => {
-            saveSelected();
-        });
-        
-        grid.appendChild(item);
-    });
-}
-
-// Select an SVG (only one at a time)
-async function selectSvg(svg) {
+// Select a file
+async function selectFile(file) {
     try {
         const response = await fetch('/api/select', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ svg })
+            body: JSON.stringify({ file })
         });
         
         if (response.ok) {
-            selectedSvg = svg;
-            renderSvgs();
-            loadFeedback(svg);
+            selectedFile = file;
+            
+            selectedIndex = files.findIndex(f => f.name === file);
+            render();
+            loadFeedback(file);
         } else {
-            showStatus('Error selecting SVG', 'error');
+            showStatus('Error selecting file', 'error');
         }
     } catch (error) {
-        showStatus('Error selecting SVG: ' + error.message, 'error');
+        showStatus('Error selecting file: ' + error.message, 'error');
     }
 }
 
-// Load feedback for a specific SVG
-async function loadFeedback(svg) {
+// Load feedback for a specific file
+async function loadFeedback(file) {
     try {
-        const response = await fetch(`/api/feedback/${svg}`);
+        const response = await fetch(`/api/feedback/${file}`);
         const data = await response.json();
         
-        feedbackData[svg] = data.feedback;
+        feedbackData[file] = data.feedback;
         renderFeedbackList();
     } catch (error) {
         console.error('Error loading feedback:', error);
@@ -96,12 +48,12 @@ function renderFeedbackList() {
     const list = document.getElementById('feedbackList');
     list.innerHTML = '';
     
-    if (!selectedSvg || !feedbackData[selectedSvg] || feedbackData[selectedSvg].length === 0) {
+    if (!selectedFile || !feedbackData[selectedFile] || feedbackData[selectedFile].length === 0) {
         list.innerHTML = '<div class="feedback-empty-state">No feedback yet</div>';
         return;
     }
     
-    feedbackData[selectedSvg].forEach((feedback, index) => {
+    feedbackData[selectedFile].forEach((feedback, index) => {
         const feedbackItem = document.createElement('div');
         feedbackItem.className = 'feedback-item';
         feedbackItem.textContent = feedback;
@@ -109,7 +61,7 @@ function renderFeedbackList() {
     });
 }
 
-// Save feedback for selected SVG
+// Save feedback for selected file
 async function saveFeedback() {
     const feedback = document.getElementById('feedbackInput').value.trim();
     
@@ -118,8 +70,8 @@ async function saveFeedback() {
         return;
     }
     
-    if (!selectedSvg) {
-        showStatus('Please select an SVG first', 'error');
+    if (!selectedFile) {
+        showStatus('Please select an object first', 'error');
         return;
     }
     
@@ -129,15 +81,15 @@ async function saveFeedback() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ svg: selectedSvg, feedback })
+            body: JSON.stringify({ file: selectedFile, feedback })
         });
         
         if (response.ok) {
-            showStatus(`Feedback saved for ${selectedSvg}`, 'success');
+            showStatus(`Feedback saved for ${selectedFile}`, 'success');
             document.getElementById('feedbackInput').value = '';
             
-            // Reload feedback for the selected SVG
-            await loadFeedback(selectedSvg);
+            // Reload feedback for the selected file
+            await loadFeedback(selectedFile);
         } else {
             showStatus('Error saving feedback', 'error');
         }
@@ -146,10 +98,10 @@ async function saveFeedback() {
     }
 }
 
-// Save selected SVG
+// Save selected file
 async function saveSelected() {
-    if (!selectedSvg) {
-        showStatus('No SVG selected', 'error');
+    if (!selectedFile) {
+        showStatus('No object selected', 'error');
         return;
     }
     
@@ -164,12 +116,12 @@ async function saveSelected() {
         
         if (response.ok) {
             const data = await response.json();
-            showStatus(`SVG ${selectedSvg} saved to ${data.path}`, 'success');
+            showStatus(`Object ${selectedFile} saved to ${data.path}`, 'success');
         } else {
-            showStatus('Error saving SVG', 'error');
+            showStatus('Error saving object', 'error');
         }
     } catch (error) {
-        showStatus('Error saving SVG: ' + error.message, 'error');
+        showStatus('Error saving object: ' + error.message, 'error');
     }
 }
 
@@ -199,10 +151,10 @@ async function closeViewer() {
 }
 
 // Show status message
-function showStatus(message, type) {
+function showStatus(message, type = 'info') {
     const status = document.getElementById('status');
     status.textContent = message;
-    status.className = 'status ' + type;
+    status.className = `status ${type}`;
     status.style.display = 'block';
     
     setTimeout(() => {
@@ -210,27 +162,26 @@ function showStatus(message, type) {
     }, 3000);
 }
 
-// Navigate to previous SVG
 function navigatePrevious() {
-    if (svgs.length === 0) return;
+    if (files.length === 0) return;
     
     let newIndex = selectedIndex - 1;
-    if (newIndex < 0) newIndex = svgs.length - 1;
+    if (newIndex < 0) newIndex = files.length - 1;
     
-    selectSvg(svgs[newIndex].name);
+    selectFile(files[newIndex].name);
 }
 
-// Navigate to next SVG
 function navigateNext() {
-    if (svgs.length === 0) return;
+    console.log(files);
+    if (files.length === 0) return;
     
     let newIndex = selectedIndex + 1;
-    if (newIndex >= svgs.length) newIndex = 0;
+    if (newIndex >= files.length) newIndex = 0;
+    console.log('navigateNext', newIndex, files[newIndex].name);
     
-    selectSvg(svgs[newIndex].name);
+    selectFile(files[newIndex].name);
 }
 
-// Handle keyboard shortcuts
 function handleKeyDown(e) {
     // If user is typing in the feedback input, don't handle navigation keys
     if (e.target.id === 'feedbackInput') {
@@ -247,12 +198,13 @@ function handleKeyDown(e) {
             navigatePrevious();
             break;
         case 'ArrowRight':
+            console.log('ArrowRight');
             e.preventDefault();
             navigateNext();
             break;
         case 'Enter':
             e.preventDefault();
-            if (selectedSvg) {
+            if (selectedFile) {
                 document.getElementById('feedbackInput').focus();
             }
             break;
@@ -268,17 +220,24 @@ function handleKeyDown(e) {
     }
 }
 
-// Event listeners
-document.getElementById('saveFeedbackBtn').addEventListener('click', saveFeedback);
-document.addEventListener('keydown', handleKeyDown);
-
-// Add beforeunload event handler
-window.addEventListener('beforeunload', function(e) {
-    if (!isClosing) {
-        // Use sendBeacon for more reliable delivery during page unload
-        navigator.sendBeacon('/api/close');
-    }
-});
+// Handle window resize
+function handleResize() {
+    console.log('Window resized');
+}
 
 // Initialize
-fetchSvgs();
+document.addEventListener('DOMContentLoaded', () => {
+    // Set up keyboard event listener
+    document.addEventListener('keydown', handleKeyDown);
+    
+    // Set up window resize event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Set up feedback button click event listener
+    document.getElementById('saveFeedbackBtn').addEventListener('click', saveFeedback);
+    
+    // Load initial files if available
+    if (files.length > 0) {
+        selectFile(files[0].name);
+    }
+}); 

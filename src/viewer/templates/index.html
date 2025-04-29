@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
     <div class="container">
-        
-        
         <h1>{{ title }}</h1>
 
         <div id="status" class="status" style="display: none;"></div>
         
-        <div class="svg-grid" id="svgGrid">
-            <!-- SVGs will be loaded here -->
+        <div class="main-grid" id="mainGrid">
+            <!-- Objects will be loaded here -->
         </div>
 
         <div class="global-feedback-form">
@@ -29,14 +29,10 @@
                 </div>
             </div>
             <div id="feedbackList" class="feedback-list">
-                <div class="feedback-empty-state">Select an SVG to save feedback</div>
+                <div class="feedback-empty-state">Select an object to save feedback</div>
             </div>
         </div>
-
-
     </div>
-    
-    
     
     <div class="keyboard-shortcuts">
         <h3>Keyboard Shortcuts</h3>
@@ -44,10 +40,10 @@
         <div class="shortcut"><span class="key">→</span> <span>Next</span></div>
         <div class="shortcut"><span class="key">Enter</span> <span>Select / Save Feedback</span></div>
         <div class="shortcut"><span class="key">Esc</span> <span>Close Viewer</span></div>
-        <div class="shortcut"><span class="key">S</span> or  <span class="key">Double Click</span> <span>Save Selected as Example</span></div>
+        <div class="shortcut"><span class="key">S</span> or <span class="key">Double Click</span> <span>Save Selected as Example</span></div>
     </div>
 
     <script src="/static/scripts.js"></script>
+    <script src="{{ scripts_path }}"></script>
 </body>
-</html>
-        
+</html> 
