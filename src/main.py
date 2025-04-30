@@ -1,14 +1,8 @@
 from domains.domain import Domain
 from domains.dormroom.dormroom import DormRoom
 import argparse
-import random
-import time
-import os
-import tkinter as tk
 from rich.console import Console
-from rich.panel import Panel
-from rich.text import Text
-from rich.rule import Rule
+from models.models import cerebras_model
 
 # Initialize rich console
 console = Console()
@@ -32,6 +26,7 @@ def main():
     if args.cerebras:
         args.model = "cerebras"
         args.n = 3
+        console.print(f"[dark_orange]Using {cerebras_model} on Cerebras 🚀[/dark_orange]")
 
     if args.domain == "dormroom":
         domain = DormRoom(args.data_dir, args.model, console)

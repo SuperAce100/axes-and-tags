@@ -55,8 +55,6 @@ class Domain(ABC):
 
     
     def run_experiment(self, n: int, n_examples: int, max_iterations: int = 10):
-        print("\n")
-
         self.console.print(Rule(f"[bold green]Starting initial {self.name} generation[/bold green]", style="green", align="left"))
 
         examples, example_names = self.collect_examples(n_examples)

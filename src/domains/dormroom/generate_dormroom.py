@@ -58,7 +58,7 @@ def generate_dsl_multiple(examples: str, n: int = 10, model: str = text_model, p
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(generate_one) for _ in range(n)]
-        dsl_objects = [future.result() for future in track(concurrent.futures.as_completed(futures), total=n, description=f"[grey11]Generating [bold cyan]{n}[/bold cyan] {prompt} Layouts[/grey11]", style="grey15")]
+        dsl_objects = [future.result() for future in track(concurrent.futures.as_completed(futures), total=n, description=f"[grey11]Generating [bold cyan]{n}[/bold cyan] dorm rooms[/grey11]", style="grey15")]
 
     return dsl_objects
 

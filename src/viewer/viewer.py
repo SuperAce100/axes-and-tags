@@ -189,7 +189,7 @@ class Viewer:
     async def close_viewer(self):
         """Close the viewer and return the feedback."""
         self.server_running = False
-        self.console.print("[yellow]Viewer closed[/yellow]")
+        self.console.print("[grey11]Viewer closed[/grey11]")
         return {"success": True}
     
     def run(self, open_browser=True):
