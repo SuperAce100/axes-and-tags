@@ -31,7 +31,7 @@ class DormRoomViewer(Viewer):
         super().__init__(
             data_folder=str(dormroom_folder),
             output_path=output_path,
-            domain=concept or "dormroom",
+            concept=concept,
             title=title,
             port=port,
             console=console,

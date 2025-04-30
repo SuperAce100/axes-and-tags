@@ -22,7 +22,7 @@ class Viewer:
     def __init__(self, 
                  data_folder: str, 
                  output_path: Optional[str] = None, 
-                 domain: Optional[str] = None, 
+                 concept: Optional[str] = None, 
                  title: str = "3D Object Viewer", 
                  port: int = 8001, 
                  console: Optional[Console] = None,
@@ -48,7 +48,7 @@ class Viewer:
         self.feedback_data = {}
         self.server_running = False
         self.server_thread = None
-        self.domain = domain
+        self.concept = concept
         self.title = title
         self.console = console or Console()
         self.file_extension = file_extension
@@ -84,13 +84,13 @@ class Viewer:
         self.app.post("/api/save-selected")(self.save_selected)
         self.app.post("/api/close")(self.close_viewer)
         
-        self.console.print(f"[grey11]Initialized Viewer for [bold cyan]{self.domain or 'objects'}[/bold cyan][/grey11]")
+        self.console.print(f"[grey11]Initialized Viewer for [bold cyan]{self.concept or 'objects'}[/bold cyan][/grey11]")
     
     async def index(self, request: Request):
         """Render the main page."""
         return self.templates.TemplateResponse("index.html", {
             "request": request, 
-            "domain": self.domain, 
+            "concept": self.concept, 
             "title": self.title,
             "scripts_path": os.path.join("/custom", self.custom_scripts_path.split("/")[-1])
         })
@@ -173,11 +173,11 @@ class Viewer:
         output_dir = Path(self.output_path)
         output_dir.mkdir(parents=True, exist_ok=True)
         
-        # Copy selected file to the output path with domain name
+        # Copy selected file to the output path with concept name
         src_path = self.data_folder / file
         timestamp = int(time.time())
-        domain_prefix = self.domain.replace(' ', '_') if self.domain else "object"
-        dst_path = Path(self.output_path) / f"{domain_prefix}_{timestamp}{self.file_extension}"
+        concept_prefix = self.concept.replace(' ', '_') if self.concept else "object"
+        dst_path = Path(self.output_path) / f"{concept_prefix}_{timestamp}{self.file_extension}"
         
         if src_path.exists():
             shutil.copy2(src_path, dst_path)

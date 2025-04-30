@@ -31,7 +31,7 @@ class SVGViewer(Viewer):
         super().__init__(
             data_folder=str(svg_folder),
             output_path=output_path,
-            domain=concept or "svg",
+            concept=concept,
             title=title,
             port=port,
             console=console,

@@ -1,8 +1,8 @@
-let scenes = {};
-let cameras = {};
-let renderers = {};
-let controls = {};
-let objects = {};
+let scenes = [];
+let cameras = [];
+let renderers = [];
+let controls = [];
+let objects = [];
 
 /**
  * Creates the dorm room scene with furniture based on the DSL layout
@@ -848,52 +848,15 @@ function parseDormRoomDSL(dslString) {
 
 
 // Render JavaScript files in the grid
-function render() {
-    const grid = document.getElementById('mainGrid');
-    grid.innerHTML = '';
-    
-    files.forEach((fileData, index) => {
-        const fileName = fileData.name;
-        const fileContent = fileData.content;
-        
-        const item = document.createElement('div');
-        item.className = 'threejs-item';
-        if (selectedFile === fileName) {
-            item.classList.add('selected');
-            selectedIndex = index;
-        }
-        
-        // Add feedback badge if there's feedback
-        const hasFeedback = feedbackData[fileName] && feedbackData[fileName].length > 0;
-        
-        item.innerHTML = `
-            <div class="js-number">${index + 1}</div>
-            ${hasFeedback ? `<div class="feedback-badge">${feedbackData[fileName].length}</div>` : ''}
-            <div class="threejs-preview" id="preview-${index}"></div>
-        `;
-        
-        item.addEventListener('click', () => {
-            selectFile(fileName);
-        });
+function render(id, content) {
+    const container = document.getElementById(id);
 
-        item.addEventListener('dblclick', () => {
-            saveSelected();
-        });
-        
-        grid.appendChild(item);
-
-        // Use DSL content from server if available, otherwise use default
-        const dslContent = jsData.dslContent || defaultDslContent;
-        
-        // Initialize Three.js scene for this preview with DSL content
-        initThreeJsScene(index, jsContent, dslContent);
-    });
+    initThreeJsScene(container, content);
 }
 
 // Initialize Three.js scene for a preview
 // Initialize Three.js scene for a dorm room preview
-async function initThreeJsScene(index, jsContent, dslContent) {
-    const container = document.getElementById(`preview-${index}`);
+async function initThreeJsScene(container, dslContent) {
     if (!container) return;
 
     const width = container.clientWidth;
@@ -902,11 +865,9 @@ async function initThreeJsScene(index, jsContent, dslContent) {
     // Create scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xf0f0f0);
-    scenes[index] = scene;
     
     // Create camera
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-    cameras[index] = camera;
     camera.position.set(5, 5, 5);
     camera.lookAt(0, 0, 0);
     
@@ -918,7 +879,6 @@ async function initThreeJsScene(index, jsContent, dslContent) {
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(width, height);
     renderer.shadowMap.enabled = true;
-    renderers[index] = renderer;
     container.appendChild(renderer.domElement);
     
     // Add lights
@@ -941,51 +901,12 @@ async function initThreeJsScene(index, jsContent, dslContent) {
     orbitControls.enablePan = true;
     orbitControls.autoRotate = true;
     orbitControls.autoRotateSpeed = 1.3;
-    controls[index] = orbitControls;
+    controls.push(orbitControls);
     
     try {
-        // Create a blob URL from the JavaScript content
-        const blob = new Blob([jsContent], { type: 'application/javascript' });
-        const blobUrl = URL.createObjectURL(blob);
-        
-        // Load the script
-        const script = document.createElement('script');
-        script.src = blobUrl;
-        
-        // Wait for script to load
-        await new Promise((resolve, reject) => {
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
-        
-        // Clean up
-        URL.revokeObjectURL(blobUrl);
-        document.head.removeChild(script);
-        
-        // Parse the DSL content if provided
-        let dslData = null;
-        if (dslContent) {
-            dslData = parseDormRoomDSL(dslContent);
-            if (!dslData) {
-                console.warn('Failed to parse DSL content, using default scene');
-                // Create default DSL data
-                dslData = {
-                    room: {
-                        name: "Default Room",
-                        width: 300,
-                        length: 250,
-                        height: 240,
-                        type: "single"
-                    },
-                    furniture: [
-                        { item: 'bed', position: [30, 30], rotation: 0 },
-                        { item: 'desk', position: [30, 150], rotation: 0 }
-                    ]
-                };
-            }
-        } else {
-            console.warn('No DSL content provided, using default scene');
+        dslData = parseDormRoomDSL(dslContent);
+        if (!dslData) {
+            console.warn('Failed to parse DSL content, using default scene');
             // Create default DSL data
             dslData = {
                 room: {
@@ -1003,9 +924,8 @@ async function initThreeJsScene(index, jsContent, dslContent) {
         }
 
         const roomObj = createDormRoom(scene, dslData.room, dslData.furniture);
-        objects[index] = roomObj || scene;
+        objects.push(roomObj);
         
-        // Create a bounding box from all objects in the scene
         const box = new THREE.Box3();
         scene.traverse(object => {
             if (object.isMesh) {
@@ -1016,11 +936,9 @@ async function initThreeJsScene(index, jsContent, dslContent) {
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
         
-        // Position camera to better view the scene
         const maxDim = Math.max(size.x, size.y, size.z);
         const distance = maxDim * 2;
         
-        // Position camera to see the room from a good viewpoint
         camera.position.set(
             center.x + distance * 0.6, 
             center.y + distance * 0.5, 
@@ -1028,18 +946,18 @@ async function initThreeJsScene(index, jsContent, dslContent) {
         );
         camera.lookAt(center);
         
-        // Update controls to target the center
-        controls[index].target.set(center.x, center.y, center.z);
-        controls[index].update();
+        orbitControls.target.set(center.x, center.y, center.z);
+        orbitControls.update();
     } catch (error) {
         console.error('Error creating dorm room:', error);
         showStatus('Error creating dorm room: ' + error.message, 'error');
     }
     
-    // Animate
     function animate() {
         requestAnimationFrame(animate);
-        controls[index].update();
+        controls.forEach(control => {
+            control.update();
+        });
         renderer.render(scene, camera);
     }
     animate();
