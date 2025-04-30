@@ -71,7 +71,6 @@ class Viewer:
             self.app.mount("/custom", StaticFiles(directory=str(custom_dir)), name="custom")
 
             self.console.print(f"[grey11]Mounted custom scripts at [bold cyan]{custom_dir}[/bold cyan][/grey11]")
-            self.console.print(f"[grey11]Custom scripts path: [bold cyan]{os.listdir(custom_dir)}[/bold cyan][/grey11]")
 
         # Register routes
         self.app.get("/")(self.index)
@@ -118,7 +117,7 @@ class Viewer:
                     })
                 except Exception as e:
                     self.console.print(f"[bold red]Error reading {file}: {e}[/bold red]")
-        self.console.print(f"[grey11]Found [bold cyan]{len(files)}[/bold cyan] files[/grey11]")
+        self.console.print(f"[grey11]Rendering [bold cyan]{len(files)}[/bold cyan] files[/grey11]")
         return files
     
     async def select_file(self, data: Dict[str, Any]):
@@ -223,7 +222,7 @@ class Viewer:
         if self.feedback_data:
             self.console.print(f"[grey11]Collected feedback for [bold cyan]{len(self.feedback_data)}[/bold cyan] files[/grey11]")
         else:
-            self.console.print("[red]No feedback collected[/red]")
+            self.console.print("[grey11]No feedback collected, shutting down...[/grey11]")
         
         return self.feedback_data 
     

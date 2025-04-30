@@ -1,4 +1,6 @@
+import random
 import re
+import time
 
 def parse_svg(response: str) -> str:
     # Extract SVG content between <svg> tags
@@ -20,6 +22,7 @@ def parse_dsl(response: str) -> str:
     if dsl_match:
         return dsl_match.group(1)
     return response
+
 
 if __name__ == "__main__":
     example_response = """

@@ -1,0 +1,98 @@
+import os
+from typing import Callable, List, Dict, Tuple
+from abc import ABC, abstractmethod
+from models.models import text_model
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
+from rich.rule import Rule
+
+class Domain(ABC):
+    def __init__(self, name: str, data_dir: str, model: str = text_model, console: Console = Console()):
+        self.name = name
+        self.data_dir = data_dir
+        self.model = model
+        self.console = console
+        self.examples_dir = os.path.join(data_dir, name, "examples")
+        self.output_dir = os.path.join(data_dir, name, "results")
+        os.makedirs(self.examples_dir, exist_ok=True)
+        os.makedirs(self.output_dir, exist_ok=True)
+
+    @abstractmethod
+    def run_viewer(self, title: str, port: int, path: str) -> Dict[str, List[str]]:
+        """Run the viewer for this domain. Returns a dictionary of example names and their feedback."""
+        pass
+
+    @abstractmethod
+    def generate(self, examples: str) -> str:
+        """Generate a single example. Returns the generated example."""
+        pass
+
+    @abstractmethod
+    def generate_multiple(self, n: int, examples: str) -> List[str]:
+        """Generate multiple examples. Returns a list of generated examples."""
+        pass
+
+    @abstractmethod
+    def collect_examples(self, n: int) -> Tuple[str, List[str]]:
+        """Collect examples for this domain. Returns a tuple of example names and their content."""
+        pass
+
+    @abstractmethod
+    def feedback_examples(self, feedback: Dict[str, List[str]]) -> str:
+        """Apply feedback to examples. Returns the feedback as a string."""
+        pass
+
+    @abstractmethod
+    def name_output_dir(self) -> str:
+        """Name the output directory."""
+        pass
+
+    @abstractmethod
+    def save_result(self, results: List[str], path: str = None) -> str:
+        """Save the result of the domain processing. Returns the path to the saved result."""
+        pass
+
+    
+    def run_experiment(self, n: int, n_examples: int, max_iterations: int = 10):
+        print("\n")
+
+        self.console.print(Rule(f"[bold green]Starting initial {self.name} generation[/bold green]", style="green", align="left"))
+
+        examples, example_names = self.collect_examples(n_examples)
+
+        self.console.print(f"[green]✓[/green] [grey11] Collected {len(example_names)} examples for {self.name}: {', '.join(example_names)}[/grey11]")
+
+        objects = self.generate_multiple(n, examples)
+
+        save_path = self.save_result(objects)
+
+        self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.name} layouts to {self.output_dir}[/grey11]")
+
+        feedback_data = self.run_viewer(f"{self.name}s made with {len(example_names)} examples", 8002, save_path)
+
+        for i in range(max_iterations):
+
+            if not feedback_data:
+                break
+
+            feedback_examples = self.feedback_examples(feedback_data)
+            
+            feedback_text = Text()
+            for i, name in enumerate(feedback_data.keys()):
+                feedback_text.append(f"{i}. {name}: ", style="white")
+                feedback_text.append("\n".join(feedback_data[name]) + "\n", style="grey11")
+            
+            self.console.print(Panel(feedback_text, title=f"[blue]Feedback for iteration {i}[/blue]", border_style="blue"))
+
+            self.console.print(f"[grey11]Generating new layouts based on feedback...[/grey11]")
+            objects = self.generate_multiple(n, feedback_examples)
+
+            save_path = self.save_result(objects, os.path.join(save_path, "feedback"))
+            self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.name} layouts after reflection {i} to {self.output_dir}[/grey11]")
+
+            viewer = self.run_viewer(f"{self.name}s made with {len(feedback_examples)} pieces of feedback(iteration {i})", 8003 + i, save_path)
+            feedback_data = viewer.run()
+            
+        
+        self.console.print(Rule(f"[bold green]Done![/bold green]", style="green", align="left"))
