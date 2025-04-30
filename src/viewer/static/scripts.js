@@ -20,7 +20,7 @@ async function selectFile(file) {
             selectedFile = file;
             
             selectedIndex = files.findIndex(f => f.name === file);
-            render();
+            renderGrid();
             loadFeedback(file);
         } else {
             showStatus('Error selecting file', 'error');
@@ -225,6 +225,59 @@ function handleResize() {
     console.log('Window resized');
 }
 
+async function fetchFiles() {
+    try {
+        const response = await fetch('/api/files');
+        files = await response.json();
+        renderGrid();
+    } catch (error) {
+        showStatus('Error loading files: ' + error.message, 'error');
+    }
+}
+
+
+// Render files in the grid
+function renderGrid() {
+    console.log("Rendering files");
+    const grid = document.getElementById('mainGrid');
+    grid.innerHTML = '';
+    
+    files.forEach((fileData, index) => {
+        const item = document.createElement('div');
+        item.className = 'main-item';
+        
+        const fileName = fileData.name;
+        const fileContent = fileData.content;
+        
+        // Add feedback badge if there's feedback
+        const hasFeedback = feedbackData[fileName] && feedbackData[fileName].length > 0;
+
+        if (selectedFile === fileName) {
+            item.classList.add('selected');
+        }
+        
+        item.innerHTML = `
+            <div class="main-number">${index + 1}</div>
+            ${hasFeedback ? `<div class="feedback-badge">${feedbackData[fileName].length}</div>` : ''}
+            <div class="main-preview" id="preview-${index}">
+            </div>
+            `;
+            
+        grid.appendChild(item);
+        render("preview-" + index, fileContent);
+        
+        item.addEventListener('click', () => {
+            selectFile(fileName);
+        });
+
+        item.addEventListener('dblclick', () => {
+            saveSelected();
+        });
+        
+    });
+}
+
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     // Set up keyboard event listener
@@ -236,6 +289,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set up feedback button click event listener
     document.getElementById('saveFeedbackBtn').addEventListener('click', saveFeedback);
     
+    fetchFiles();
+
     // Load initial files if available
     if (files.length > 0) {
         selectFile(files[0].name);

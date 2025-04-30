@@ -1,9 +1,3 @@
-let jsFiles = [];
-let selectedJs = null;
-let feedbackData = {};
-let isClosing = false;
-let selectedIndex = -1;
-let isTyping = false;
 let scenes = {};
 let cameras = {};
 let renderers = {};
@@ -852,62 +846,34 @@ function parseDormRoomDSL(dslString) {
   return result;
 }
 
-// Fetch JavaScript files from the server
-async function fetchJsFiles() {
-    try {
-        const response = await fetch('/api/js');
-        jsFiles = await response.json();
-        
-        // Check if each JS file has a corresponding DSL file
-        for (let i = 0; i < jsFiles.length; i++) {
-            const jsName = jsFiles[i].name;
-            const dslName = jsName.replace('.js', '.dsl');
-            
-            try {
-                // Try to fetch the corresponding DSL file
-                const dslResponse = await fetch(`/api/dsl/${dslName}`);
-                if (dslResponse.ok) {
-                    const dslContent = await dslResponse.text();
-                    jsFiles[i].dslContent = dslContent;
-                }
-            } catch (error) {
-                console.warn(`No DSL file found for ${jsName}: ${error.message}`);
-            }
-        }
-        
-        renderJsFiles();
-    } catch (error) {
-        showStatus('Error loading JavaScript files: ' + error.message, 'error');
-    }
-}
 
 // Render JavaScript files in the grid
-function renderJsFiles() {
+function render() {
     const grid = document.getElementById('mainGrid');
     grid.innerHTML = '';
     
-    jsFiles.forEach((jsData, index) => {
-        const jsName = jsData.name;
-        const jsContent = jsData.content;
+    files.forEach((fileData, index) => {
+        const fileName = fileData.name;
+        const fileContent = fileData.content;
         
         const item = document.createElement('div');
         item.className = 'threejs-item';
-        if (selectedJs === jsName) {
+        if (selectedFile === fileName) {
             item.classList.add('selected');
             selectedIndex = index;
         }
         
         // Add feedback badge if there's feedback
-        const hasFeedback = feedbackData[jsName] && feedbackData[jsName].length > 0;
+        const hasFeedback = feedbackData[fileName] && feedbackData[fileName].length > 0;
         
         item.innerHTML = `
             <div class="js-number">${index + 1}</div>
-            ${hasFeedback ? `<div class="feedback-badge">${feedbackData[jsName].length}</div>` : ''}
+            ${hasFeedback ? `<div class="feedback-badge">${feedbackData[fileName].length}</div>` : ''}
             <div class="threejs-preview" id="preview-${index}"></div>
         `;
         
         item.addEventListener('click', () => {
-            selectJs(jsName);
+            selectFile(fileName);
         });
 
         item.addEventListener('dblclick', () => {
@@ -915,59 +881,7 @@ function renderJsFiles() {
         });
         
         grid.appendChild(item);
-        
-        // Default DSL content for dorm room
-        const defaultDslContent = `
-room:
-  name: "Jones Hall 101"
-  width: 300
-  length: 250
-  height: 240
-  unit: cm
-  type: single
-    
-layout:
-  - item: bed
-    position: [30, 30]
-    rotation: 0
-    
-  - item: desk
-    position: [30, 150]
-    rotation: 0
-    
-  - item: chair
-    position: [30, 200]
-    rotation: 180
-    
-  - item: dresser
-    position: [200, 30]
-    rotation: 270
-    
-  - item: bookshelf
-    position: [200, 150]
-    rotation: 270
-    
-  - item: minifridge
-    position: [200, 220]
-    rotation: 270
-    
-  - item: microwave
-    ontop: minifridge
-    position: [10, 10]
-    
-  - item: lamp
-    ontop: desk
-    position: [50, 20]
-    
-  - item: storage_bin
-    position: [30, 100]
-    rotation: 0
-    
-  - item: bulletin_board
-    position: [30, 240]
-    rotation: 0
-`;
-        
+
         // Use DSL content from server if available, otherwise use default
         const dslContent = jsData.dslContent || defaultDslContent;
         
@@ -1087,42 +1001,36 @@ async function initThreeJsScene(index, jsContent, dslContent) {
                 ]
             };
         }
+
+        const roomObj = createDormRoom(scene, dslData.room, dslData.furniture);
+        objects[index] = roomObj || scene;
         
-        // Check if the required functions are available
-        if (typeof createDormRoom === 'function' && typeof createDormRoomUtils === 'function') {
-            // Create a dorm room with the parsed DSL data
-            const roomObj = createDormRoom(scene, dslData.room, dslData.furniture);
-            objects[index] = roomObj || scene;
-            
-            // Create a bounding box from all objects in the scene
-            const box = new THREE.Box3();
-            scene.traverse(object => {
-                if (object.isMesh) {
-                    box.expandByObject(object);
-                }
-            });
-            
-            const center = box.getCenter(new THREE.Vector3());
-            const size = box.getSize(new THREE.Vector3());
-            
-            // Position camera to better view the scene
-            const maxDim = Math.max(size.x, size.y, size.z);
-            const distance = maxDim * 2;
-            
-            // Position camera to see the room from a good viewpoint
-            camera.position.set(
-                center.x + distance * 0.6, 
-                center.y + distance * 0.5, 
-                center.z + distance * 0.6
-            );
-            camera.lookAt(center);
-            
-            // Update controls to target the center
-            controls[index].target.set(center.x, center.y, center.z);
-            controls[index].update();
-        } else {
-            throw new Error('Required functions not found in the JavaScript code');
-        }
+        // Create a bounding box from all objects in the scene
+        const box = new THREE.Box3();
+        scene.traverse(object => {
+            if (object.isMesh) {
+                box.expandByObject(object);
+            }
+        });
+        
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        
+        // Position camera to better view the scene
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const distance = maxDim * 2;
+        
+        // Position camera to see the room from a good viewpoint
+        camera.position.set(
+            center.x + distance * 0.6, 
+            center.y + distance * 0.5, 
+            center.z + distance * 0.6
+        );
+        camera.lookAt(center);
+        
+        // Update controls to target the center
+        controls[index].target.set(center.x, center.y, center.z);
+        controls[index].update();
     } catch (error) {
         console.error('Error creating dorm room:', error);
         showStatus('Error creating dorm room: ' + error.message, 'error');
