@@ -113,7 +113,7 @@ class Viewer:
                         content = f.read()
                     files.append({
                         'name': file,
-                        'content': content
+                        'content': json.dumps(content)
                     })
                 except Exception as e:
                     self.console.print(f"[bold red]Error reading {file}: {e}[/bold red]")
