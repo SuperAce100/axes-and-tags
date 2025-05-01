@@ -70,11 +70,10 @@ class Domain(ABC):
         feedback_data = self.run_viewer(f"{self.name}s made with {len(example_names)} examples", 8002, save_path)
 
         for i in range(max_iterations):
-
             if not feedback_data:
                 break
-
-            feedback_examples = self.feedback_examples(feedback_data)
+                
+            feedback_examples = self.feedback_examples(feedback_data, save_path)
             
             feedback_text = Text()
             for i, name in enumerate(feedback_data.keys()):
@@ -84,13 +83,14 @@ class Domain(ABC):
             self.console.print(Panel(feedback_text, title=f"[blue]Feedback for iteration {i}[/blue]", border_style="blue"))
 
             self.console.print(f"[grey11]Generating new layouts based on feedback...[/grey11]")
+
             objects = self.generate_multiple(n, feedback_examples)
 
             save_path = self.save_result(objects, os.path.join(save_path, "feedback"))
             self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.name} layouts after reflection {i} to {self.output_dir}[/grey11]")
 
-            viewer = self.run_viewer(f"{self.name}s made with {len(feedback_examples)} pieces of feedback(iteration {i})", 8003 + i, save_path)
-            feedback_data = viewer.run()
+            feedback_data = self.run_viewer(f"{self.name}s made with {len(feedback_data)} pieces of feedback(iteration {i})", 8003 + i, save_path)
+
             
         
         self.console.print(Rule(f"[bold green]Done![/bold green]", style="green", align="left"))
