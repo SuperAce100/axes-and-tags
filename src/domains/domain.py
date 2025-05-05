@@ -44,6 +44,16 @@ class Domain(ABC):
         pass
 
     @abstractmethod
+    def generate_insights(self, feedback: str) -> str:
+        """Generate insights from feedback. Returns the insights as a string."""
+        pass
+
+    @abstractmethod
+    def extract_tags(self, prompt: str, model: str = text_model) -> List[str]:
+        """Extract tags from a prompt. Returns a list of tags."""
+        pass
+
+    @abstractmethod
     def name_output_dir(self) -> str:
         """Name the output directory."""
         pass
@@ -62,6 +72,8 @@ class Domain(ABC):
         self.console.print(f"[green]✓[/green] [grey11] Collected {len(example_names)} examples for {self.name}: {', '.join(example_names)}[/grey11]")
 
         objects = self.generate_multiple(n, examples)
+
+        self.console.print(objects, style="grey11")
 
         save_path = self.save_result(objects)
 

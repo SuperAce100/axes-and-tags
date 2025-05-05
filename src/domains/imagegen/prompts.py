@@ -19,7 +19,7 @@ Here are some examples:
 """
 
 image_gen_expand_system_prompt_extend = """
-You must generate {n} new prompts for the user, each following the feedback and examples provided.
+You must generate {n} new prompts for the user, ALL of which must follow EVERY piece of feedback provided
 
 If you've recieved feedback on any previous generations, make sure to include that feedback in each new prompt - EVERY NEW PROMPT MUST INCOPORATE ALL THE FEEDBACK.
 
@@ -54,11 +54,34 @@ Here is some feedback on the image generated from this prompt:
 {feedback}
 """
 
-
 image_gen_insights_format = """
 Here are some prompts used to generate images
 {feedback}
-In a future prompt generation, which specific features need to be retained and which ones need to be changed. ONLY include a list of very specific features that must be constant in the future generation. (not "the elephant, the background" but "an african elephant with large ears, background: a clear night sky next to a lake")
+In a future prompt generation, which specific features need to be retained and which ones need to be changed. ONLY include a list of very specific features with detailed descriptions that must be constant in the future generation. (not "the elephant, the background" but "an african elephant with large ears, background: a clear night sky next to a lake")
 
-Think about it as a list of features that must be consistent in the future generations, based on the preferences expressed by the user. If they say they like the cats in an image that includes a black cat, it means that all future generations must include a black cat.
+Think about it as a list of features and adjectives that must be consistent in the future generations, based on the preferences expressed by the user. If they say they like the cats in an image that includes a black cat, it means that all future generations must include a black cat. 
+
+DO not adlib anything the user did not specifically mention in their feedback. Extract only what the user explicitly said they liked.
+"""
+
+image_gen_tags_format = """
+Here is a prompt:
+
+<prompt>
+{prompt}
+</prompt>
+
+Extract a set of 3-5 useful tags from the prompt. These could be objects, actions, adjectives, etc all present in the prompt. 
+
+Each tag should be atomic and 1-3 words, and extremely brief, specific, and descriptive. They should be the building blocks on top of which the propmt is constucted.
+
+Enclose each tag in <tag></tag> XML tags, like this, and return the list of tags in a <tags></tags> XML tag:
+
+<tags>
+<tag>TAG HERE</tag>
+<tag>TAG HERE</tag>
+<tag>TAG HERE</tag>
+</tags>
+
+This is a list of existing tags, if any is relevant to the prompt, include it as is. 
 """

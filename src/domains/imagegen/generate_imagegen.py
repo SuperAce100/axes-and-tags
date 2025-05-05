@@ -9,7 +9,7 @@ from models.models import llm_call, text_model as language_model
 import fal_client
 import concurrent.futures
 from rich.progress import track
-from domains.imagegen.prompts import image_gen_expand_system_prompt, image_gen_expand_user_prompt, image_gen_examples_format, image_gen_feedback_format, image_gen_expand_system_prompt_extend, image_gen_insights_format
+from domains.imagegen.prompts import *
 
 img_model = "fal-ai/flux/schnell"
 
@@ -90,17 +90,27 @@ def generate_image_multiple(concept: str, examples: str, n: int, image_model: st
     expanded_prompts = [p.strip() for p in expanded_prompts.split("<prompt>")[1:] if p.strip()]
     expanded_prompts = [p.split("</prompt>")[0].strip() for p in expanded_prompts]
 
-
-    def generate_one(prompt):
-        return generate_image(prompt, examples, image_model, text_model)
+    def process_prompt(prompt):
+        tags = extract_tags(prompt)
+        image_result = generate_image(prompt, examples, image_model, text_model)
+        return image_result, tags
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(generate_one, prompt) for prompt in expanded_prompts]
+        futures = [executor.submit(process_prompt, prompt) for prompt in expanded_prompts]
         results = [future.result() for future in track(concurrent.futures.as_completed(futures), total=len(expanded_prompts), description=f"[grey11]Generating [bold cyan]{len(expanded_prompts)}[/bold cyan] images[/grey11]", style="grey15")]
-        prompts, image_urls = zip(*results)
+        image_results, tags = zip(*results)
+        prompts, image_urls = zip(*image_results)
 
-    return prompts, image_urls
+    return prompts, image_urls, tags
 
+def extract_tags(prompt: str, model: str = language_model) -> list[str]:
+    tags_xml = llm_call(image_gen_tags_format.format(prompt=prompt), model=model)
+    tags = [tag.strip() for tag in tags_xml.split("<tag>")[1:] if tag.strip()]
+    tags = [tag.split("</tag>")[0].strip() for tag in tags]
+    return tags
+
+def generate_insights(feedback: str, model: str = language_model) -> str:
+    return llm_call(image_gen_insights_format.format(feedback=feedback), model=model)
 
 def load_image_from_feedback(concept: str, feedback_data: dict[str, list], results_dir: str):
     examples_str = ""
@@ -109,33 +119,33 @@ def load_image_from_feedback(concept: str, feedback_data: dict[str, list], resul
             prompt = json.load(f)["prompt"]
             examples_str += image_gen_feedback_format.format(concept=concept, example=prompt, feedback=feedbacks)
     
-    insights = llm_call(image_gen_insights_format.format(feedback=examples_str), model="anthropic/claude-3.7-sonnet")
+    insights = generate_insights(examples_str)
 
     print(examples_str)
     print(insights)
 
     return examples_str + insights
 
-def save_images(image_urls: list[str], prompts: list[str], path: str):
+def save_images(image_urls: list[str], prompts: list[str], tags: list[str], path: str):
     os.makedirs(path, exist_ok=True)
     
     def save_one(args):
-        i, (image_url, prompt) = args
+        i, (image_url, prompt, tag) = args
         response = requests.get(image_url)
         image_data = base64.b64encode(response.content).decode('utf-8').replace('"', '\\"')
         with open(os.path.join(path, f"{i}.json"), "w") as f:
-            json.dump({"prompt": prompt, "data": image_data}, f)
+            json.dump({"prompt": prompt, "data": image_data, "tags": tag}, f)
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        list(executor.map(save_one, enumerate(zip(image_urls, prompts))))
+        list(executor.map(save_one, enumerate(zip(image_urls, prompts, tags))))
 
 
 def main():
     concept = "elephant"
     examples, example_names = collect_examples(concept, "../.data/imagegen/examples", 5)
-    prompts, image_urls = generate_image_multiple(concept, examples, 5)
+    prompts, image_urls, tags = generate_image_multiple(concept, examples, 5)
 
-    save_images(image_urls, prompts, "../.data/imagegen/results")
+    save_images(image_urls, prompts, tags, "../.data/imagegen/results")
 
 if __name__ == "__main__":
     main()

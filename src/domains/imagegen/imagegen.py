@@ -3,7 +3,7 @@ import random
 import time
 from domains.domain import Domain
 from domains.imagegen.image_viewer import ImageViewer
-from domains.imagegen.generate_imagegen import generate_image, generate_image_multiple, collect_examples, load_image_from_feedback, save_images, expand_prompt
+from domains.imagegen.generate_imagegen import generate_image, generate_image_multiple, collect_examples, load_image_from_feedback, save_images, expand_prompt, extract_tags, generate_insights
 from models.models import text_model
 from typing import List, Tuple, Dict
 from rich.console import Console
@@ -36,6 +36,12 @@ class ImageGen(Domain):
 
     def feedback_examples(self, feedback: Dict[str, List[str]], results_dir: str) -> str:
         return load_image_from_feedback(self.concept, feedback, results_dir)
+    
+    def extract_tags(self, prompt: str) -> List[str]:
+        return extract_tags(prompt, self.model)
+
+    def generate_insights(self, feedback: str) -> str:
+        return generate_insights(feedback, self.model)
 
     def name_output_dir(self) -> str:
         timestamp = int(time.time())
@@ -48,6 +54,7 @@ class ImageGen(Domain):
         
         prompts = [r for r in results[0]]
         image_urls = [r for r in results[1]]
+        tags = [r for r in results[2]]
 
-        save_images(image_urls, prompts, path)
+        save_images(image_urls, prompts, tags, path)
         return path

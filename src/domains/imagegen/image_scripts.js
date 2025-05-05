@@ -12,62 +12,66 @@ function render(id, content) {
   // Create prompt overlay with gradient
   const promptOverlay = document.createElement('div');
   promptOverlay.style.position = 'absolute';
-  promptOverlay.style.bottom = '0';
+  promptOverlay.style.top = '0';
   promptOverlay.style.left = '0';
   promptOverlay.style.width = '100%';
+  promptOverlay.style.height = '100%';
   promptOverlay.style.padding = '12px';
-  promptOverlay.style.background = 'linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.6) 70%, transparent 100%)';
+  promptOverlay.style.background = 'linear-gradient(to bottom, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.6) 70%, transparent 100%)';
   promptOverlay.style.boxSizing = 'border-box';
+  promptOverlay.style.display = 'flex';
+  promptOverlay.style.flexDirection = 'column';
+  promptOverlay.style.justifyContent = 'space-between';
   
   // Create prompt text element
   const promptElement = document.createElement('div');
   promptElement.textContent = content.prompt;
   promptElement.style.color = 'white';
-  promptElement.style.fontFamily = 'system-ui, -apple-system, sans-serif';
-  promptElement.style.fontSize = '14px';
+  promptElement.style.fontSize = '12px';
+  promptElement.style.fontFamily = 'Inter, sans-serif';
   promptElement.style.maxWidth = '100%';
   promptElement.style.overflow = 'hidden';
-  promptElement.style.textOverflow = 'ellipsis';
-  promptElement.style.whiteSpace = 'nowrap';
-  promptElement.style.textShadow = '0 1px 2px rgba(0, 0, 0, 0.5)';
+  promptElement.style.lineHeight = '1.2em';
+  promptElement.style.maxHeight = '2.4em';
+  promptElement.style.display = '-webkit-box';
+  promptElement.style.webkitLineClamp = '2';
+  promptElement.style.webkitBoxOrient = 'vertical';
   
-  // Create tooltip for full prompt on hover
-  const tooltip = document.createElement('div');
-  tooltip.textContent = content.prompt;
-  tooltip.style.position = 'absolute';
-  tooltip.style.top = 'calc(100% + 5px)';
-  tooltip.style.left = '0';
-  tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
-  tooltip.style.color = 'white';
-  tooltip.style.padding = '10px';
-  tooltip.style.borderRadius = '4px';
-  tooltip.style.maxWidth = '400px';
-  tooltip.style.wordWrap = 'break-word';
-  tooltip.style.whiteSpace = 'normal';
-  tooltip.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.3)';
-  tooltip.style.zIndex = '1000';
-  tooltip.style.opacity = '0';
-  tooltip.style.visibility = 'hidden';
-  tooltip.style.transition = 'opacity 0.2s, visibility 0.2s';
-  tooltip.style.fontSize = '13px';
-  tooltip.style.lineHeight = '1.4';
-  
-  // Only show tooltip if prompt is truncated
-  promptOverlay.addEventListener('mouseenter', () => {
-    tooltip.style.opacity = '1';
-    tooltip.style.visibility = 'visible';
-  });
-  
-  promptOverlay.addEventListener('mouseleave', () => {
-    tooltip.style.opacity = '0';
-    tooltip.style.visibility = 'hidden';
-  });
-  
+  // Create tags container
+  const tagsContainer = document.createElement('div');
+  tagsContainer.style.display = 'flex';
+  tagsContainer.style.gap = '4px';
+  tagsContainer.style.flexWrap = 'wrap';
+  tagsContainer.style.marginTop = 'auto';
+
+  // Add each tag
+  if (content.tags && Array.isArray(content.tags)) {
+    content.tags.forEach(tag => {
+      const tagElement = document.createElement('span');
+      tagElement.textContent = tag;
+      tagElement.style.background = 'rgba(255, 255, 255, 0.2)';
+      tagElement.style.padding = '2px 6px';
+      tagElement.style.borderRadius = 'calc(infinity * 1px)';
+      tagElement.style.fontSize = '10px';
+      tagElement.style.fontFamily = 'Inter, sans-serif';
+      tagElement.style.color = 'white';
+      tagElement.style.transition = 'var(--transition)';
+      tagElement.addEventListener('mouseenter', () => {
+        tagElement.style.background = 'rgba(255, 255, 255, 0.3)';
+        tagElement.style.transform = 'scale(1.05)';
+      });
+      tagElement.addEventListener('mouseleave', () => {
+        tagElement.style.background = 'rgba(255, 255, 255, 0.2)';
+        tagElement.style.transform = 'scale(1)';
+      });
+      tagsContainer.appendChild(tagElement);
+    });
+  }
   // Append elements
   promptOverlay.appendChild(promptElement);
+  promptOverlay.appendChild(tagsContainer);
   container.appendChild(imgElement);
   container.appendChild(promptOverlay);
-  container.appendChild(tooltip);
   
   return imgElement;
 }
