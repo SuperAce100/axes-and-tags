@@ -55,11 +55,29 @@ function render(id, content, fileName) {
   const tagOverlay = document.createElement('div');
   tagOverlay.className = 'bg-gradient-to-t from-black/85 via-black/60 to-transparent p-3 absolute bottom-0 left-0 w-full';
   // Append elements
-  promptOverlay.appendChild(promptElement);
   tagOverlay.appendChild(tagsContainer);
+  container.appendChild(tagOverlay);
+  promptOverlay.appendChild(promptElement);
   container.appendChild(imgElement);
   container.appendChild(promptOverlay);
-  container.appendChild(tagOverlay);
   
   return imgElement;
+}
+
+function renderExample(container, content, feedback) {
+  console.log(feedback);
+  const imgElement = document.createElement('img');
+  imgElement.src = `data:image/png;base64,${content.data}`;
+  imgElement.className = 'w-full h-full object-contain';
+  container.appendChild(imgElement);
+
+  const feedbackContainer = document.createElement('div');
+  feedbackContainer.className = 'absolute top-0 left-0 w-full p-2 z-10 bg-gradient-to-b from-black/85 via-black/60 to-transparent';
+  
+  const feedbackElement = document.createElement('div');
+  feedbackElement.textContent = feedback;
+  feedbackElement.className = 'text-white font-bold font-tight';
+  feedbackContainer.appendChild(feedbackElement);
+  
+  container.appendChild(feedbackContainer);
 }

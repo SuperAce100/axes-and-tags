@@ -4,7 +4,7 @@ let selectedFile = null;
 let selectedIndex = -1;
 let feedbackData = {};
 let isClosing = false;
-
+let usedExamples = {};
 // Select a file
 async function selectFile(file) {
     try {
@@ -291,10 +291,27 @@ function renderGrid() {
 async function fetchUsedExamples() {
     const response = await fetch('/api/used-examples');
     const data = await response.json();
+    usedExamples = data.used_examples;
     console.log("used examples", data);
-    return data.used_examples;
 }
 
+function renderUsedExamples() {
+    const usedExamplesList = document.getElementById('usedExamplesList');
+    usedExamplesList.innerHTML = '';
+    usedExamplesList.className = 'mt-4 grid gap-4 grid-flow-col auto-cols-max';
+
+    for (const [file, feedbacks] of Object.entries(usedExamples)) {
+        const fileContent = feedbacks.content;
+        const newFeedbacks = feedbacks.feedback;
+        newFeedbacks.forEach(feedback => {
+            const item = document.createElement('div');
+            item.id = "used-example-" + file;
+            item.className = 'aspect-square bg-white rounded-lg shadow-md transition-all relative overflow-hidden max-w-[200px]';
+            renderExample(item, fileContent, feedback);
+            usedExamplesList.appendChild(item);
+        });
+    }
+}
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
@@ -312,6 +329,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await getFeedbackData();
     console.log(feedbackData);
     await fetchUsedExamples();
+    renderUsedExamples();
     // console.log(usedExamples);
     if (files.length > 0) {
         selectFile(files[3].name);
