@@ -244,27 +244,31 @@ function renderGrid() {
     
     files.forEach((fileData, index) => {
         const item = document.createElement('div');
-        item.className = 'main-item';
         
         const fileName = fileData.name;
         const fileContent = fileData.content;
         
         // Add feedback badge if there's feedback
         const hasFeedback = feedbackData[fileName] && feedbackData[fileName].length > 0;
-
+        
         if (selectedFile === fileName) {
             item.classList.add('selected');
         }
         
         item.innerHTML = `
-            <div class="main-number">${index + 1}</div>
-            ${hasFeedback ? `<div class="feedback-badge">${feedbackData[fileName].length}</div>` : ''}
-            <div class="main-preview" id="preview-${index}">
-            </div>
-            `;
-            
+        <div class="main-number">${index + 1}</div>
+        ${hasFeedback ? `<div class="feedback-badge">${feedbackData[fileName].length}</div>` : ''}
+        <div class="main-preview" id="preview-${index}">
+        </div>
+        `;
+        
+        item.className = item.className + ' bg-white rounded-lg shadow-md transition-all relative cursor-pointer overflow-hidden aspect-square hover:-translate-y-1 hover:shadow-lg';
+        if (selectedFile === fileName) {
+            item.className = item.className + ' border-2 border-green-500';
+        }
+
         grid.appendChild(item);
-        render("preview-" + index, fileContent);
+        render("preview-" + index, fileContent, fileName);
         
         item.addEventListener('click', () => {
             selectFile(fileName);

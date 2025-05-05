@@ -1,4 +1,4 @@
-function render(id, content) {
+function render(id, content, fileName) {
   const container = document.getElementById(id);
   container.className = 'relative';
   
@@ -14,7 +14,7 @@ function render(id, content) {
   // Create prompt text element
   const promptElement = document.createElement('div');
   promptElement.textContent = content.prompt;
-  promptElement.className = 'text-white text-xs max-w-full overflow-hidden leading-tight max-h-[3.6em]';
+  promptElement.className = 'text-white text-xs max-w-full overflow-hidden leading-tight max-h-[3.6em] font-sans';
   
   // Create tags container
   const tagsContainer = document.createElement('div');
@@ -25,25 +25,20 @@ function render(id, content) {
     content.tags.forEach(tag => {
       const tagElement = document.createElement('span');
       tagElement.textContent = tag;
-      tagElement.className = 'bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] text-white transition-all hover:bg-white/30 hover:scale-105 cursor-pointer';
+      tagElement.className = 'bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] text-white transition-all hover:bg-white/30 hover:scale-105 cursor-pointer font-sans';
       
       tagElement.addEventListener('click', async () => {
         const feedbackInput = document.getElementById('feedbackInput');
+        console.log(feedbackInput);
         if (feedbackInput) {
-          // Get the file name from the container's parent
-          const fileContainer = container.closest('.main-item');
-          if (fileContainer) {
-            const fileNumber = fileContainer.querySelector('.main-number').textContent;
-            const fileIndex = parseInt(fileNumber) - 1;
-            const file = files[fileIndex];
-            
+            const file = fileName;
+            console.log(file);
             if (file) {
-              await selectFile(file.name);
+              await selectFile(file);
               feedbackInput.value = `${tag}`;
               feedbackInput.focus();
               saveFeedback();
             }
-          }
         }
       });
       tagsContainer.appendChild(tagElement);

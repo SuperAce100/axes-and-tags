@@ -88,9 +88,7 @@ class Domain(ABC):
             feedback_examples = self.feedback_examples(feedback_data, save_path)
             
             feedback_text = Text()
-            for i, name in enumerate(feedback_data.keys()):
-                feedback_text.append(f"{i}. {name}: ", style="white")
-                feedback_text.append("\n".join(feedback_data[name]) + "\n", style="grey11")
+            feedback_text.append(feedback_examples, style="grey11")
             
             self.console.print(Panel(feedback_text, title=f"[blue]Feedback for iteration {i}[/blue]", border_style="blue"))
 
