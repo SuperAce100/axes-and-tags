@@ -83,9 +83,8 @@ def generate_image_multiple(concept: str, examples: str, n: int, image_model: st
     prompts = []
 
 
-    expanded_prompts = llm_call(image_gen_expand_user_prompt.format(concept=concept), system_prompt=image_gen_expand_system_prompt.format(examples=examples) + image_gen_expand_system_prompt_extend.format(n=n), temperature=1.5)
+    expanded_prompts = llm_call(image_gen_expand_user_prompt.format(concept=concept), system_prompt=image_gen_expand_system_prompt.format(examples=examples) + image_gen_expand_system_prompt_extend.format(n=n))
 
-    # print(image_gen_expand_system_prompt.format(examples=examples))
 
     expanded_prompts = [p.strip() for p in expanded_prompts.split("<prompt>")[1:] if p.strip()]
     expanded_prompts = [p.split("</prompt>")[0].strip() for p in expanded_prompts]
