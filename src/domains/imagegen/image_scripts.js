@@ -14,7 +14,7 @@ function render(id, content, fileName) {
   // Create prompt text element
   const promptElement = document.createElement('div');
   promptElement.textContent = content.prompt;
-  promptElement.className = 'text-white text-xs max-w-full overflow-hidden leading-tight font-sans';
+  promptElement.className = 'text-white text-xs max-w-full overflow-hidden leading-tight font-sans max-h-[2.5em] hover:max-h-[200px] transition-all mask-b-from-0% mask-b-to-20%';
   
   // Create tags container
   const tagsContainer = document.createElement('div');
@@ -25,11 +25,16 @@ function render(id, content, fileName) {
     content.tags.forEach(tag => {
       const tagElement = document.createElement('span');
       tagElement.textContent = tag;
-      tagElement.className = 'bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] text-white transition-all hover:bg-white/30 hover:scale-105 cursor-pointer font-sans';
+      tagElement.className = 'bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] text-white hover:bg-white/30 hover:scale-105 cursor-pointer font-sans active:scale-95 transition-all';
 
       if (feedbackData[fileName]) {
         if (feedbackData[fileName].includes(tag)) {
-          tagElement.className = 'bg-green-500/20 px-1.5 py-0.5 rounded-full text-[10px] text-green-500 transition-all hover:bg-green-500/30 hover:scale-105 cursor-pointer font-sans';
+          tagElement.classList.remove('bg-white/20');
+          tagElement.classList.add('bg-green-500/20');
+          tagElement.classList.remove('text-white');
+          tagElement.classList.add('text-green-500');
+          tagElement.classList.add('hover:bg-green-500/30');
+          tagElement.classList.remove('hover:bg-white/30');
         }
       }
       

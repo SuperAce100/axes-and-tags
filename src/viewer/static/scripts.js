@@ -269,7 +269,7 @@ function renderGrid() {
         </div>
         `;
         
-        item.className = item.className + ' bg-white rounded-lg shadow-md transition-all relative cursor-pointer overflow-hidden aspect-square hover:-translate-y-1 hover:shadow-lg';
+        item.className = item.className + ' bg-white rounded-lg shadow-md transition-all relative cursor-pointer overflow-hidden aspect-square hover:-translate-y-0.5 active:translate-y-0 hover:shadow-lg';
         if (selectedFile === fileName) {
             item.className = item.className + ' border-2 border-green-500';
         }
