@@ -80,7 +80,6 @@ button.close-btn {
 .main-item {
   background-color: var(--card-bg);
   border-radius: var(--border-radius);
-  padding: 10px;
   box-shadow: var(--shadow);
   transition: var(--transition);
   position: relative;

@@ -60,6 +60,7 @@ class ImageViewer(Viewer):
                     self.console.print(f"[bold red]Error reading {file}: {e}[/bold red]")
         self.console.print(f"[grey11]Rendering [bold cyan]{len(files)}[/bold cyan] files[/grey11]")
         return files
+    
         
 
 

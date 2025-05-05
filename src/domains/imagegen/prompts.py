@@ -49,7 +49,7 @@ Here is an example of a {concept}:
 image_gen_feedback_format = """
 {example}
 
-Here is some feedback on the image generated from this prompt:
+Here are the things the user likes about the image:
 
 {feedback}
 """
