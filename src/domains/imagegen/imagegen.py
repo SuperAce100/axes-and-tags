@@ -13,14 +13,15 @@ class ImageGen(Domain):
         super().__init__(name="imagegen", display_name=concept, data_dir=data_dir, model=model, console=console)
         self.concept = concept
 
-    def run_viewer(self, title: str, port: int, path: str) -> None:
+    def run_viewer(self, title: str, port: int, path: str, used_examples: List[str] = None) -> None:
         viewer = ImageViewer(
             concept=self.concept,
             image_folder=path, 
             output_path=self.examples_dir, 
             title=title, 
             port=port, 
-            console=self.console
+            console=self.console,
+            used_examples=used_examples
         )
         return viewer.run()
 

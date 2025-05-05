@@ -27,7 +27,8 @@ class Viewer:
                  port: int = 8001, 
                  console: Optional[Console] = None,
                  file_extension: str = ".dsl",
-                 custom_scripts_path: str = None):
+                 custom_scripts_path: str = None,
+                 used_examples: Optional[Dict[str, List[str]]] = None):
         """
         Initialize the generic viewer.
         
@@ -53,6 +54,7 @@ class Viewer:
         self.console = console or Console()
         self.file_extension = file_extension
         self.custom_scripts_path = custom_scripts_path
+        self.used_examples = used_examples
         
         # Create FastAPI app
         self.app = FastAPI(title=title)
@@ -82,6 +84,7 @@ class Viewer:
         self.app.get("/api/feedback/{filename}")(self.get_feedback)
         self.app.post("/api/save-selected")(self.save_selected)
         self.app.post("/api/close")(self.close_viewer)
+        self.app.get("/api/used-examples")(self.get_used_examples)
         
         self.console.print(f"[grey11]Initialized Viewer for [bold cyan]{self.concept or 'objects'}[/bold cyan][/grey11]")
     
@@ -186,6 +189,24 @@ class Viewer:
             self.console.print(f"[bold red]File not found: {src_path}[/bold red]")
             raise HTTPException(status_code=404, detail="File not found")
     
+    async def get_used_examples(self):
+        """Get the used examples."""
+        if not self.used_examples:
+            return {"used_examples": {}}
+        
+        used_examples = {}
+        for file, feedbacks in self.used_examples.items():
+            file_path = self.data_folder.parent / file
+            if file_path.exists():
+                with open(file_path, 'r') as f:
+                    content = json.load(f)
+                used_examples[file] = {
+                    "content": content,
+                    "feedback": feedbacks
+                }
+        
+        return {"used_examples": used_examples}
+
     async def close_viewer(self):
         """Close the viewer and return the feedback."""
         self.server_running = False

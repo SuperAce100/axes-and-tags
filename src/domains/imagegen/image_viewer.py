@@ -2,7 +2,7 @@ from ast import Dict
 from datetime import time
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, List
 from fastapi import HTTPException
 from rich.console import Console
 import argparse
@@ -20,7 +20,8 @@ class ImageViewer(Viewer):
                  title: str = "Image Viewer", 
                  port: int = 8002, 
                  console: Console = None,
-                 concept: str = "image"):
+                 concept: str = "image",
+                 used_examples: List[str] = None):
         """
         Initialize the ImageViewer.
         
@@ -40,7 +41,8 @@ class ImageViewer(Viewer):
             port=port,
             console=console,
             file_extension=".json",
-            custom_scripts_path="domains/imagegen/image_scripts.js"
+            custom_scripts_path="domains/imagegen/image_scripts.js",
+            used_examples=used_examples
         )
     
     async def get_files(self):

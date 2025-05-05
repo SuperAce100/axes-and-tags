@@ -20,7 +20,7 @@ class Domain(ABC):
         os.makedirs(self.output_dir, exist_ok=True)
 
     @abstractmethod
-    def run_viewer(self, title: str, port: int, path: str) -> Dict[str, List[str]]:
+    def run_viewer(self, title: str, port: int, path: str, used_examples: List[str] = None) -> Dict[str, List[str]]:
         """Run the viewer for this domain. Returns a dictionary of example names and their feedback."""
         pass
 
@@ -100,7 +100,7 @@ class Domain(ABC):
             save_path = self.save_result(objects, os.path.join(save_path, "feedback"))
             self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.display_name}s after reflection {i} to {self.output_dir}[/grey11]")
 
-            feedback_data = self.run_viewer(f"{self.display_name}s made with {len(feedback_data)} pieces of feedback(iteration {i})", 8003 + i, save_path)
+            feedback_data = self.run_viewer(f"{self.display_name}s made with {len(feedback_data)} pieces of feedback(iteration {i})", 8003 + i, save_path, used_examples=feedback_data)
 
             
         

@@ -288,6 +288,13 @@ function renderGrid() {
     });
 }
 
+async function fetchUsedExamples() {
+    const response = await fetch('/api/used-examples');
+    const data = await response.json();
+    console.log("used examples", data);
+    return data.used_examples;
+}
+
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
@@ -304,6 +311,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log(files);
     await getFeedbackData();
     console.log(feedbackData);
+    await fetchUsedExamples();
+    // console.log(usedExamples);
     if (files.length > 0) {
         selectFile(files[3].name);
     }
