@@ -5,6 +5,7 @@ let selectedIndex = -1;
 let feedbackData = {};
 let isClosing = false;
 let usedExamples = {};
+let isFirstRender = true;
 // Select a file
 async function selectFile(file) {
     try {
@@ -270,12 +271,23 @@ function renderGrid() {
         `;
         
         item.className = item.className + ' bg-white rounded-lg shadow-md transition-all relative cursor-pointer overflow-hidden aspect-square hover:-translate-y-0.5 active:translate-y-0 hover:shadow-lg';
+        if (isFirstRender) {
+            item.className = item.className + ' opacity-0 translate-y-4 scale-80 duration-300 ';
+        }
         if (selectedFile === fileName) {
             item.className = item.className + ' border-2 border-green-500';
         }
 
         grid.appendChild(item);
         render("preview-" + index, fileContent, fileName);
+        
+        // Animate in with a delay based on index
+        if (isFirstRender) {
+            setTimeout(() => {
+                item.classList.remove('opacity-0', 'translate-y-4', 'scale-80');
+                item.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+            }, index * 100);
+        }
         
         item.addEventListener('click', () => {
             selectFile(fileName);
@@ -337,4 +349,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     renderGrid();
     renderFeedbackList();
+    // isFirstRender = false;
 }); 
