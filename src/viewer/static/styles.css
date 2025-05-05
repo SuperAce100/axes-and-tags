@@ -20,18 +20,6 @@ body {
   font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-h1 {
-  color: var(--text-color);
-  text-align: left;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
-  margin-top: 20px;
-}
 
 /* Controls */
 .controls {
@@ -139,7 +127,6 @@ button.close-btn {
   border-radius: 50%;
   width: 22px;
   height: 22px;
-  opacity: 0.8;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -148,91 +135,7 @@ button.close-btn {
   z-index: 10;
 }
 
-/* Feedback Form */
-.global-feedback-form {
-  background-color: var(--card-bg);
-  padding: 20px;
-  border-radius: var(--border-radius);
-  margin: 2rem 0;
-  box-shadow: var(--shadow);
-}
 
-.feedback-header {
-  margin-bottom: 1rem;
-}
-
-.feedback-header h3 {
-  margin: 0 0 1rem 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-color);
-}
-
-.feedback-input-group {
-  display: flex;
-  gap: 8px;
-}
-
-.feedback-input {
-  flex: 1;
-  width: 100%;
-  padding: 10px 16px;
-  border: 1px solid #e1e4e8;
-  border-radius: var(--border-radius);
-  font-size: 14px;
-  transition: var(--transition);
-  background-color: #f8f9fa;
-}
-
-.feedback-input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  background-color: white;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-}
-
-.feedback-input::placeholder {
-  color: #a0aec0;
-}
-
-.feedback-submit {
-  padding: 10px 20px;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: var(--border-radius);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition);
-  white-space: nowrap;
-}
-
-.feedback-submit:hover {
-  background-color: #2980b9;
-  transform: translateY(-1px);
-}
-
-.feedback-list {
-  margin-top: 1rem;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.feedback-item {
-  padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: var(--border-radius);
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-.feedback-empty-state {
-  color: #a0aec0;
-  text-align: center;
-  padding: 20px;
-  font-style: italic;
-}
 
 /* Status Messages */
 .status {
@@ -268,38 +171,4 @@ button.close-btn {
     transform: translateX(0);
     opacity: 1;
   }
-}
-
-/* Keyboard Shortcuts */
-.keyboard-shortcuts {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: var(--card-bg);
-  padding: 15px;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-  font-size: 14px;
-}
-
-.keyboard-shortcuts h3 {
-  margin: 0 0 10px 0;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.shortcut {
-  display: flex;
-  align-items: center;
-  margin-bottom: 5px;
-}
-
-.key {
-  background-color: #f0f0f0;
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-right: 8px;
-  font-family: monospace;
-  font-size: 12px;
-  font-weight: 500;
 }

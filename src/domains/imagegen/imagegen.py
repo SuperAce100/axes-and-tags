@@ -10,7 +10,7 @@ from rich.console import Console
 
 class ImageGen(Domain):
     def __init__(self, concept: str, data_dir: str, model: str = text_model, console: Console = Console()):
-        super().__init__(name="imagegen", data_dir=data_dir, model=model, console=console)
+        super().__init__(name="imagegen", display_name=concept, data_dir=data_dir, model=model, console=console)
         self.concept = concept
 
     def run_viewer(self, title: str, port: int, path: str) -> None:

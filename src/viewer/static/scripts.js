@@ -20,8 +20,8 @@ async function selectFile(file) {
             selectedFile = file;
             
             selectedIndex = files.findIndex(f => f.name === file);
+            await loadFeedback(file);
             renderGrid();
-            loadFeedback(file);
         } else {
             showStatus('Error selecting file', 'error');
         }
@@ -43,19 +43,25 @@ async function loadFeedback(file) {
     }
 }
 
+async function getFeedbackData() {
+    files.forEach(async (file) => {
+        await loadFeedback(file.name);
+    });
+}
+
 // Render feedback list
 function renderFeedbackList() {
     const list = document.getElementById('feedbackList');
     list.innerHTML = '';
     
     if (!selectedFile || !feedbackData[selectedFile] || feedbackData[selectedFile].length === 0) {
-        list.innerHTML = '<div class="feedback-empty-state">No feedback yet</div>';
+        list.innerHTML = '<div class="text-gray-400 text-center py-8 text-sm">No feedback yet</div>';
         return;
     }
     
     feedbackData[selectedFile].forEach((feedback, index) => {
         const feedbackItem = document.createElement('div');
-        feedbackItem.className = 'feedback-item';
+        feedbackItem.className = 'p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors';
         feedbackItem.textContent = feedback;
         list.appendChild(feedbackItem);
     });
@@ -90,6 +96,7 @@ async function saveFeedback() {
             
             // Reload feedback for the selected file
             await loadFeedback(selectedFile);
+            renderGrid();
         } else {
             showStatus('Error saving feedback', 'error');
         }
@@ -229,7 +236,7 @@ async function fetchFiles() {
     try {
         const response = await fetch('/api/files');
         files = await response.json();
-        renderGrid();
+        // renderGrid();
     } catch (error) {
         showStatus('Error loading files: ' + error.message, 'error');
     }
@@ -257,7 +264,7 @@ function renderGrid() {
         
         item.innerHTML = `
         <div class="main-number">${index + 1}</div>
-        ${hasFeedback ? `<div class="feedback-badge">${feedbackData[fileName].length}</div>` : ''}
+        ${false ? `<div class="feedback-badge">${feedbackData[fileName].length}</div>` : ''}
         <div class="main-preview" id="preview-${index}">
         </div>
         `;
@@ -283,7 +290,7 @@ function renderGrid() {
 
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Set up keyboard event listener
     document.addEventListener('keydown', handleKeyDown);
     
@@ -293,10 +300,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set up feedback button click event listener
     document.getElementById('saveFeedbackBtn').addEventListener('click', saveFeedback);
     
-    fetchFiles();
-
-    // Load initial files if available
+    await fetchFiles();
+    console.log(files);
+    await getFeedbackData();
+    console.log(feedbackData);
     if (files.length > 0) {
-        selectFile(files[0].name);
+        selectFile(files[3].name);
     }
+    
+    renderGrid();
+    renderFeedbackList();
 }); 

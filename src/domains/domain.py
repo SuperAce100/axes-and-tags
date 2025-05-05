@@ -8,8 +8,9 @@ from rich.text import Text
 from rich.rule import Rule
 
 class Domain(ABC):
-    def __init__(self, name: str, data_dir: str, model: str = text_model, console: Console = Console()):
+    def __init__(self, name: str, display_name: str, data_dir: str, model: str = text_model, console: Console = Console()):
         self.name = name
+        self.display_name = display_name
         self.data_dir = data_dir
         self.model = model
         self.console = console
@@ -77,9 +78,9 @@ class Domain(ABC):
 
         save_path = self.save_result(objects)
 
-        self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.name} layouts to {self.output_dir}[/grey11]")
+        self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.display_name}s to {self.output_dir}[/grey11]")
 
-        feedback_data = self.run_viewer(f"{self.name}s made with {len(example_names)} examples", 8002, save_path)
+        feedback_data = self.run_viewer(f"Generated {len(objects)} {self.display_name}", 8002, save_path)
 
         for i in range(max_iterations):
             if not feedback_data:
@@ -89,7 +90,7 @@ class Domain(ABC):
             
             feedback_text = Text()
             feedback_text.append(feedback_examples, style="grey11")
-            
+
             self.console.print(Panel(feedback_text, title=f"[blue]Feedback for iteration {i}[/blue]", border_style="blue"))
 
             self.console.print(f"[grey11]Generating new layouts based on feedback...[/grey11]")
@@ -97,9 +98,9 @@ class Domain(ABC):
             objects = self.generate_multiple(n, feedback_examples)
 
             save_path = self.save_result(objects, os.path.join(save_path, "feedback"))
-            self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.name} layouts after reflection {i} to {self.output_dir}[/grey11]")
+            self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.display_name}s after reflection {i} to {self.output_dir}[/grey11]")
 
-            feedback_data = self.run_viewer(f"{self.name}s made with {len(feedback_data)} pieces of feedback(iteration {i})", 8003 + i, save_path)
+            feedback_data = self.run_viewer(f"{self.display_name}s made with {len(feedback_data)} pieces of feedback(iteration {i})", 8003 + i, save_path)
 
             
         

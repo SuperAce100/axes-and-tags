@@ -14,7 +14,7 @@ function render(id, content, fileName) {
   // Create prompt text element
   const promptElement = document.createElement('div');
   promptElement.textContent = content.prompt;
-  promptElement.className = 'text-white text-xs max-w-full overflow-hidden leading-tight max-h-[3.6em] font-sans';
+  promptElement.className = 'text-white text-xs max-w-full overflow-hidden leading-tight font-sans';
   
   // Create tags container
   const tagsContainer = document.createElement('div');
@@ -26,17 +26,19 @@ function render(id, content, fileName) {
       const tagElement = document.createElement('span');
       tagElement.textContent = tag;
       tagElement.className = 'bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] text-white transition-all hover:bg-white/30 hover:scale-105 cursor-pointer font-sans';
+
+      if (feedbackData[fileName]) {
+        if (feedbackData[fileName].includes(tag)) {
+          tagElement.className = 'bg-green-500/20 px-1.5 py-0.5 rounded-full text-[10px] text-green-500 transition-all hover:bg-green-500/30 hover:scale-105 cursor-pointer font-sans';
+        }
+      }
       
       tagElement.addEventListener('click', async () => {
         const feedbackInput = document.getElementById('feedbackInput');
-        console.log(feedbackInput);
         if (feedbackInput) {
-            const file = fileName;
-            console.log(file);
-            if (file) {
-              await selectFile(file);
+            if (fileName) {
+              await selectFile(fileName);
               feedbackInput.value = `${tag}`;
-              feedbackInput.focus();
               saveFeedback();
             }
         }
