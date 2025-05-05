@@ -100,8 +100,12 @@ class Domain(ABC):
             save_path = self.save_result(objects, os.path.join(save_path, "feedback"))
             self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.display_name}s after reflection {i} to {self.output_dir}[/grey11]")
 
-            feedback_data = self.run_viewer(f"{self.display_name}s made with {len(feedback_data)} pieces of feedback(iteration {i})", 8003 + i, save_path, used_examples=feedback_data)
+            new_feedback_data = self.run_viewer(f"{self.display_name}s made with {len(feedback_data)} pieces of feedback(iteration {i})", 8003 + i, save_path, used_examples=feedback_data)
 
-            
+            if not new_feedback_data:
+                break
+
+            feedback_data = {f"../{k}": v for k, v in feedback_data.items()}
+            feedback_data = {**feedback_data, **new_feedback_data}
         
         self.console.print(Rule(f"[bold green]Done![/bold green]", style="green", align="left"))
