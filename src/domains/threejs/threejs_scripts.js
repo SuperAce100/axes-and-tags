@@ -97,7 +97,7 @@ async function initThreeJsScene(id, container, jsContent) {
                 
                 // Scale the object to fit the view
                 const maxDim = Math.max(size.x, size.y, size.z);
-                const scale = 5 / maxDim;
+                const scale = 4 / maxDim;
                 object.scale.multiplyScalar(scale);
             }
         }
@@ -133,7 +133,7 @@ async function initThreeJsScene(id, container, jsContent) {
 function render(id, content) {
     const item = document.getElementById(id);
     const container = document.createElement("div");
-    container.className = "bg-amber-50 rounded-lg flex flex-col items-center justify-center group w-full h-full";
+    container.className = "bg-white rounded-lg flex flex-col items-center justify-center group w-full h-full";
     item.appendChild(container);
     
     try {
@@ -146,40 +146,39 @@ function render(id, content) {
 
 function renderExample(container, content, feedback) {
     const example = document.createElement('div');
-    container.classList.add('flex', 'flex-col', 'items-center', 'justify-center');
-    example.className = 'w-full flex-1 p-4';
-    example.innerHTML = content.svg;
-
-    const svg = example.querySelector('svg');
-    if (svg) {
-        svg.setAttribute('width', '100%');
-        svg.setAttribute('height', '100%');
-        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-    }
-
+    container.className = 'relative w-full h-full bg-white rounded-lg flex flex-col items-center justify-center group';
+    const id = container.id;
+    
     const titleOverlay = document.createElement('div');
-    titleOverlay.className = 'p-4 pb-0 w-full text-left';
+    titleOverlay.className = 'p-2 pb-0 w-full text-left z-12 absolute top-0 left-0';
     
     const titleElement = document.createElement('div');
     titleElement.textContent = feedback;
     titleElement.className = 'font-tight';
     
     titleOverlay.appendChild(titleElement);
+
+    const exampleContainer = document.createElement('div');
+    exampleContainer.className = 'w-full h-full overflow-hidden rounded-lg';
+    exampleContainer.appendChild(example);
+
     container.appendChild(titleOverlay);
-    container.appendChild(example);
+    container.appendChild(exampleContainer);
+
+    initThreeJsScene(id, exampleContainer, content.model);
 }
 
 function renderTags(fileData, container) {
     // Create tags container
     const tagsContainer = document.createElement('div');
-    tagsContainer.className = 'flex gap-1 flex-wrap mt-1';
+    tagsContainer.className = 'flex gap-1 flex-wrap-reverse mt-1 ';
 
     // Add each tag
     if (fileData.content.tags && Array.isArray(fileData.content.tags)) {
         fileData.content.tags.forEach(tag => {
             const tagElement = document.createElement('span');
             tagElement.textContent = tag;
-            tagElement.className = 'tag bg-gray-100 px-1.5 py-0.5 rounded-full text-[10px] text-gray-600 hover:bg-gray-200/50 hover:scale-105 cursor-pointer font-sans active:scale-95 transition-all';
+            tagElement.className = 'tag bg-gray-100/10 px-1.5 py-0.5 rounded-full text-[10px] text-gray-600 hover:bg-gray-200/50 hover:scale-105 cursor-pointer font-sans active:scale-95 transition-all border';
 
             if (feedbackData[fileData.name]) {
                 if (feedbackData[fileData.name].includes(tag)) {
@@ -200,7 +199,7 @@ function renderTags(fileData, container) {
     }
 
     const tagOverlay = document.createElement('div');
-    tagOverlay.className = 'p-3 pt-0 w-full z-12 absolute bottom-0 left-0';
+    tagOverlay.className = 'p-2 pt-0 w-full z-12 absolute bottom-0 left-0';
     tagOverlay.id = "tag-overlay";
     // Append elements
     tagOverlay.appendChild(tagsContainer);

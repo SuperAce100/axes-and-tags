@@ -285,8 +285,9 @@ function renderUsedExamples() {
             if (isFirstRender) {
                 item.className = item.className + ' opacity-0 translate-y-4 scale-80 duration-500 filter blur-md';
             }
-            renderExample(item, fileContent, feedback);
             usedExamplesList.appendChild(item);
+            
+            renderExample(item, fileContent, feedback);
 
             if (isFirstRender) {
                 setTimeout(() => {
