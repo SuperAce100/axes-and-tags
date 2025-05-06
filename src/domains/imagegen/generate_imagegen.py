@@ -79,9 +79,7 @@ def generate_image(prompt: str, examples: str, image_model: str = img_model, tex
 
 def generate_image_multiple(concept: str, examples: str, n: int, image_model: str = img_model, text_model: str = language_model):
     image_urls = []
-
     prompts = []
-
 
     expanded_prompts = llm_call(image_gen_expand_user_prompt.format(concept=concept), system_prompt=image_gen_expand_system_prompt.format(examples=examples) + image_gen_expand_system_prompt_extend.format(n=n))
 

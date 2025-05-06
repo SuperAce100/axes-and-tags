@@ -168,41 +168,44 @@ async function fetchFiles() {
     }
 }
 
-function renderTags(fileData, container) {
-    // Create tags container
-    const tagsContainer = document.createElement('div');
-    tagsContainer.className = 'flex gap-1 flex-wrap mt-1';
+if(typeof renderTags === 'undefined') {
+    function renderTags(fileData, container) {
+        // Create tags container
+        const tagsContainer = document.createElement('div');
+        tagsContainer.className = 'flex gap-1 flex-wrap mt-1';
 
-    // Add each tag
-    if (fileData.content.tags && Array.isArray(fileData.content.tags)) {
-        fileData.content.tags.forEach(tag => {
-            const tagElement = document.createElement('span');
-            tagElement.textContent = tag;
-            tagElement.className = 'bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] text-white hover:bg-white/30 hover:scale-105 cursor-pointer font-sans active:scale-95 transition-all';
+        // Add each tag
+        if (fileData.content.tags && Array.isArray(fileData.content.tags)) {
+            fileData.content.tags.forEach(tag => {
+                const tagElement = document.createElement('span');
+                tagElement.textContent = tag;
+                tagElement.className = 'tag bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] text-white hover:bg-white/30 hover:scale-105 cursor-pointer font-sans active:scale-95 transition-all';
 
-            if (feedbackData[fileData.name]) {
-                if (feedbackData[fileData.name].includes(tag)) {
-                tagElement.className = tagElement.className.replace('bg-white/20', 'bg-green-300/30')
-                    .replace('text-white', 'text-green-500')
-                    .replace('hover:bg-white/30', 'hover:bg-green-300/50');
+                if (feedbackData[fileData.name]) {
+                    if (feedbackData[fileData.name].includes(tag)) {
+                    tagElement.className = tagElement.className.replace('bg-white/20', 'bg-green-300/30')
+                        .replace('text-white', 'text-green-500')
+                        .replace('hover:bg-white/30', 'hover:bg-green-300/50');
+                    }
                 }
-            }
-            
-            tagElement.addEventListener('click', async () => {
-                if (fileData.name) {
-                    await selectFile(fileData.name);
-                    saveFeedback(tag);
-                }
+                
+                tagElement.addEventListener('click', async () => {
+                    if (fileData.name) {
+                        await selectFile(fileData.name);
+                        saveFeedback(tag);
+                    }
+                });
+                tagsContainer.appendChild(tagElement);
             });
-            tagsContainer.appendChild(tagElement);
-        });
-    }
+        }
 
-    const tagOverlay = document.createElement('div');
-    tagOverlay.className = 'bg-gradient-to-t from-black/85 via-black/60 to-transparent p-3 absolute bottom-0 left-0 w-full z-12';
-    // Append elements
-    tagOverlay.appendChild(tagsContainer);
-    container.appendChild(tagOverlay);
+        const tagOverlay = document.createElement('div');
+        tagOverlay.className = 'bg-gradient-to-t from-black/85 via-black/60 to-transparent p-3 absolute bottom-0 left-0 w-full z-12';
+        tagOverlay.id = "tag-overlay";
+        // Append elements
+        tagOverlay.appendChild(tagsContainer);
+        container.appendChild(tagOverlay);
+    }
 }
 
 // Render files in the grid
@@ -217,10 +220,10 @@ function renderGrid() {
         const fileName = fileData.name;
         const fileContent = fileData.content;
         
-        item.innerHTML = `
-        <div class="main-preview" id="preview-${index}">
-        </div>
-        `;
+        const previewDiv = document.createElement('div');
+        previewDiv.className = 'main-preview w-full h-full max-h-full flex flex-col items-center justify-center';
+        previewDiv.id = `preview-${index}`;
+        item.appendChild(previewDiv);
         
         item.className = item.className + ' bg-white rounded-lg shadow-md transition-all relative overflow-hidden aspect-square hover:-translate-y-0.5 hover:shadow-lg';
         if (isFirstRender) {
@@ -229,7 +232,7 @@ function renderGrid() {
         grid.appendChild(item);
 
         render("preview-" + index, fileContent, fileName);
-        renderTags(fileData, item);
+        renderTags(fileData, previewDiv);
 
         // Animate in with a delay based on index
         if (isFirstRender) {

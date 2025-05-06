@@ -2,21 +2,21 @@ import os
 import random
 import time
 from domains.domain import Domain
-from domains.imagegen.image_viewer import ImageViewer
-from domains.imagegen.generate_imagegen import generate_image, generate_image_multiple, collect_examples, load_image_from_feedback, save_images, expand_prompt, extract_tags, generate_insights
+from domains.svg.svg_viewer import SVGViewer
+from domains.svg.generate_svg import collect_examples, extract_tags, generate_svg_multiple, generate_insights, load_svgs_from_feedback, save_svgs
 from models.models import text_model
 from typing import List, Tuple, Dict
 from rich.console import Console
 
-class ImageGen(Domain):
+class SVGGen(Domain):
     def __init__(self, concept: str, data_dir: str, model: str = text_model, console: Console = Console()):
-        super().__init__(name="imagegen", display_name=concept, data_dir=data_dir, model=model, console=console)
+        super().__init__(name="svg", display_name=concept, data_dir=data_dir, model=model, console=console)
         self.concept = concept
 
     def run_viewer(self, title: str, port: int, path: str, used_examples: List[str] = None) -> None:
-        viewer = ImageViewer(
+        viewer = SVGViewer(
             concept=self.concept,
-            image_folder=path, 
+            svg_folder=path, 
             output_path=self.examples_dir, 
             title=title, 
             port=port, 
@@ -26,13 +26,13 @@ class ImageGen(Domain):
         return viewer.run()
 
     def generate_multiple(self, n: int, examples: str) -> List[str]:
-        return generate_image_multiple(self.concept, examples, n, text_model=self.model)
+        return generate_svg_multiple(self.concept, examples, n, model=self.model)
 
     def collect_examples(self, n: int) -> Tuple[str, List[str]]:
         return collect_examples(self.concept, self.examples_dir, n)
 
     def feedback_examples(self, feedback: Dict[str, List[str]], results_dir: str) -> str:
-        return load_image_from_feedback(self.concept, feedback, results_dir)
+        return load_svgs_from_feedback(self.concept, feedback, results_dir)
     
     def extract_tags(self, prompt: str) -> List[str]:
         return extract_tags(prompt, self.model)
@@ -49,9 +49,8 @@ class ImageGen(Domain):
         if path is None:
             path = self.name_output_dir()
         
-        prompts = [r for r in results[0]]
-        image_urls = [r for r in results[1]]
-        tags = [r for r in results[2]]
+        svgs = [r for r in results[0]]
+        tags = [r for r in results[1]]
 
-        save_images(image_urls, prompts, tags, path)
+        save_svgs(svgs, tags, path)
         return path

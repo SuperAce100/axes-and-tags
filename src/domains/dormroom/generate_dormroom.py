@@ -1,5 +1,5 @@
 from rich.progress import track
-from models.prompts import dsl_system_prompt, dsl_example_format, examples_format, feedback_example_format, example_room, dsl_user_prompt
+from models.prompts import dsl_system_prompt, dsl_example_format, feedback_example_format, example_room, dsl_user_prompt
 from models.models import llm_call, text_model
 from lib.utils import parse_dsl
 import os
@@ -34,7 +34,7 @@ def collect_examples(examples_dir: str, n: int = 10):
 
         example_concept = os.path.splitext(yaml_file)[0]
 
-        formatted_example = examples_format.format(
+        formatted_example = dsl_example_format.format(
             concept=example_concept, example=yaml_content
         )
 

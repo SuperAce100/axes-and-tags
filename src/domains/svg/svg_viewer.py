@@ -1,9 +1,7 @@
-import os
-import shutil
 import argparse
 from pathlib import Path
 from rich.console import Console
-
+from typing import List
 from viewer.viewer import Viewer
 
 class SVGViewer(Viewer):
@@ -16,7 +14,8 @@ class SVGViewer(Viewer):
                  concept: str = None, 
                  title: str = "SVG Viewer", 
                  port: int = 8002, 
-                 console: Console = None):
+                 console: Console = None,
+                 used_examples: List[str] = None):
         """
         Initialize the SVGViewer.
         
@@ -36,8 +35,8 @@ class SVGViewer(Viewer):
             title=title,
             port=port,
             console=console,
-            file_extension=".svg",
-            custom_scripts_path="domains/svg/svg_scripts.js"
+            custom_scripts_path="domains/svg/svg_scripts.js",
+            used_examples=used_examples
         )
         
 

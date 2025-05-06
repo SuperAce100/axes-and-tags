@@ -26,7 +26,7 @@ class Viewer:
                  title: str = "3D Object Viewer", 
                  port: int = 8001, 
                  console: Optional[Console] = None,
-                 file_extension: str = ".dsl",
+                 file_extension: str = ".json",
                  custom_scripts_path: str = None,
                  used_examples: Optional[Dict[str, List[str]]] = None):
         """
@@ -113,10 +113,10 @@ class Viewer:
                 file_path = self.data_folder / file
                 try:
                     with open(file_path, 'r') as f:
-                        content = f.read()
+                        content = json.load(f)
                     files.append({
                         'name': file,
-                        'content': json.dumps(content)
+                        'content': content
                     })
                 except Exception as e:
                     self.console.print(f"[bold red]Error reading {file}: {e}[/bold red]")

@@ -25,11 +25,6 @@ class Domain(ABC):
         pass
 
     @abstractmethod
-    def generate(self, examples: str) -> str:
-        """Generate a single example. Returns the generated example."""
-        pass
-
-    @abstractmethod
     def generate_multiple(self, n: int, examples: str) -> List[str]:
         """Generate multiple examples. Returns a list of generated examples."""
         pass

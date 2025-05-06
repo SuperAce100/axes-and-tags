@@ -1,15 +1,8 @@
-from ast import Dict
-from datetime import time
-import os
 from pathlib import Path
-from typing import Any, List
-from fastapi import HTTPException
 from rich.console import Console
 import argparse
 from viewer.viewer import Viewer
-import base64
-import json
-
+from typing import List
 class ImageViewer(Viewer):
     """
     A specialized viewer for SVG files.
@@ -40,28 +33,11 @@ class ImageViewer(Viewer):
             title=title,
             port=port,
             console=console,
-            file_extension=".json",
             custom_scripts_path="domains/imagegen/image_scripts.js",
             used_examples=used_examples
         )
     
-    async def get_files(self):
-        """Get a list of all files in the folder with their content."""
-        files = []
-        for file in sorted(os.listdir(self.data_folder)):
-            if file.lower().endswith(self.file_extension):
-                file_path = self.data_folder / file
-                try:
-                    with open(file_path, 'r') as f:
-                        content = json.load(f)
-                    files.append({
-                        'name': file,
-                        'content': content
-                    })
-                except Exception as e:
-                    self.console.print(f"[bold red]Error reading {file}: {e}[/bold red]")
-        self.console.print(f"[grey11]Rendering [bold cyan]{len(files)}[/bold cyan] files[/grey11]")
-        return files
+    
     
         
 

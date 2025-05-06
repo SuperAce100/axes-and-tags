@@ -82,6 +82,4 @@ Enclose each tag in <tag></tag> XML tags, like this, and return the list of tags
 <tag>TAG HERE</tag>
 <tag>TAG HERE</tag>
 </tags>
-
-This is a list of existing tags, if any is relevant to the prompt, include it as is. 
 """
