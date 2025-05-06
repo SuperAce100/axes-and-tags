@@ -120,7 +120,7 @@ def load_image_from_feedback(concept: str, feedback_data: dict[str, list], resul
     
     insights = generate_insights(examples_str)
 
-    return examples_str + "\n Here is what you need to include in the next generation: \n" + insights
+    return examples_str + "\n Here is what you need to include in every future generation: \n" + insights
 
 def save_images(image_urls: list[str], prompts: list[str], tags: list[str], path: str):
     os.makedirs(path, exist_ok=True)

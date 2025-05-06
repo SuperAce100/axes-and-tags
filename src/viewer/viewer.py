@@ -85,7 +85,7 @@ class Viewer:
         self.app.post("/api/save-selected")(self.save_selected)
         self.app.post("/api/close")(self.close_viewer)
         self.app.get("/api/used-examples")(self.get_used_examples)
-        
+        self.app.get("/api/all-feedback")(self.get_all_feedback)
         self.console.print(f"[grey11]Initialized Viewer for [bold cyan]{self.concept or 'objects'}[/bold cyan][/grey11]")
     
     async def index(self, request: Request):
@@ -158,6 +158,10 @@ class Viewer:
             return {"feedback": []}
         
         return {"feedback": self.feedback_data[filename]}
+    
+    def get_all_feedback(self):
+        """Get all feedback for all files."""
+        return self.feedback_data
     
     async def save_selected(self, data: Dict[str, Any]):
         """Save the selected file to the output path."""

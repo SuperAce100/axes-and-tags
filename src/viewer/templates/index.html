@@ -11,17 +11,21 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <div class="container mx-auto">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4 mt-4 font-tight">{{ title }}</h1>
+    <div class="container mx-auto w-10/12">
+        <h1 class="text-4xl font-bold text-gray-900 mb-8 mt-6 font-tight">{{ title }}</h1>
 
         <div id="status" class="status" style="display: none;"></div>
         
-        <div class="flex gap-4">
-            <div class="main-grid flex-3" id="mainGrid">
+        <div class="grid grid-cols-12 gap-6">
+            <div class="col-span-9 grid grid-cols-3 gap-4" id="mainGrid">
                 <!-- Objects will be loaded here -->
             </div>
 
-            <div class="mt-4 rounded-lg border border-gray-100 bg-white p-4 flex-1" id="usedExamples">
+            <div class="col-span-3" id="usedExamples">
+                <h3 class="text-2xl font-medium text-gray-900 font-tight">Used Examples</h3>
+                <div id="usedExamplesList" class="mt-4 grid gap-4 grid-cols-2">
+                    <!-- Used examples will be loaded here -->
+                </div>
             </div>
         </div>
 

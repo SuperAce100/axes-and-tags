@@ -44,9 +44,10 @@ async function loadFeedback(file) {
 }
 
 async function getFeedbackData() {
-    files.forEach(async (file) => {
-        await loadFeedback(file.name);
-    });
+    const response = await fetch('/api/all-feedback');
+    const data = await response.json();
+    feedbackData = data;
+    console.log("feedbackData", feedbackData);
 }
 
 
@@ -83,6 +84,7 @@ async function saveFeedback(feedback) {
             
             // Reload feedback for the selected file
             await loadFeedback(selectedFile);
+            
             renderGrid();
         } else {
             showStatus('Error saving feedback', 'error');
@@ -156,69 +158,6 @@ function showStatus(message, type = 'info') {
     }, 3000);
 }
 
-function navigatePrevious() {
-    if (files.length === 0) return;
-    
-    let newIndex = selectedIndex - 1;
-    if (newIndex < 0) newIndex = files.length - 1;
-    
-    selectFile(files[newIndex].name);
-}
-
-function navigateNext() {
-    console.log(files);
-    if (files.length === 0) return;
-    
-    let newIndex = selectedIndex + 1;
-    if (newIndex >= files.length) newIndex = 0;
-    console.log('navigateNext', newIndex, files[newIndex].name);
-    
-    selectFile(files[newIndex].name);
-}
-
-function handleKeyDown(e) {
-    // If user is typing in the feedback input, don't handle navigation keys
-    if (e.target.id === 'feedbackInput') {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            saveFeedback();
-        }
-        return;
-    }
-    
-    switch (e.key) {
-        case 'ArrowLeft':
-            e.preventDefault();
-            navigatePrevious();
-            break;
-        case 'ArrowRight':
-            console.log('ArrowRight');
-            e.preventDefault();
-            navigateNext();
-            break;
-        case 'Enter':
-            e.preventDefault();
-            if (selectedFile) {
-                // document.getElementById('feedbackInput').focus();
-            }
-            break;
-        case 'Escape':
-            e.preventDefault();
-            closeViewer();
-            break;
-        case 's':
-        case 'S':
-            e.preventDefault();
-            saveSelected();
-            break;
-    }
-}
-
-// Handle window resize
-function handleResize() {
-    console.log('Window resized');
-}
-
 async function fetchFiles() {
     try {
         const response = await fetch('/api/files');
@@ -229,6 +168,42 @@ async function fetchFiles() {
     }
 }
 
+function renderTags(fileData, container) {
+    // Create tags container
+    const tagsContainer = document.createElement('div');
+    tagsContainer.className = 'flex gap-1 flex-wrap mt-1';
+
+    // Add each tag
+    if (fileData.content.tags && Array.isArray(fileData.content.tags)) {
+        fileData.content.tags.forEach(tag => {
+            const tagElement = document.createElement('span');
+            tagElement.textContent = tag;
+            tagElement.className = 'bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] text-white hover:bg-white/30 hover:scale-105 cursor-pointer font-sans active:scale-95 transition-all';
+
+            if (feedbackData[fileData.name]) {
+                if (feedbackData[fileData.name].includes(tag)) {
+                tagElement.className = tagElement.className.replace('bg-white/20', 'bg-green-300/30')
+                    .replace('text-white', 'text-green-500')
+                    .replace('hover:bg-white/30', 'hover:bg-green-300/50');
+                }
+            }
+            
+            tagElement.addEventListener('click', async () => {
+                if (fileData.name) {
+                    await selectFile(fileData.name);
+                    saveFeedback(tag);
+                }
+            });
+            tagsContainer.appendChild(tagElement);
+        });
+    }
+
+    const tagOverlay = document.createElement('div');
+    tagOverlay.className = 'bg-gradient-to-t from-black/85 via-black/60 to-transparent p-3 absolute bottom-0 left-0 w-full z-12';
+    // Append elements
+    tagOverlay.appendChild(tagsContainer);
+    container.appendChild(tagOverlay);
+}
 
 // Render files in the grid
 function renderGrid() {
@@ -242,39 +217,28 @@ function renderGrid() {
         const fileName = fileData.name;
         const fileContent = fileData.content;
         
-        // Add feedback badge if there's feedback
-        const hasFeedback = feedbackData[fileName] && feedbackData[fileName].length > 0;
-        
-        if (selectedFile === fileName) {
-            item.classList.add('selected');
-        }
-        
         item.innerHTML = `
-        <div class="main-number">${index + 1}</div>
-        ${false ? `<div class="feedback-badge">${feedbackData[fileName].length}</div>` : ''}
         <div class="main-preview" id="preview-${index}">
         </div>
         `;
         
-        item.className = item.className + ' bg-white rounded-lg shadow-md transition-all relative cursor-pointer overflow-hidden aspect-square hover:-translate-y-0.5 active:translate-y-0 hover:shadow-lg';
+        item.className = item.className + ' bg-white rounded-lg shadow-md transition-all relative overflow-hidden aspect-square hover:-translate-y-0.5 hover:shadow-lg';
         if (isFirstRender) {
-            item.className = item.className + ' opacity-0 translate-y-4 scale-80 duration-300 ';
+            item.className = item.className + ' opacity-0 translate-y-4 scale-80 duration-500 filter blur-md';
         }
-        if (selectedFile === fileName) {
-            item.className = item.className + ' border-2 border-green-500';
-        }
-
         grid.appendChild(item);
+
         render("preview-" + index, fileContent, fileName);
-        
+        renderTags(fileData, item);
+
         // Animate in with a delay based on index
         if (isFirstRender) {
             setTimeout(() => {
-                item.classList.remove('opacity-0', 'translate-y-4', 'scale-80');
+                item.classList.remove('opacity-0', 'translate-y-4', 'scale-80', 'filter', 'blur-md');
                 item.classList.add('opacity-100', 'translate-y-0', 'scale-100');
             }, index * 100);
         }
-        
+
         item.addEventListener('click', () => {
             selectFile(fileName);
         });
@@ -303,26 +267,31 @@ function renderUsedExamples() {
         usedExamplesContainer.classList.add('hidden');
         return;
     } else {
-        usedExamplesContainer.innerHTML = `
-        <h3 class="text-lg font-medium text-gray-900 font-tight">Used Examples</h3>
-        <div id="usedExamplesList"></div>
-        `;
         usedExamplesContainer.classList.remove('hidden');
     }
 
     const usedExamplesList = document.getElementById('usedExamplesList');
     usedExamplesList.innerHTML = '';
-    usedExamplesList.className = 'mt-4 grid gap-4 grid-flow-col auto-cols-max';
 
     for (const [file, feedbacks] of Object.entries(usedExamples)) {
         const fileContent = feedbacks.content;
         const newFeedbacks = feedbacks.feedback;
-        newFeedbacks.forEach(feedback => {
+        newFeedbacks.forEach((feedback, index) => {
             const item = document.createElement('div');
             item.id = "used-example-" + file;
-            item.className = 'aspect-square bg-white rounded-lg shadow-md transition-all relative overflow-hidden max-w-[200px]';
+            item.className = 'aspect-square bg-white rounded-lg shadow-md transition-all relative overflow-hidden hover:-translate-y-0.5';
+            if (isFirstRender) {
+                item.className = item.className + ' opacity-0 translate-y-4 scale-80 duration-500 filter blur-md';
+            }
             renderExample(item, fileContent, feedback);
             usedExamplesList.appendChild(item);
+
+            if (isFirstRender) {
+                setTimeout(() => {
+                    item.classList.remove('opacity-0', 'translate-y-4', 'scale-80', 'filter', 'blur-md');
+                    item.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+                }, index * 100);
+            }
         });
     }
 }
@@ -330,26 +299,24 @@ function renderUsedExamples() {
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     isFirstRender = true;
-    // Set up keyboard event listener
-    document.addEventListener('keydown', handleKeyDown);
-    
-    // Set up window resize event listener
-    window.addEventListener('resize', handleResize);
-    
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeViewer();
+        }
+    });
     
     await fetchFiles();
     console.log(files);
     await getFeedbackData();
     console.log(feedbackData);
     await fetchUsedExamples();
+
     renderUsedExamples();
-    // console.log(usedExamples);
-    if (files.length > 0) {
-        selectFile(files[3].name);
-    }
     
     renderGrid();
+
     setTimeout(() => {
         isFirstRender = false;
-    }, 2000);
+    }, 1000);
 }); 
