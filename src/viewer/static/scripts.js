@@ -308,6 +308,22 @@ async function fetchUsedExamples() {
 }
 
 function renderUsedExamples() {
+    usedExamplesContainer = document.getElementById('usedExamples');
+
+    console.log("usedExamples", usedExamples);
+
+    if(Object.keys(usedExamples).length === 0) {
+        console.log("No used examples");
+        usedExamplesContainer.innerHTML = '';
+        return;
+    } else {
+        usedExamplesContainer.innerHTML = `
+        <h3 class="text-lg font-medium text-gray-900 font-tight">Used Examples</h3>
+        <div id="usedExamplesList"></div>
+        `;
+        usedExamplesContainer.className = "mt-4 rounded-lg border border-gray-100 bg-white p-4";
+    }
+
     const usedExamplesList = document.getElementById('usedExamplesList');
     usedExamplesList.innerHTML = '';
     usedExamplesList.className = 'mt-4 grid gap-4 grid-flow-col auto-cols-max';
@@ -327,6 +343,7 @@ function renderUsedExamples() {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
+    isFirstRender = true;
     // Set up keyboard event listener
     document.addEventListener('keydown', handleKeyDown);
     
@@ -349,5 +366,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     renderGrid();
     renderFeedbackList();
-    // isFirstRender = false;
+    setTimeout(() => {
+        isFirstRender = false;
+    }, 2000);
 }); 
