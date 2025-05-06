@@ -14,9 +14,7 @@ Here are some examples:
 <examples>
 {examples}
 </examples>
-"""
 
-svg_system_prompt_extend = """
 You must generate {n} new and UNIQUE SVGs for the user, ALL of which must follow EVERY piece of feedback provided
 
 If you've recieved feedback on any previous generations, make sure to include that feedback in each new SVG - EVERY NEW SVG MUST INCOPORATE ALL THE FEEDBACK.
@@ -50,7 +48,6 @@ Here are the things the user likes about the SVG:
 
 {feedback}
 """
-
 
 svg_insights_format = """
 Here are some SVGs used to generate images

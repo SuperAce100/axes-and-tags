@@ -1,5 +1,5 @@
 from rich.progress import track
-from models.prompts import dsl_system_prompt, dsl_example_format, feedback_example_format, example_room, dsl_user_prompt
+from domains.dormroom.prompts import dsl_system_prompt, dsl_example_format, feedback_example_format, example_room, dsl_user_prompt
 from models.models import llm_call, text_model
 from lib.utils import parse_dsl
 import os

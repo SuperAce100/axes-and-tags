@@ -51,7 +51,7 @@ def extract_tags(prompt: str, model: str = text_model) -> list[str]:
     return tags
 
 def generate_svg_multiple(concept: str, examples: str, n: int = 10, model: str = text_model):
-    svg_results = llm_call(svg_user_prompt.format(concept=concept), system_prompt=svg_system_prompt.format(examples=examples) + svg_system_prompt_extend.format(n=n), model=model)
+    svg_results = llm_call(svg_user_prompt.format(concept=concept), system_prompt=svg_system_prompt.format(examples=examples, n=n), model=model)
 
     svg_results = [p.strip() for p in svg_results.split("<result>")[1:] if p.strip()]
     svg_results = [p.split("</result>")[0].strip() for p in svg_results]
