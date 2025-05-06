@@ -38,7 +38,6 @@ async function loadFeedback(file) {
         const data = await response.json();
         
         feedbackData[file] = data.feedback;
-        renderFeedbackList();
     } catch (error) {
         console.error('Error loading feedback:', error);
     }
@@ -50,28 +49,13 @@ async function getFeedbackData() {
     });
 }
 
-// Render feedback list
-function renderFeedbackList() {
-    const list = document.getElementById('feedbackList');
-    list.innerHTML = '';
-    
-    if (!selectedFile || !feedbackData[selectedFile] || feedbackData[selectedFile].length === 0) {
-        list.innerHTML = '<div class="text-gray-400 text-center py-8 text-sm">No feedback yet</div>';
-        return;
-    }
-    
-    feedbackData[selectedFile].forEach((feedback, index) => {
-        const feedbackItem = document.createElement('div');
-        feedbackItem.className = 'p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors';
-        feedbackItem.textContent = feedback;
-        list.appendChild(feedbackItem);
-    });
-}
 
 // Save feedback for selected file
-async function saveFeedback() {
-    const feedback = document.getElementById('feedbackInput').value.trim();
-    
+async function saveFeedback(feedback) {
+    // if (!feedback) {
+    //     feedback = document.getElementById('feedbackInput').value.trim();
+    // }
+
     if (!feedback) {
         showStatus('Please enter feedback', 'error');
         return;
@@ -90,10 +74,12 @@ async function saveFeedback() {
             },
             body: JSON.stringify({ file: selectedFile, feedback })
         });
+
+        console.log({file: selectedFile, feedback});
         
         if (response.ok) {
             showStatus(`Feedback saved for ${selectedFile}`, 'success');
-            document.getElementById('feedbackInput').value = '';
+            // document.getElementById('feedbackInput').value = '';
             
             // Reload feedback for the selected file
             await loadFeedback(selectedFile);
@@ -213,7 +199,7 @@ function handleKeyDown(e) {
         case 'Enter':
             e.preventDefault();
             if (selectedFile) {
-                document.getElementById('feedbackInput').focus();
+                // document.getElementById('feedbackInput').focus();
             }
             break;
         case 'Escape':
@@ -314,14 +300,14 @@ function renderUsedExamples() {
 
     if(Object.keys(usedExamples).length === 0) {
         console.log("No used examples");
-        usedExamplesContainer.innerHTML = '';
+        usedExamplesContainer.classList.add('hidden');
         return;
     } else {
         usedExamplesContainer.innerHTML = `
         <h3 class="text-lg font-medium text-gray-900 font-tight">Used Examples</h3>
         <div id="usedExamplesList"></div>
         `;
-        usedExamplesContainer.className = "mt-4 rounded-lg border border-gray-100 bg-white p-4";
+        usedExamplesContainer.classList.remove('hidden');
     }
 
     const usedExamplesList = document.getElementById('usedExamplesList');
@@ -350,8 +336,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Set up window resize event listener
     window.addEventListener('resize', handleResize);
     
-    // Set up feedback button click event listener
-    document.getElementById('saveFeedbackBtn').addEventListener('click', saveFeedback);
     
     await fetchFiles();
     console.log(files);
@@ -365,7 +349,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     renderGrid();
-    renderFeedbackList();
     setTimeout(() => {
         isFirstRender = false;
     }, 2000);

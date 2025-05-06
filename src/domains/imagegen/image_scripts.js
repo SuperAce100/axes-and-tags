@@ -39,14 +39,12 @@ function render(id, content, fileName) {
       }
       
       tagElement.addEventListener('click', async () => {
-        const feedbackInput = document.getElementById('feedbackInput');
-        if (feedbackInput) {
-            if (fileName) {
-              await selectFile(fileName);
-              feedbackInput.value = `${tag}`;
-              saveFeedback();
-            }
-        }
+        
+      if (fileName) {
+        await selectFile(fileName);
+        // feedbackInput.value = `${tag}`;
+        saveFeedback(tag);
+      }
       });
       tagsContainer.appendChild(tagElement);
     });
