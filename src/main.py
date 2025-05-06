@@ -4,6 +4,7 @@ import argparse
 from rich.console import Console
 from domains.imagegen.imagegen import ImageGen
 from domains.svg.svg import SVGGen
+from domains.threejs.threejs import ThreeJSGen
 from models.models import cerebras_model
 
 # Initialize rich console
@@ -13,7 +14,7 @@ console = Console()
 def parse_args():
     parser = argparse.ArgumentParser(description='Generate dorm room layouts using DSL')
     parser.add_argument('--data-dir', type=str, default='../.data', help='Directory containing data')
-    parser.add_argument('--domain', type=str, default='svg', help='Domain to run')
+    parser.add_argument('--domain', type=str, default='threejs', help='Domain to run')
     parser.add_argument('--n', type=int, default=6, help='Number of layouts to generate')
     parser.add_argument('--n-examples', type=int, default=10, help='Number of examples to use')
     parser.add_argument('--model', type=str, default='openai/gpt-4.1', help='Model to use')
@@ -44,6 +45,10 @@ def main():
         n = args.n
         n_examples = 5
         domain = SVGGen(args.concept, args.data_dir, args.model, console)
+    elif args.domain == "threejs":
+        n = args.n
+        n_examples = 5
+        domain = ThreeJSGen(args.concept, args.data_dir, args.model, console)
     else:
         raise ValueError(f"Domain {args.domain} not supported")
 

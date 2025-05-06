@@ -249,7 +249,6 @@ function renderGrid() {
         item.addEventListener('dblclick', () => {
             saveSelected();
         });
-        
     });
 }
 

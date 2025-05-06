@@ -1,9 +1,9 @@
 threejs_system_prompt = """
 You will need to generate Three.js code to create {n} 3D models of a concept. The code should:
 
-1. For each generation, define a function named `createObject_generation_number` that takes a container parameter:
+1. For each generation, define a function named `createObject` that takes a container parameter:
    ```javascript
-   function createObject_GENERATION_NUMBER(container) {
+   function createObject(container) 
      // Create a group to hold all objects
      const group = new THREE.Group();
      
@@ -12,7 +12,7 @@ You will need to generate Three.js code to create {n} 3D models of a concept. Th
      
      // Return the group
      return group;
-   }
+   
    ```
 2. Inside the function:
    - Create a group to hold all objects

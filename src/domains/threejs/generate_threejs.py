@@ -19,9 +19,12 @@ def collect_examples(concept: str, examples_dir: str, n: int = 10):
         n = len(os.listdir(examples_dir))
     
     model = SentenceTransformer('all-MiniLM-L6-v2')
-    all_files = [f for f in os.listdir(examples_dir) if f.endswith(".svg")]
+    all_files = [f for f in os.listdir(examples_dir) if f.endswith(".json")]
     file_names = [os.path.splitext(f)[0] for f in all_files]
     
+    if len(all_files) == 0:
+        return examples, []
+
     concept_embedding = model.encode([concept])[0]
     filename_embeddings = model.encode(file_names)
     
