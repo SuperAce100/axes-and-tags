@@ -179,13 +179,13 @@ if(typeof renderTags === 'undefined') {
             fileData.content.tags.forEach(tag => {
                 const tagElement = document.createElement('span');
                 tagElement.textContent = tag;
-                tagElement.className = 'tag bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] text-white hover:bg-white/30 hover:scale-105 cursor-pointer font-sans active:scale-95 transition-all';
+                tagElement.className = 'tag bg-gray-100 px-1.5 py-0.5 rounded-full text-[10px] text-gray-600 hover:bg-gray-200 hover:scale-105 cursor-pointer font-sans active:scale-95 transition-all';
 
                 if (feedbackData[fileData.name]) {
                     if (feedbackData[fileData.name].includes(tag)) {
-                    tagElement.className = tagElement.className.replace('bg-white/20', 'bg-green-300/30')
-                        .replace('text-white', 'text-green-500')
-                        .replace('hover:bg-white/30', 'hover:bg-green-300/50');
+                    tagElement.className = tagElement.className.replace('bg-gray-100', 'bg-green-100')
+                        .replace('text-gray-600', 'text-green-600')
+                        .replace('hover:bg-gray-200', 'hover:bg-green-200');
                     }
                 }
                 
@@ -200,7 +200,7 @@ if(typeof renderTags === 'undefined') {
         }
 
         const tagOverlay = document.createElement('div');
-        tagOverlay.className = 'bg-gradient-to-t from-black/85 via-black/60 to-transparent p-3 absolute bottom-0 left-0 w-full z-12';
+        tagOverlay.className = 'bg-white/80 backdrop-blur-sm p-3 pt-0 w-full z-12';
         tagOverlay.id = "tag-overlay";
         // Append elements
         tagOverlay.appendChild(tagsContainer);
