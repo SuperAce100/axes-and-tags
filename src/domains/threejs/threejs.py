@@ -25,8 +25,8 @@ class ThreeJSGen(Domain):
         )
         return viewer.run()
 
-    def generate_multiple(self, n: int, examples: str) -> List[str]:
-        return generate_threejs_multiple(self.concept, examples, n, model=self.model)
+    def generate_multiple(self, n: int, examples: str, old_tags: List[str]) -> List[str]:
+        return generate_threejs_multiple(self.concept, examples, old_tags, n, model=self.model)
 
     def collect_examples(self, n: int) -> Tuple[str, List[str]]:
         return collect_examples(self.concept, self.examples_dir, n)
@@ -34,8 +34,8 @@ class ThreeJSGen(Domain):
     def feedback_examples(self, feedback: Dict[str, List[str]], results_dir: str) -> str:
         return load_models_from_feedback(self.concept, feedback, results_dir)
     
-    def extract_tags(self, prompt: str) -> List[str]:
-        return extract_tags(prompt, self.model)
+    def extract_tags(self, prompt: str, old_tags: List[str]) -> List[str]:
+        return extract_tags(prompt, old_tags, self.model)
 
     def generate_insights(self, feedback: str) -> str:
         return generate_insights(feedback, self.model)

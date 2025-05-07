@@ -19,7 +19,7 @@ Here are some examples:
 """
 
 image_gen_expand_system_prompt_extend = """
-You must generate {n} new prompts for the user, ALL of which must follow EVERY piece of feedback provided
+You must generate {n} new prompts for the user, ALL of which must follow EVERY piece of feedback provided. Make them all meaningfully different by varying styles, objects, and adjectives while keeping specified deta
 
 If you've recieved feedback on any previous generations, make sure to include that feedback in each new prompt - EVERY NEW PROMPT MUST INCOPORATE ALL THE FEEDBACK.
 
@@ -82,4 +82,12 @@ Enclose each tag in <tag></tag> XML tags, like this, and return the list of tags
 <tag>TAG HERE</tag>
 <tag>TAG HERE</tag>
 </tags>
+
+Here are some tags that have already been used:
+
+<old_tags>
+{old_tags}
+</old_tags>
+
+Every tag you generate MUST NOT be in the old_tags list.
 """

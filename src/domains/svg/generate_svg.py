@@ -44,20 +44,20 @@ def collect_examples(concept: str, examples_dir: str, n: int = 10):
 
     return examples, example_names
 
-def extract_tags(prompt: str, model: str = text_model) -> list[str]:
-    tags_xml = llm_call(svg_tags_format.format(svg=prompt), model=model)
+def extract_tags(prompt: str, old_tags: list[str], model: str = text_model) -> list[str]:
+    tags_xml = llm_call(svg_tags_format.format(svg=prompt, old_tags=old_tags), model=model)
     tags = [tag.strip() for tag in tags_xml.split("<tag>")[1:] if tag.strip()]
     tags = [tag.split("</tag>")[0].strip() for tag in tags]
     return tags
 
-def generate_svg_multiple(concept: str, examples: str, n: int = 10, model: str = text_model):
+def generate_svg_multiple(concept: str, examples: str, old_tags: list[str], n: int = 10, model: str = text_model):
     svg_results = llm_call(svg_user_prompt.format(concept=concept), system_prompt=svg_system_prompt.format(examples=examples, n=n), model=model)
 
     svg_results = [p.strip() for p in svg_results.split("<result>")[1:] if p.strip()]
     svg_results = [p.split("</result>")[0].strip() for p in svg_results]
 
     def process_svg(svg):
-        tags = extract_tags(svg)
+        tags = extract_tags(svg, old_tags)
         return svg, tags
 
     with concurrent.futures.ThreadPoolExecutor() as executor:

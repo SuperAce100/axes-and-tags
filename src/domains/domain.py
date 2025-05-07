@@ -25,7 +25,7 @@ class Domain(ABC):
         pass
 
     @abstractmethod
-    def generate_multiple(self, n: int, examples: str) -> List[str]:
+    def generate_multiple(self, n: int, examples: str, old_tags: List[str]) -> List[str]:
         """Generate multiple examples. Returns a list of generated examples."""
         pass
 
@@ -45,7 +45,7 @@ class Domain(ABC):
         pass
 
     @abstractmethod
-    def extract_tags(self, prompt: str, model: str = text_model) -> List[str]:
+    def extract_tags(self, prompt: str, old_tags: List[str], model: str = text_model) -> List[str]:
         """Extract tags from a prompt. Returns a list of tags."""
         pass
 
@@ -67,7 +67,7 @@ class Domain(ABC):
 
         self.console.print(f"[green]✓[/green] [grey11] Collected {len(example_names)} examples for {self.name}: {', '.join(example_names)}[/grey11]")
 
-        objects = self.generate_multiple(n, examples)
+        objects = self.generate_multiple(n, examples, [])
 
         self.console.print(objects, style="grey11")
 
@@ -76,6 +76,10 @@ class Domain(ABC):
         self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.display_name}s to {self.output_dir}[/grey11]")
 
         feedback_data = self.run_viewer(f"Generated {len(objects)} {self.display_name}", 8002, save_path)
+
+        tags = []
+        for feedback_list in feedback_data.values():
+            tags.extend(feedback_list)
 
         for i in range(max_iterations):
             if not feedback_data:
@@ -90,7 +94,7 @@ class Domain(ABC):
 
             self.console.print(f"[grey11]Generating new layouts based on feedback...[/grey11]")
 
-            objects = self.generate_multiple(n, feedback_examples)
+            objects = self.generate_multiple(n, feedback_examples, tags)
 
             save_path = self.save_result(objects, os.path.join(save_path, "feedback"))
             self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.display_name}s after reflection {i} to {self.output_dir}[/grey11]")
@@ -102,5 +106,7 @@ class Domain(ABC):
 
             feedback_data = {f"../{k}": v for k, v in feedback_data.items()}
             feedback_data = {**feedback_data, **new_feedback_data}
+            for v in new_feedback_data.values():
+                tags.extend(v)
         
         self.console.print(Rule(f"[bold green]Done![/bold green]", style="green", align="left"))

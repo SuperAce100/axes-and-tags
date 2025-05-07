@@ -79,4 +79,12 @@ Enclose each tag in <tag></tag> XML tags, like this, and return the list of tags
 <tag>TAG HERE</tag>
 <tag>TAG HERE</tag>
 </tags>
+
+Here are some tags that have already been used:
+
+<old_tags>
+{old_tags}
+</old_tags>
+
+Every tag you generate MUST NOT be in the old_tags list.
 """

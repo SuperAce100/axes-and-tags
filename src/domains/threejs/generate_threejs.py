@@ -47,13 +47,13 @@ def collect_examples(concept: str, examples_dir: str, n: int = 10):
 
     return examples, example_names
 
-def extract_tags(prompt: str, model: str = text_model) -> list[str]:
-    tags_xml = llm_call(threejs_tags_format.format(model=prompt), model=model)
+def extract_tags(prompt: str, old_tags: list[str], model: str = text_model) -> list[str]:
+    tags_xml = llm_call(threejs_tags_format.format(model=prompt, old_tags=old_tags), model=model)
     tags = [tag.strip() for tag in tags_xml.split("<tag>")[1:] if tag.strip()]
     tags = [tag.split("</tag>")[0].strip() for tag in tags]
     return tags
 
-def generate_threejs_multiple(concept: str, examples: str, n: int = 10, model: str = text_model):
+def generate_threejs_multiple(concept: str, examples: str, old_tags: list[str], n: int = 10, model: str = text_model):
     threejs_results = llm_call(threejs_user_prompt.format(concept=concept), system_prompt=threejs_system_prompt.format(examples=examples, n=n), model=model)
 
     threejs_results = [p.strip() for p in threejs_results.split("<result>")[1:] if p.strip()]
@@ -61,7 +61,7 @@ def generate_threejs_multiple(concept: str, examples: str, n: int = 10, model: s
     threejs_results = [p.replace("```js", "").replace("```javascript", "").replace("```", "") for p in threejs_results]
 
     def process_model(model):
-        tags = extract_tags(model)
+        tags = extract_tags(model, old_tags)
         return model, tags
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
