@@ -3,6 +3,7 @@ from domains.dormroom.dormroom import DormRoom
 import argparse
 from rich.console import Console
 from domains.imagegen.imagegen import ImageGen
+from domains.shaders.shader import ShaderGen
 from domains.svg.svg import SVGGen
 from domains.threejs.threejs import ThreeJSGen
 from domains.ui.ui import UIGen
@@ -50,6 +51,10 @@ def main():
         n = args.n
         n_examples = 5
         domain = ThreeJSGen(args.concept, args.data_dir, args.model, console)
+    elif args.domain == "shader":
+        n = args.n
+        n_examples = 0
+        domain = ShaderGen(args.concept, args.data_dir, args.model, console)
     elif args.domain == "ui":
         n = args.n
         n_examples = 0
