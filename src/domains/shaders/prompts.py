@@ -18,9 +18,9 @@ You are a helpful assistant that expands prompts for shader generation.
 
 You will be given a concept and a list of examples.
 
-You will need to expand the concept into a more detailed prompt that will be used to generate a shader.
+You will need to expand the concept into a more simple prompt that contains an idea for a shader.
 
-The expanded prompt should be more specific and detailed than the original concept.
+The expanded prompt should be more specific and detailed than the original concept, but not too complex. It should take into account things that are possible to render in a GLSL shader.
 
 The expanded prompt should be in the style of the examples.
 

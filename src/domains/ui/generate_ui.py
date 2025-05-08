@@ -95,8 +95,8 @@ def load_ui_from_feedback(concept: str, feedback_data: dict[str, list], results_
     examples_str = ""
     for filename, feedbacks in feedback_data.items():
         with open(os.path.join(results_dir, filename), "r") as f:
-            prompt = json.load(f)["prompt"]
-            examples_str += ui_feedback_format.format(concept=concept, example=prompt, feedback=feedbacks)
+            data = json.load(f)
+            examples_str += ui_feedback_format.format(concept=concept, example=data["prompt"] + ": \n" + data["data"], feedback=feedbacks)
     
     insights = generate_insights(examples_str)
 

@@ -65,6 +65,7 @@ function render(id, content, fileName) {
 
   if (!vertexShader || !fragmentShader) {
     container.innerHTML = 'Failed to compile shaders';
+    container.parentElement.remove();
     return;
   }
 
