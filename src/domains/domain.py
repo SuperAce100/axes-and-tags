@@ -1,6 +1,7 @@
 import os
 from typing import Callable, List, Dict, Tuple
 from abc import ABC, abstractmethod
+from lib.utils import pretty_name
 from models.models import text_model
 from rich.console import Console
 from rich.panel import Panel
@@ -75,7 +76,7 @@ class Domain(ABC):
 
         self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.display_name}s to {self.output_dir}[/grey11]")
 
-        feedback_data = self.run_viewer(f"Generated {len(objects)} {self.display_name}", 8002, save_path)
+        feedback_data = self.run_viewer(pretty_name(f"Generated {len(objects[0])} {self.display_name}"), 8002, save_path)
 
         tags = []
         for feedback_list in feedback_data.values():
@@ -99,7 +100,7 @@ class Domain(ABC):
             save_path = self.save_result(objects, os.path.join(save_path, "feedback"))
             self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.display_name}s after reflection {i} to {self.output_dir}[/grey11]")
 
-            new_feedback_data = self.run_viewer(f"{self.display_name}s made with {len(feedback_data)} pieces of feedback(iteration {i})", 8003 + i, save_path, used_examples=feedback_data)
+            new_feedback_data = self.run_viewer(pretty_name(f"{self.display_name}s made with {len(feedback_data)} labels (iteration {i})"), 8003 + i, save_path, used_examples=feedback_data)
 
             if not new_feedback_data:
                 break

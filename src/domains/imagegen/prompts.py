@@ -19,7 +19,7 @@ Here are some examples:
 """
 
 image_gen_expand_system_prompt_extend = """
-You must generate {n} new prompts for the user, ALL of which must follow EVERY piece of feedback provided. Make them all meaningfully different by varying styles, objects, and adjectives while keeping specified deta
+You must generate {n} new prompts for the user, ALL of which must follow EVERY piece of feedback provided. Make them all meaningfully different by varying styles, objects, camera angles, and adjectives while keeping specified details.
 
 If you've recieved feedback on any previous generations, make sure to include that feedback in each new prompt - EVERY NEW PROMPT MUST INCOPORATE ALL THE FEEDBACK.
 
@@ -62,6 +62,8 @@ In a future prompt generation, which specific features need to be retained and w
 Think about it as a list of features and adjectives that must be consistent in the future generations, based on the preferences expressed by the user. If they say they like the cats in an image that includes a black cat, it means that all future generations must include a black cat. 
 
 DO not adlib anything the user did not specifically mention in their feedback. Extract only what the user explicitly said they liked.
+
+After defining the list of features that must be consistent, present a list of 3-5 features that can be varied.
 """
 
 image_gen_tags_format = """

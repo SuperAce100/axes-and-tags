@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from rich.console import Console
 import argparse
@@ -45,7 +46,7 @@ class ImageViewer(Viewer):
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Image Viewer Example')
-    parser.add_argument('--data-dir', type=str, default='../.data/imagegen/results/desk setup_1746588662_8819/feedback', 
+    parser.add_argument('--data-dir', type=str, default='../.data/imagegen/results/dog_1746519682_9003/', 
                         help='Directory containing image files')
     parser.add_argument('--output-dir', type=str, default='../.data/imagegen/examples', 
                         help='Directory to save selected files')
@@ -74,6 +75,29 @@ def main():
     feedback_data = viewer.run()
     
     console.print(feedback_data)
+    i = 0
+
+    while "feedback" in os.listdir(data_dir):
+        i += 1
+        data_dir = os.path.join(data_dir, "feedback")
+        viewer = ImageViewer(
+            image_folder=str(data_dir),
+            output_path=str(output_dir),
+            concept="examples",
+            title="Image Viewer",
+            port=args.port + i,
+            console=console,
+            used_examples=feedback_data
+        )
+        new_feedback_data = viewer.run()
+        # if not new_feedback_data:
+        #     break
+
+        console.print(new_feedback_data)
+
+        feedback_data = {f"../{k}": v for k, v in feedback_data.items()}
+        feedback_data = {**feedback_data, **new_feedback_data}
+
 
 if __name__ == "__main__":
     main() 
