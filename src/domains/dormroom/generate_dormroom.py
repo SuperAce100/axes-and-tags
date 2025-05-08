@@ -1,12 +1,12 @@
 from rich.progress import track
-from models.prompts import dsl_system_prompt, dsl_example_format, examples_format, feedback_example_format, example_room, dsl_user_prompt
+from domains.dormroom.prompts import dsl_system_prompt, dsl_example_format, feedback_example_format, example_room, dsl_user_prompt
 from models.models import llm_call, text_model
 from lib.utils import parse_dsl
 import os
 import concurrent.futures
 
 
-def collect_examples(concept: str, examples_dir: str, n: int = 10):
+def collect_examples(examples_dir: str, n: int = 10):
     examples = ""
     if n == 0:
         return examples, []
@@ -34,7 +34,7 @@ def collect_examples(concept: str, examples_dir: str, n: int = 10):
 
         example_concept = os.path.splitext(yaml_file)[0]
 
-        formatted_example = examples_format.format(
+        formatted_example = dsl_example_format.format(
             concept=example_concept, example=yaml_content
         )
 
@@ -58,7 +58,7 @@ def generate_dsl_multiple(examples: str, n: int = 10, model: str = text_model, p
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(generate_one) for _ in range(n)]
-        dsl_objects = [future.result() for future in track(concurrent.futures.as_completed(futures), total=n, description=f"[blue]Generating [bold cyan]{n}[/bold cyan] {prompt} Layouts[/blue]", style="grey15")]
+        dsl_objects = [future.result() for future in track(concurrent.futures.as_completed(futures), total=n, description=f"[grey11]Generating [bold cyan]{n}[/bold cyan] dorm rooms[/grey11]", style="grey15")]
 
     return dsl_objects
 

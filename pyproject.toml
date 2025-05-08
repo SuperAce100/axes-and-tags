@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "cairosvg>=2.7.1",
+    "fal-client>=0.5.9",
     "fastapi>=0.115.12",
     "openai>=1.72.0",
     "pillow>=11.1.0",
