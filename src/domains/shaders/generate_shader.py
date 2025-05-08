@@ -1,19 +1,16 @@
-import base64
 import os
 import json
 import numpy as np
 from pydantic import BaseModel
-import requests
 from sentence_transformers import SentenceTransformer
 from models.models import llm_call, text_model as language_model
-import fal_client
 import concurrent.futures
 from rich.progress import track
-from domains.ui.prompts import *
+from domains.shaders.prompts import *
 
 
 def expand_prompt(concept: str, model: str = language_model, examples: str = "") -> str:
-    return llm_call(ui_expand_user_prompt.format(concept=concept), system_prompt=ui_expand_system_prompt.format(examples=examples), temperature=2)
+    return llm_call(shader_expand_user_prompt.format(concept=concept), system_prompt=shader_expand_system_prompt.format(examples=examples), temperature=2)
 
 def collect_examples(concept: str,examples_dir: str = "examples", n: int = 5) -> list[str]:
     examples = ""
@@ -44,7 +41,7 @@ def collect_examples(concept: str,examples_dir: str = "examples", n: int = 5) ->
 
         example_concept = os.path.splitext(chosen_file)[0].split("_")[0]
 
-        formatted_example = ui_examples_format.format(
+        formatted_example = shader_examples_format.format(
             concept=example_concept, example=prompt
         )
 
@@ -53,17 +50,17 @@ def collect_examples(concept: str,examples_dir: str = "examples", n: int = 5) ->
     return examples, example_names
 
 
-def generate_ui(prompt: str, examples: str, text_model: str = language_model):
-    result = llm_call(prompt, system_prompt=ui_system_prompt.format(examples=examples), model=text_model)
-    result = result.split("<ui>")[1].split("</ui>")[0].strip()
+def generate_shader(prompt: str, examples: str, text_model: str = language_model):
+    result = llm_call(prompt, system_prompt=shader_system_prompt.format(examples=examples), model=text_model)
+    result = result.split("<shader>")[1].split("</shader>")[0].strip()
     return prompt,result
 
 
-def generate_ui_multiple(concept: str, examples: str, n: int, old_tags: list[str], text_model: str = language_model):
-    ui_results = []
+def generate_shader_multiple(concept: str, examples: str, n: int, old_tags: list[str], text_model: str = language_model):
+    shader_results = []
     prompts = []
 
-    expanded_prompts = llm_call(ui_expand_user_prompt.format(concept=concept), system_prompt=ui_expand_system_prompt.format(examples=examples) + ui_expand_system_prompt_extend.format(n=n))
+    expanded_prompts = llm_call(shader_expand_user_prompt.format(concept=concept), system_prompt=shader_expand_system_prompt.format(examples=examples) + shader_expand_system_prompt_extend.format(n=n))
 
 
     expanded_prompts = [p.strip() for p in expanded_prompts.split("<prompt>")[1:] if p.strip()]
@@ -71,55 +68,55 @@ def generate_ui_multiple(concept: str, examples: str, n: int, old_tags: list[str
 
     def process_prompt(prompt):
         tags = extract_tags(prompt, old_tags)
-        ui_result = generate_ui(prompt, examples, text_model)
-        return ui_result, tags
+        shader_result = generate_shader(prompt, examples, text_model)
+        return shader_result, tags
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(process_prompt, prompt) for prompt in expanded_prompts]
-        results = [future.result() for future in track(concurrent.futures.as_completed(futures), total=len(expanded_prompts), description=f"[grey11]Generating [bold cyan]{len(expanded_prompts)}[/bold cyan] UIs[/grey11]", style="grey15")]
-        ui_results, tags = zip(*results)
-        prompts, uis = zip(*ui_results)
+        results = [future.result() for future in track(concurrent.futures.as_completed(futures), total=len(expanded_prompts), description=f"[grey11]Generating [bold cyan]{len(expanded_prompts)}[/bold cyan] Shaders[/grey11]", style="grey15")]
+        shader_results, tags = zip(*results)
+        prompts, shaders = zip(*shader_results)
 
-    return prompts, uis, tags
+    return prompts, shaders, tags
 
 def extract_tags(prompt: str, old_tags: list[str], model: str = language_model) -> list[str]:
-    tags_xml = llm_call(ui_tags_format.format(prompt=prompt, old_tags=old_tags), model=model)
+    tags_xml = llm_call(shader_tags_format.format(prompt=prompt, old_tags=old_tags), model=model)
     tags = [tag.strip() for tag in tags_xml.split("<tag>")[1:] if tag.strip()]
     tags = [tag.split("</tag>")[0].strip() for tag in tags]
     return tags
 
 def generate_insights(feedback: str, model: str = language_model) -> str:
-    return llm_call(ui_insights_format.format(feedback=feedback), model=model)
+    return llm_call(shader_insights_format.format(feedback=feedback), model=model)
 
-def load_ui_from_feedback(concept: str, feedback_data: dict[str, list], results_dir: str):
+def load_shader_from_feedback(concept: str, feedback_data: dict[str, list], results_dir: str):
     examples_str = ""
     for filename, feedbacks in feedback_data.items():
         with open(os.path.join(results_dir, filename), "r") as f:
             data = json.load(f)
-            examples_str += ui_feedback_format.format(concept=concept, example=data["prompt"] + ": \n" + data["data"], feedback=feedbacks)
+            examples_str += shader_feedback_format.format(concept=concept, example=data["prompt"] + "\n" + data["data"], feedback=feedbacks)
     
     insights = generate_insights(examples_str)
 
     return examples_str + "\n Here is what you need to include in every future generation: \n" + insights
 
-def save_ui(ui_results: list[str], prompts: list[str], tags: list[str], path: str):
+def save_shader(shader_results: list[str], prompts: list[str], tags: list[str], path: str):
     os.makedirs(path, exist_ok=True)
     
     def save_one(args):
-        i, (ui, prompt, tag) = args
+        i, (shader, prompt, tag) = args
         with open(os.path.join(path, f"{i}.json"), "w") as f:
-            json.dump({"prompt": prompt, "data": ui, "tags": tag}, f)
+            json.dump({"prompt": prompt, "data": shader, "tags": tag}, f)
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        list(executor.map(save_one, enumerate(zip(ui_results, prompts, tags))))
+        list(executor.map(save_one, enumerate(zip(shader_results, prompts, tags))))
 
 
 def main():
     concept = "elephant"
-    examples, example_names = collect_examples(concept, "../.data/ui/examples", 5)
-    prompts, ui_results, tags = generate_ui_multiple(concept, examples, 5)
+    examples, example_names = collect_examples(concept, "../.data/shaders/examples", 5)
+    prompts, shader_results, tags = generate_shader_multiple(concept, examples, 5)
 
-    save_ui(ui_results, prompts, tags, "../.data/ui/results")
+    save_shader(shader_results, prompts, tags, "../.data/shaders/results")
 
 if __name__ == "__main__":
     main()
