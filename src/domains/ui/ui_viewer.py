@@ -3,23 +3,23 @@ from rich.console import Console
 import argparse
 from viewer.viewer import Viewer
 from typing import List
-class ImageViewer(Viewer):
+class UIViewer(Viewer):
     """
     A specialized viewer for SVG files.
     """
     def __init__(self, 
-                 image_folder: str, 
+                 ui_folder: str, 
                  output_path: str = None, 
-                 title: str = "Image Viewer", 
+                 title: str = "UI Viewer", 
                  port: int = 8002, 
                  console: Console = None,
-                 concept: str = "image",
+                 concept: str = "ui",
                  used_examples: List[str] = None):
         """
-        Initialize the ImageViewer.
+        Initialize the UIViewer.
         
         Args:
-            image_folder (str): Path to the folder containing image files
+            ui_folder (str): Path to the folder containing ui files
             output_path (str, optional): Path to save the selected object
             title (str, optional): Title for the viewer
             port (int, optional): Port to run the server on
@@ -27,13 +27,13 @@ class ImageViewer(Viewer):
         """
         
         super().__init__(
-            data_folder=str(image_folder),
+            data_folder=str(ui_folder),
             output_path=output_path,
             concept=concept,
             title=title,
             port=port,
             console=console,
-            custom_scripts_path="domains/imagegen/image_scripts.js",
+            custom_scripts_path="domains/ui/ui_scripts.js",
             used_examples=used_examples
         )
     
@@ -44,10 +44,10 @@ class ImageViewer(Viewer):
 
 def main():
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description='Image Viewer Example')
-    parser.add_argument('--data-dir', type=str, default='../.data/imagegen/results/desk setup_1746588662_8819/feedback', 
-                        help='Directory containing image files')
-    parser.add_argument('--output-dir', type=str, default='../.data/imagegen/examples', 
+    parser = argparse.ArgumentParser(description='UI Viewer Example')
+    parser.add_argument('--data-dir', type=str, default='../.data/ui/results/elephant', 
+                        help='Directory containing ui files')
+    parser.add_argument('--output-dir', type=str, default='../.data/ui/examples', 
                         help='Directory to save selected files')
     parser.add_argument('--port', type=int, default=8002, 
                         help='Port to run the server on')
@@ -62,11 +62,11 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
     
     
-    viewer = ImageViewer(
-        image_folder=str(data_dir),
+    viewer = UIViewer(
+        ui_folder=str(data_dir),
         output_path=str(output_dir),
         concept="examples",
-        title="Image Viewer",
+        title="UI Viewer",
         port=args.port,
         console=console
     )

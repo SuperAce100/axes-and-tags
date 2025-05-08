@@ -5,6 +5,7 @@ from rich.console import Console
 from domains.imagegen.imagegen import ImageGen
 from domains.svg.svg import SVGGen
 from domains.threejs.threejs import ThreeJSGen
+from domains.ui.ui import UIGen
 from models.models import cerebras_model
 
 # Initialize rich console
@@ -49,6 +50,10 @@ def main():
         n = args.n
         n_examples = 5
         domain = ThreeJSGen(args.concept, args.data_dir, args.model, console)
+    elif args.domain == "ui":
+        n = args.n
+        n_examples = 0
+        domain = UIGen(args.concept, args.data_dir, args.model, console)
     else:
         raise ValueError(f"Domain {args.domain} not supported")
 
