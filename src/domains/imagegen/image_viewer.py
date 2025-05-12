@@ -1,3 +1,4 @@
+from ast import Tuple
 import os
 from pathlib import Path
 from rich.console import Console
@@ -15,7 +16,8 @@ class ImageViewer(Viewer):
                  port: int = 8002, 
                  console: Console = None,
                  concept: str = "image",
-                 used_examples: List[str] = None):
+                 used_examples: list[str] = None,
+                 design_space: list[tuple[str, str]] = None):
         """
         Initialize the ImageViewer.
         
@@ -35,7 +37,8 @@ class ImageViewer(Viewer):
             port=port,
             console=console,
             custom_scripts_path="domains/imagegen/image_scripts.js",
-            used_examples=used_examples
+            used_examples=used_examples,
+            design_space=design_space
         )
     
     

@@ -13,7 +13,7 @@ class ImageGen(Domain):
         super().__init__(name="imagegen", display_name=concept, data_dir=data_dir, model=model, console=console)
         self.concept = concept
 
-    def run_viewer(self, title: str, port: int, path: str, used_examples: List[str] = None) -> None:
+    def run_viewer(self, title: str, port: int, path: str, used_examples: List[str] = None, design_space: List[Tuple[str, str]] = None) -> None:
         viewer = ImageViewer(
             concept=self.concept,
             image_folder=path, 
@@ -21,7 +21,8 @@ class ImageGen(Domain):
             title=title, 
             port=port, 
             console=self.console,
-            used_examples=used_examples
+            used_examples=used_examples,
+            design_space=design_space
         )
         return viewer.run()
 

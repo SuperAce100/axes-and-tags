@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <div class="container mx-auto w-10/12">
+    <div class="container mx-auto w-10/12 space-y-8">
         <h1 class="text-4xl font-bold text-gray-900 mb-8 mt-6 font-tight">{{ title }}</h1>
 
         <div id="status" class="status" style="display: none;"></div>
@@ -22,11 +22,20 @@
                 <!-- Objects will be loaded here -->
             </div>
 
-            <div class="col-span-1" id="usedExamples">
-                <h3 class="text-2xl font-medium text-gray-900 font-tight">Used Examples</h3>
-                <div id="usedExamplesList" class="mt-4 grid gap-4 grid-cols-2">
-                    <!-- Used examples will be loaded here -->
+            <div class="col-span-1 space-y-4">
+                <div id="designSpace">
+                    <h3 class="text-2xl font-medium text-gray-900 font-tight">Design Space</h3>
+                    <div id="designSpaceList" class="mt-4">
+                        <!-- Design space will be loaded here -->
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <div id="usedExamples">
+            <h3 class="text-2xl font-medium text-gray-900 font-tight">Used Examples</h3>
+            <div id="usedExamplesList" class="mt-4 grid gap-4 grid-cols-8 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
+                <!-- Used examples will be loaded here -->
             </div>
         </div>
 

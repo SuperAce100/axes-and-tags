@@ -6,6 +6,7 @@ let feedbackData = {};
 let isClosing = false;
 let usedExamples = {};
 let isFirstRender = true;
+let designSpace = [];
 // Select a file
 async function selectFile(file) {
     try {
@@ -299,6 +300,37 @@ function renderUsedExamples() {
     }
 }
 
+async function fetchDesignSpace() {
+    const response = await fetch('/api/design-space');
+    const data = await response.json();
+    designSpace = data.design_space;
+    console.log("designSpace", data);
+}
+
+async function renderDesignSpace() {
+    const designSpaceContainer = document.getElementById('designSpaceList');
+    designSpaceContainer.innerHTML = '';
+    designSpaceContainer.className = 'p-0 space-y-2 mt-4';
+
+    console.log("designSpaceList", designSpace);
+    
+    designSpace.forEach(([axis, value], index) => {
+        console.log("axis", axis, "value", value);
+        const item = document.createElement('div');
+        item.id = "design-space-" + axis;
+        item.className = 'transition-all relative overflow-hidden hover:-translate-y-0.5 bg-gray-200 p-2 rounded-lg shadow-sm';
+        if (isFirstRender) {
+            item.className = item.className + ' opacity-0 translate-y-4 scale-80 duration-500 filter blur-md';
+            setTimeout(() => {
+                item.classList.remove('opacity-0', 'translate-y-4', 'scale-80', 'filter', 'blur-md');
+                item.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+            }, index * 100);
+        }
+        item.innerHTML = `<p class="tracking-tight text-xs text-gray-500">${axis}:</p><p class="text-gray-900 font-semibold">${value}</p>`;
+        designSpaceContainer.appendChild(item);
+    });
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     isFirstRender = true;
@@ -314,9 +346,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     await getFeedbackData();
     console.log(feedbackData);
     await fetchUsedExamples();
-
-    renderUsedExamples();
+    await fetchDesignSpace();
     
+    renderUsedExamples();
+    renderDesignSpace();
     renderGrid();
 
     setTimeout(() => {
