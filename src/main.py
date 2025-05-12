@@ -3,6 +3,7 @@ from domains.dormroom.dormroom import DormRoom
 import argparse
 from rich.console import Console
 from domains.imagegen.imagegen import ImageGen
+from domains.p5js.p5js import P5JSSketchGen
 from domains.shaders.shader import ShaderGen
 from domains.svg.svg import SVGGen
 from domains.threejs.threejs import ThreeJSGen
@@ -59,6 +60,10 @@ def main():
         n = args.n
         n_examples = 0
         domain = UIGen(args.concept, args.data_dir, args.model, console)
+    elif args.domain == "p5js":
+        n = args.n
+        n_examples = 0
+        domain = P5JSSketchGen(args.concept, args.data_dir, args.model, console)
     else:
         raise ValueError(f"Domain {args.domain} not supported")
 
