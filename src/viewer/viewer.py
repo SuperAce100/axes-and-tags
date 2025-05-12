@@ -6,7 +6,7 @@ from pathlib import Path
 import threading
 import time
 import shutil
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
@@ -28,7 +28,8 @@ class Viewer:
                  console: Optional[Console] = None,
                  file_extension: str = ".json",
                  custom_scripts_path: str = None,
-                 used_examples: Optional[Dict[str, List[str]]] = None):
+                 used_examples: Optional[Dict[str, List[str]]] = None,
+                 design_space: List[Tuple[str, str]] = None):
         """
         Initialize the generic viewer.
         
@@ -55,6 +56,7 @@ class Viewer:
         self.file_extension = file_extension
         self.custom_scripts_path = custom_scripts_path
         self.used_examples = used_examples
+        self.design_space = design_space
         
         # Create FastAPI app
         self.app = FastAPI(title=title)
@@ -86,6 +88,7 @@ class Viewer:
         self.app.post("/api/close")(self.close_viewer)
         self.app.get("/api/used-examples")(self.get_used_examples)
         self.app.get("/api/all-feedback")(self.get_all_feedback)
+        self.app.get("/api/design-space")(self.get_design_space)
         self.console.print(f"[grey11]Initialized Viewer for [bold cyan]{self.concept or 'objects'}[/bold cyan][/grey11]")
     
     async def index(self, request: Request):
@@ -211,6 +214,13 @@ class Viewer:
         
         return {"used_examples": used_examples}
 
+    async def get_design_space(self):
+        """Get the design space."""
+        if not self.design_space:
+            return {"design_space": []}
+        
+        return {"design_space": self.design_space}
+    
     async def close_viewer(self):
         """Close the viewer and return the feedback."""
         self.server_running = False

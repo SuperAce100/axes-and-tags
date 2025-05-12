@@ -60,15 +60,28 @@ class Domain(ABC):
         """Save the result of the domain processing. Returns the path to the saved result."""
         pass
 
+    @abstractmethod
+    def get_design_space(self) -> List[Tuple[str, str]]:
+        """Get the design space that is being explored by the domain.
+        Returns a list of tuples of (space, status("constrained", "random", or "explored"))
+        """
+        pass
+
+    @abstractmethod
+    def update_design_space(self, design_space: List[Tuple[str, str]], feedback_data: Dict[str, List[str]]) -> List[Tuple[str, str]]:
+        """Get the design space that is being explored by the domain.
+        Returns a list of tuples of (space, status("constrained", "random", or "explored"))
+        """
+        pass
+
     
     def run_experiment(self, n: int, n_examples: int, max_iterations: int = 10):
         self.console.print(Rule(f"[bold green]Starting initial {self.name} generation[/bold green]", style="green", align="left"))
 
-        examples, example_names = self.collect_examples(n_examples)
+        design_space = self.get_design_space()
+        self.console.print(f"[grey11]Design space: {design_space}[/grey11]")
 
-        self.console.print(f"[green]✓[/green] [grey11] Collected {len(example_names)} examples for {self.name}: {', '.join(example_names)}[/grey11]")
-
-        objects = self.generate_multiple(n, examples, [])
+        objects = self.generate_multiple(n, design_space, [])
 
         self.console.print(objects, style="grey11")
 
@@ -86,7 +99,14 @@ class Domain(ABC):
             if not feedback_data:
                 break
                 
-            feedback_examples = self.feedback_examples(feedback_data, save_path)
+
+            design_space = self.update_design_space(design_space, feedback_data)
+
+            self.console.print(f"[grey11]Updated design space: {design_space}[/grey11]")
+
+            feedback_examples = self.feedback_examples(feedback_data, save_path, design_space)
+
+
             
             feedback_text = Text()
             feedback_text.append(feedback_examples, style="grey11")

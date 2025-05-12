@@ -59,6 +59,9 @@ Here are some prompts used to generate images
 {feedback}
 In a future prompt generation, which specific features need to be retained and which ones need to be changed. ONLY include a list of very specific features with detailed descriptions that must be constant in the future generation. (not "the elephant, the background" but "an african elephant with large ears, background: a clear night sky next to a lake")
 
+Here are the axes of the design space along which to explore. Do not explore axes that are fixed, only explore axes that do not have a value. If an axes has a value, it is fixed and you must include it in the list of features that must be consistent.
+{design_space}
+
 Think about it as a list of features and adjectives that must be consistent in the future generations, based on the preferences expressed by the user. If they say they like the cats in an image that includes a black cat, it means that all future generations must include a black cat. 
 
 DO not adlib anything the user did not specifically mention in their feedback. Extract only what the user explicitly said they liked.
@@ -92,4 +95,38 @@ Here are some tags that have already been used:
 </old_tags>
 
 Every tag you generate MUST NOT be in the old_tags list.
+"""
+
+image_gen_get_design_space_prompt = """
+Here is a concept that you will be generating an image of: {concept}
+
+Generate a list of axes of the design space that is relevant to the concept. For example, for a concept of "car", the design space could be "car_type", "car_color", "background", "camera_angle", etc... There should be between 5-10 axes. Each axis should be 1-4 words and not duplicate the others.
+
+Return the list of axes in a <axes></axes> XML tag, like this:
+
+<axes>
+<axis>AXIS HERE</axis>
+<axis>AXIS HERE</axis>
+<axis>AXIS HERE</axis>
+</axes>
+"""
+
+image_gen_update_design_space_prompt = """
+You are tasked with updating a design spaced based on a summary of what the user likes and dislikes.
+
+Here is the design space:
+{design_space}
+
+Here is the feedback from the user:
+{feedback_data}
+
+Update the design space based on the feedback, only updating axes that are not fixed based on the feedback itself, and only updating the value of the axis if the user has explicitly mentioned it in their feedback. YOU MUST leave axes blank if the user has not mentioned it in their feedback.
+
+Return the updated design space in a <design_space></design_space> XML tag, with each axis represented as a key-value pair in the format <axis name="axis_name">axis_value</axis>. For example:
+
+<design_space>
+<axis name="car_type">sports</axis>
+<axis name="car_color">red</axis>
+<axis name="background">city street</axis>
+</design_space>
 """

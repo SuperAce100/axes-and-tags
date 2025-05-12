@@ -3,7 +3,7 @@ import random
 import time
 from domains.domain import Domain
 from domains.imagegen.image_viewer import ImageViewer
-from domains.imagegen.generate_imagegen import generate_image, generate_image_multiple, collect_examples, load_image_from_feedback, save_images, expand_prompt, extract_tags, generate_insights
+from domains.imagegen.generate_imagegen import generate_image, generate_image_multiple, collect_examples, load_image_from_feedback, save_images, expand_prompt, extract_tags, generate_insights, get_design_space, update_design_space
 from models.models import text_model
 from typing import List, Tuple, Dict
 from rich.console import Console
@@ -31,14 +31,20 @@ class ImageGen(Domain):
     def collect_examples(self, n: int) -> Tuple[str, List[str]]:
         return collect_examples(self.concept, self.examples_dir, n)
 
-    def feedback_examples(self, feedback: Dict[str, List[str]], results_dir: str) -> str:
-        return load_image_from_feedback(self.concept, feedback, results_dir)
+    def feedback_examples(self, feedback: Dict[str, List[str]], results_dir: str, design_space: List[Tuple[str, str]]) -> str:
+        return load_image_from_feedback(self.concept, feedback, results_dir, design_space)
     
     def extract_tags(self, prompt: str, old_tags: List[str]) -> List[str]:
         return extract_tags(prompt, old_tags, self.model)
 
     def generate_insights(self, feedback: str) -> str:
         return generate_insights(feedback, self.model)
+    
+    def get_design_space(self) -> List[Tuple[str, str]]:
+        return get_design_space(self.concept, self.model)
+    
+    def update_design_space(self, design_space: List[Tuple[str, str]], feedback_data: Dict[str, List[str]]) -> List[Tuple[str, str]]:
+        return update_design_space(design_space, feedback_data, self.model)
 
     def name_output_dir(self) -> str:
         timestamp = int(time.time())

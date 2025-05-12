@@ -1,4 +1,5 @@
 import base64
+import re
 import os
 import json
 import numpy as np
@@ -10,6 +11,7 @@ import fal_client
 import concurrent.futures
 from rich.progress import track
 from domains.imagegen.prompts import *
+from typing import List, Tuple
 
 img_model = "fal-ai/flux/schnell"
 
@@ -106,17 +108,43 @@ def extract_tags(prompt: str, old_tags: list[str], model: str = language_model) 
     tags = [tag.split("</tag>")[0].strip() for tag in tags]
     return tags
 
-def generate_insights(feedback: str, model: str = language_model) -> str:
-    return llm_call(image_gen_insights_format.format(feedback=feedback), model=model)
+def generate_insights(feedback: str, design_space: List[Tuple[str, str]], model: str = language_model) -> str:
+    return llm_call(image_gen_insights_format.format(feedback=feedback, design_space=design_space), model=model)
 
-def load_image_from_feedback(concept: str, feedback_data: dict[str, list], results_dir: str):
+def get_design_space(concept: str, model: str = language_model) -> List[Tuple[str, str]]:
+    response = llm_call(image_gen_get_design_space_prompt.format(concept=concept), model=model)
+    # Extract axes from the response, handling potential parsing errors
+    design_space = []
+    axes_parts = response.split("<axis>")
+    if len(axes_parts) > 1:
+        for axis in axes_parts[1:]:
+            if "</axis>" in axis:
+                axis_name = axis.split("</axis>")[0].strip()
+                design_space.append((axis_name, ""))
+            else:
+                continue
+    return design_space
+    
+def update_design_space(design_space: List[Tuple[str, str]], feedback_data: dict[str, List[str]], model: str = language_model) -> List[Tuple[str, str]]:
+    response = llm_call(image_gen_update_design_space_prompt.format(design_space=design_space, feedback_data=feedback_data), model=model)
+    design_space = []
+    for axis_entry in response.split("<axis")[1:]:
+        if "</axis>" in axis_entry:
+            name_match = re.search(r'name="([^"]+)"', axis_entry)
+            if name_match:
+                axis_name = name_match.group(1)
+                axis_value = axis_entry.split(">", 1)[1].split("</axis>", 1)[0].strip()
+                design_space.append((axis_name, axis_value))
+    return design_space
+
+def load_image_from_feedback(concept: str, feedback_data: dict[str, list], results_dir: str, design_space: List[Tuple[str, str]]):
     examples_str = ""
     for filename, feedbacks in feedback_data.items():
         with open(os.path.join(results_dir, filename), "r") as f:
             prompt = json.load(f)["prompt"]
             examples_str += image_gen_feedback_format.format(concept=concept, example=prompt, feedback=feedbacks)
     
-    insights = generate_insights(examples_str)
+    insights = generate_insights(examples_str, design_space)
 
     return examples_str + "\n Here is what you need to include in every future generation: \n" + insights
 
@@ -135,11 +163,20 @@ def save_images(image_urls: list[str], prompts: list[str], tags: list[str], path
 
 
 def main():
-    concept = "elephant"
-    examples, example_names = collect_examples(concept, "../.data/imagegen/examples", 5)
-    prompts, image_urls, tags = generate_image_multiple(concept, examples, 5)
-
-    save_images(image_urls, prompts, tags, "../.data/imagegen/results")
+    design_space = """
+    <design_space>
+    <axis>car_type=sports</axis>
+    <axis>car_color=red</axis>
+    <axis>background=</axis>
+    </design_space>
+    """
+    feedback_data = """
+    <feedback_data>
+    <feedback>I like the urban background</feedback>
+    <feedback>I like the city street</feedback>
+    </feedback_data>
+    """
+    print(update_design_space(design_space, feedback_data))
 
 if __name__ == "__main__":
     main()
