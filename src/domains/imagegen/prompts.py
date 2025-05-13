@@ -79,9 +79,11 @@ Here is a prompt:
 And here is a design space:
 {design_space}
 
-Extract a set of useful tags from the prompt. For every axis in the design space, if the axis is unconstrained, extract a tag for it.
+Extract a set of useful tags from the prompt. These could be objects, actions, adjectives, etc all present in the prompt. 
 
 Each tag should be atomic and 1-3 words, and extremely brief, specific, and descriptive. They should be the building blocks on top of which the prompt is constucted. The tags should be based on any empty axes in the design space.
+
+The tags should be based on the design space, and there should be exactly ONE (1) tag for every open axis in the design space.
 
 Enclose each tag in <tag></tag> XML tags, like this, and return the list of tags in a <tags></tags> XML tag:
 
