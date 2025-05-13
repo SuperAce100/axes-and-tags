@@ -310,7 +310,7 @@ async function fetchDesignSpace() {
 async function renderDesignSpace() {
     const designSpaceContainer = document.getElementById('designSpaceList');
     designSpaceContainer.innerHTML = '';
-    designSpaceContainer.className = 'p-0 space-y-2 mt-4';
+    designSpaceContainer.className = 'p-0 space-y-3 mt-4';
 
     console.log("designSpaceList", designSpace);
     
@@ -318,7 +318,7 @@ async function renderDesignSpace() {
         console.log("axis", axis, "value", value);
         const item = document.createElement('div');
         item.id = "design-space-" + axis;
-        item.className = 'transition-all relative overflow-hidden hover:-translate-y-0.5 bg-gray-200 p-2 rounded-lg shadow-sm';
+        item.className = 'transition-all relative overflow-hidden hover:-translate-y-1 bg-gray-200 p-2 rounded-lg shadow-sm';
         if (isFirstRender) {
             item.className = item.className + ' opacity-0 translate-y-4 scale-80 duration-500 filter blur-md';
             setTimeout(() => {
@@ -326,7 +326,7 @@ async function renderDesignSpace() {
                 item.classList.add('opacity-100', 'translate-y-0', 'scale-100');
             }, index * 100);
         }
-        item.innerHTML = `<p class="tracking-tight text-xs text-gray-500">${axis}:</p><p class="text-gray-900 font-semibold">${value}</p>`;
+        item.innerHTML = `<p class="text-xs text-gray-500">${axis}</p><p class="text-gray-900 text-sm font-semibold">${value}</p>`;
         designSpaceContainer.appendChild(item);
     });
 }

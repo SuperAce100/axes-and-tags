@@ -76,9 +76,12 @@ Here is a prompt:
 {prompt}
 </prompt>
 
-Extract a set of 3-5 useful tags from the prompt. These could be objects, actions, adjectives, etc all present in the prompt. 
+And here is a design space:
+{design_space}
 
-Each tag should be atomic and 1-3 words, and extremely brief, specific, and descriptive. They should be the building blocks on top of which the propmt is constucted.
+Extract a set of 5-7 useful tags from the prompt. These could be objects, actions, adjectives, etc all present in the prompt. 
+
+Each tag should be atomic and 1-3 words, and extremely brief, specific, and descriptive. They should be the building blocks on top of which the prompt is constucted. The tags should be based on any empty axes in the design space.
 
 Enclose each tag in <tag></tag> XML tags, like this, and return the list of tags in a <tags></tags> XML tag:
 

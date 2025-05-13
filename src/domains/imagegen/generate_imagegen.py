@@ -79,7 +79,7 @@ def generate_image(prompt: str, examples: str, image_model: str = img_model, tex
     return prompt, image_url
 
 
-def generate_image_multiple(concept: str, examples: str, n: int, old_tags: list[str], image_model: str = img_model, text_model: str = language_model):
+def generate_image_multiple(concept: str, examples: str, n: int, old_tags: list[str], design_space: List[Tuple[str, str]], image_model: str = img_model, text_model: str = language_model):
     image_urls = []
     prompts = []
 
@@ -90,7 +90,7 @@ def generate_image_multiple(concept: str, examples: str, n: int, old_tags: list[
     expanded_prompts = [p.split("</prompt>")[0].strip() for p in expanded_prompts]
 
     def process_prompt(prompt):
-        tags = extract_tags(prompt, old_tags)
+        tags = extract_tags(prompt, old_tags, design_space=design_space)
         image_result = generate_image(prompt, examples, image_model, text_model)
         return image_result, tags
 
@@ -102,8 +102,8 @@ def generate_image_multiple(concept: str, examples: str, n: int, old_tags: list[
 
     return prompts, image_urls, tags
 
-def extract_tags(prompt: str, old_tags: list[str], model: str = language_model) -> list[str]:
-    tags_xml = llm_call(image_gen_tags_format.format(prompt=prompt, old_tags=old_tags), model=model)
+def extract_tags(prompt: str, old_tags: list[str], model: str = language_model, design_space: List[Tuple[str, str]] = None) -> list[str]:
+    tags_xml = llm_call(image_gen_tags_format.format(prompt=prompt, old_tags=old_tags, design_space=design_space), model=model)
     tags = [tag.strip() for tag in tags_xml.split("<tag>")[1:] if tag.strip()]
     tags = [tag.split("</tag>")[0].strip() for tag in tags]
     return tags

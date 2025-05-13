@@ -26,7 +26,7 @@ class Domain(ABC):
         pass
 
     @abstractmethod
-    def generate_multiple(self, n: int, examples: str, old_tags: List[str]) -> List[str]:
+    def generate_multiple(self, n: int, examples: str, old_tags: List[str], design_space: List[Tuple[str, str]]) -> List[str]:
         """Generate multiple examples. Returns a list of generated examples."""
         pass
 
@@ -81,7 +81,7 @@ class Domain(ABC):
         design_space = self.get_design_space()
         self.console.print(f"[grey11]Design space: {design_space}[/grey11]")
 
-        objects = self.generate_multiple(n, design_space, [])
+        objects = self.generate_multiple(n, design_space, [], design_space)
 
         self.console.print(objects, style="grey11")
 
@@ -115,7 +115,7 @@ class Domain(ABC):
 
             self.console.print(f"[grey11]Generating new layouts based on feedback...[/grey11]")
 
-            objects = self.generate_multiple(n, feedback_examples, tags)
+            objects = self.generate_multiple(n, feedback_examples, tags, design_space)
 
             save_path = self.save_result(objects, os.path.join(save_path, "feedback"))
             self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.display_name}s after reflection {i} to {self.output_dir}[/grey11]")
