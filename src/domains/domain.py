@@ -21,12 +21,12 @@ class Domain(ABC):
         os.makedirs(self.output_dir, exist_ok=True)
 
     @abstractmethod
-    def run_viewer(self, title: str, port: int, path: str, used_examples: List[str] = None, design_space: List[Tuple[str, str]] = None) -> Dict[str, List[str]]:
+    def run_viewer(self, title: str, port: int, path: str, used_examples: List[str] = None, design_space: Dict[str, Tuple[str, str]] = None) -> Dict[str, List[str]]:
         """Run the viewer for this domain. Returns a dictionary of example names and their feedback."""
         pass
 
     @abstractmethod
-    def generate_multiple(self, n: int, examples: str, old_tags: List[str], design_space: List[Tuple[str, str]]) -> List[str]:
+    def generate_multiple(self, n: int, examples: str, old_tags: List[str], design_space: Dict[str, Tuple[str, str]]) -> List[str]:
         """Generate multiple examples. Returns a list of generated examples."""
         pass
 
@@ -89,14 +89,17 @@ class Domain(ABC):
 
         self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.display_name}s to {self.output_dir}[/grey11]")
 
-        feedback_data = self.run_viewer(pretty_name(f"Generated {len(objects[0])} {self.display_name}"), 8002, save_path, design_space=design_space)
+        viewer_data = self.run_viewer(pretty_name(f"Generated {len(objects[0])} {self.display_name}"), 8002, save_path, design_space=design_space)
+
+        feedback_data = viewer_data["feedback"]
+        design_space = viewer_data["design_space"]
 
         tags = []
         for feedback_list in feedback_data.values():
             tags.extend(feedback_list)
 
         for i in range(max_iterations):
-            if not feedback_data:
+            if not feedback_data and design_space == design_space:
                 break
                 
 
@@ -106,8 +109,6 @@ class Domain(ABC):
 
             feedback_examples = self.feedback_examples(feedback_data, save_path, design_space)
 
-
-            
             feedback_text = Text()
             feedback_text.append(feedback_examples, style="grey11")
 
@@ -120,10 +121,13 @@ class Domain(ABC):
             save_path = self.save_result(objects, os.path.join(save_path, "feedback"))
             self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.display_name}s after reflection {i} to {self.output_dir}[/grey11]")
 
-            new_feedback_data = self.run_viewer(pretty_name(f"{self.display_name}s made with {len(feedback_data)} labels (iteration {i})"), 8003 + i, save_path, used_examples=feedback_data, design_space=design_space)
+            new_viewer_data = self.run_viewer(pretty_name(f"{self.display_name}s made with {len(feedback_data)} labels (iteration {i})"), 8003 + i, save_path, used_examples=feedback_data, design_space=design_space)
 
-            if not new_feedback_data:
+            if not new_viewer_data["feedback"] and new_viewer_data["design_space"] == design_space:
                 break
+
+            new_feedback_data = new_viewer_data["feedback"]
+            design_space = new_viewer_data["design_space"]
 
             feedback_data = {f"../{k}": v for k, v in feedback_data.items()}
             feedback_data = {**feedback_data, **new_feedback_data}

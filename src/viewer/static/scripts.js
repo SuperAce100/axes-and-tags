@@ -6,7 +6,7 @@ let feedbackData = {};
 let isClosing = false;
 let usedExamples = {};
 let isFirstRender = true;
-let designSpace = [];
+let designSpace = {};
 // Select a file
 async function selectFile(file) {
     try {
@@ -92,6 +92,22 @@ async function saveFeedback(feedback) {
         }
     } catch (error) {
         showStatus('Error saving feedback: ' + error.message, 'error');
+    }
+}
+
+async function saveDesignSpace() {
+    const response = await fetch('/api/save-designspace', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({designSpace})
+    });
+
+    if (response.ok) {
+        showStatus('Design space saved', 'success');
+    } else {
+        showStatus('Error saving design space', 'error');
     }
 }
 
@@ -335,7 +351,8 @@ async function renderDesignSpace() {
         container.appendChild(item);
         container.appendChild(label);
         item.addEventListener('change', (event) => {
-            designSpace[index] = [axis, event.target.value];
+            designSpace[axis] = [status, event.target.value];
+            saveDesignSpace();
             console.log("designSpace updated", designSpace);
         });
         designSpaceContainer.appendChild(container);

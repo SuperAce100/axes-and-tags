@@ -79,7 +79,7 @@ def generate_image(prompt: str, examples: str, image_model: str = img_model, tex
     return prompt, image_url
 
 
-def generate_image_multiple(concept: str, examples: str, n: int, old_tags: list[str], design_space: List[Tuple[str, str]], image_model: str = img_model, text_model: str = language_model):
+def generate_image_multiple(concept: str, examples: str, n: int, old_tags: list[str], design_space: Dict[str, Tuple[str, str]], image_model: str = img_model, text_model: str = language_model):
     image_urls = []
     prompts = []
 
@@ -133,7 +133,7 @@ def update_design_space(design_space: Dict[str, Tuple[str, str]], feedback_data:
             if name_match:
                 axis_name = name_match.group(1)
                 axis_value = axis_entry.split(">", 1)[1].split("</axis>", 1)[0].strip()
-                design_space[axis_name] = ("constrained", axis_value)
+                design_space[axis_name] = ("constrained" if axis_value else "unconstrained", axis_value)
     return design_space
 
 def load_image_from_feedback(concept: str, feedback_data: dict[str, list], results_dir: str, design_space: dict[str, Tuple[str, str]]):

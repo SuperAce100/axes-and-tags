@@ -89,6 +89,7 @@ class Viewer:
         self.app.get("/api/used-examples")(self.get_used_examples)
         self.app.get("/api/all-feedback")(self.get_all_feedback)
         self.app.get("/api/design-space")(self.get_design_space)
+        self.app.post("/api/save-designspace")(self.save_design_space)
         self.console.print(f"[grey11]Initialized Viewer for [bold cyan]{self.concept or 'objects'}[/bold cyan][/grey11]")
     
     async def index(self, request: Request):
@@ -153,6 +154,11 @@ class Viewer:
         self.feedback_data[file].append(feedback)
         self.console.print(f"[grey11]Saved feedback for [bold cyan]{file}[/bold cyan]: [grey11]{feedback[:50]}...[/grey11]")
         
+        return {"success": True}
+    
+    async def save_design_space(self, data: Dict[str, Any]):
+        """Save the design space."""
+        self.design_space = data.get('designSpace')
         return {"success": True}
     
     async def get_feedback(self, filename: str):
@@ -260,7 +266,7 @@ class Viewer:
         else:
             self.console.print("[grey11]No feedback collected, shutting down...[/grey11]")
         
-        return self.feedback_data 
+        return {"feedback": self.feedback_data, "design_space": self.design_space}
     
 if __name__ == "__main__":
     viewer = Viewer(".data/examples/", ".data/examples/", "example", "Example Viewer", 8001)

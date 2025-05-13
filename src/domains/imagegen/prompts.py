@@ -62,7 +62,7 @@ In a future prompt generation, which specific features need to be retained and w
 Here are the axes of the design space along which to explore. Do not explore axes that are fixed, only explore axes that do not have a value. If an axes has a value, it is fixed and you must include it in the list of features that must be consistent.
 {design_space}
 
-Think about it as a list of features and adjectives that must be consistent in the future generations, based on the preferences expressed by the user. If they say they like the cats in an image that includes a black cat, it means that all future generations must include a black cat. 
+Think about it as a list of features and adjectives that must be consistent in the future generations, based on the preferences expressed by the user and the constraints set in the design space. If they say they like the cats in an image that includes a black cat, it means that all future generations must include a black cat. 
 
 DO not adlib anything the user did not specifically mention in their feedback. Extract only what the user explicitly said they liked.
 
