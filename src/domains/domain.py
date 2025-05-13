@@ -61,16 +61,16 @@ class Domain(ABC):
         pass
 
     @abstractmethod
-    def get_design_space(self) -> List[Tuple[str, str]]:
+    def get_design_space(self) -> Dict[str, Tuple[str, str]]:
         """Get the design space that is being explored by the domain.
-        Returns a list of tuples of (space, status("constrained", "random", or "explored"))
+        Returns a dictionary of (space, (status, value))
         """
         pass
 
     @abstractmethod
-    def update_design_space(self, design_space: List[Tuple[str, str]], feedback_data: Dict[str, List[str]]) -> List[Tuple[str, str]]:
+    def update_design_space(self, design_space: Dict[str, Tuple[str, str]], feedback_data: Dict[str, List[str]]) -> Dict[str, Tuple[str, str]]:
         """Get the design space that is being explored by the domain.
-        Returns a list of tuples of (space, status("constrained", "random", or "explored"))
+        Returns a dictionary of (space, (status("constrained", "random", or "explored"), value))
         """
         pass
 

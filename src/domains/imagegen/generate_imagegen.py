@@ -11,7 +11,7 @@ import fal_client
 import concurrent.futures
 from rich.progress import track
 from domains.imagegen.prompts import *
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 img_model = "fal-ai/flux/schnell"
 
@@ -108,36 +108,35 @@ def extract_tags(prompt: str, old_tags: list[str], model: str = language_model, 
     tags = [tag.split("</tag>")[0].strip() for tag in tags]
     return tags
 
-def generate_insights(feedback: str, design_space: List[Tuple[str, str]], model: str = language_model) -> str:
+def generate_insights(feedback: str, design_space: Dict[str, Tuple[str, str]], model: str = language_model) -> str:
     return llm_call(image_gen_insights_format.format(feedback=feedback, design_space=design_space), model=model)
 
-def get_design_space(concept: str, model: str = language_model) -> List[Tuple[str, str]]:
+def get_design_space(concept: str, model: str = language_model) -> Dict[str, Tuple[str, str]]:
     response = llm_call(image_gen_get_design_space_prompt.format(concept=concept), model=model)
     # Extract axes from the response, handling potential parsing errors
-    design_space = []
+    design_space = {}
     axes_parts = response.split("<axis>")
     if len(axes_parts) > 1:
         for axis in axes_parts[1:]:
             if "</axis>" in axis:
                 axis_name = axis.split("</axis>")[0].strip()
-                design_space.append((axis_name, ""))
+                design_space[axis_name] = ("unconstrained", "")
             else:
                 continue
     return design_space
     
-def update_design_space(design_space: List[Tuple[str, str]], feedback_data: dict[str, List[str]], model: str = language_model) -> List[Tuple[str, str]]:
+def update_design_space(design_space: Dict[str, Tuple[str, str]], feedback_data: dict[str, List[str]], model: str = language_model) -> Dict[str, Tuple[str, str]]:
     response = llm_call(image_gen_update_design_space_prompt.format(design_space=design_space, feedback_data=feedback_data), model=model)
-    design_space = []
     for axis_entry in response.split("<axis")[1:]:
         if "</axis>" in axis_entry:
             name_match = re.search(r'name="([^"]+)"', axis_entry)
             if name_match:
                 axis_name = name_match.group(1)
                 axis_value = axis_entry.split(">", 1)[1].split("</axis>", 1)[0].strip()
-                design_space.append((axis_name, axis_value))
+                design_space[axis_name] = ("constrained", axis_value)
     return design_space
 
-def load_image_from_feedback(concept: str, feedback_data: dict[str, list], results_dir: str, design_space: List[Tuple[str, str]]):
+def load_image_from_feedback(concept: str, feedback_data: dict[str, list], results_dir: str, design_space: dict[str, Tuple[str, str]]):
     examples_str = ""
     for filename, feedbacks in feedback_data.items():
         with open(os.path.join(results_dir, filename), "r") as f:

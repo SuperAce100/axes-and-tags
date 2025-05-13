@@ -29,7 +29,7 @@ class Viewer:
                  file_extension: str = ".json",
                  custom_scripts_path: str = None,
                  used_examples: Optional[Dict[str, List[str]]] = None,
-                 design_space: List[Tuple[str, str]] = None):
+                 design_space: Optional[Dict[str, Tuple[str, str]]] = None):
         """
         Initialize the generic viewer.
         
@@ -217,7 +217,7 @@ class Viewer:
     async def get_design_space(self):
         """Get the design space."""
         if not self.design_space:
-            return {"design_space": []}
+            return {"design_space": {}}
         
         return {"design_space": self.design_space}
     

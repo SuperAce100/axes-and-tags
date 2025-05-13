@@ -4,7 +4,7 @@ from pathlib import Path
 from rich.console import Console
 import argparse
 from viewer.viewer import Viewer
-from typing import List
+from typing import Dict, Tuple
 class ImageViewer(Viewer):
     """
     A specialized viewer for SVG files.
@@ -17,7 +17,7 @@ class ImageViewer(Viewer):
                  console: Console = None,
                  concept: str = "image",
                  used_examples: list[str] = None,
-                 design_space: list[tuple[str, str]] = None):
+                 design_space: dict[str, Tuple[str, str]] = None):
         """
         Initialize the ImageViewer.
         

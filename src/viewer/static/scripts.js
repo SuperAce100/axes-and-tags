@@ -313,8 +313,8 @@ async function renderDesignSpace() {
     designSpaceContainer.className = 'p-0 space-y-3 mt-4';
 
     console.log("designSpaceList", designSpace);
-    
-    designSpace.forEach(([axis, value], index) => {
+
+    for (const [index, [axis, [status, value]]] of Object.entries(Object.entries(designSpace))) {
         console.log("axis", axis, "value", value);
         const container = document.createElement('div');
         container.className = 'relative';
@@ -339,7 +339,7 @@ async function renderDesignSpace() {
             console.log("designSpace updated", designSpace);
         });
         designSpaceContainer.appendChild(container);
-    });
+    }
 }
 
 // Initialize
