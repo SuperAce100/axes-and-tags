@@ -316,18 +316,29 @@ async function renderDesignSpace() {
     
     designSpace.forEach(([axis, value], index) => {
         console.log("axis", axis, "value", value);
-        const item = document.createElement('div');
+        const container = document.createElement('div');
+        container.className = 'relative';
+        const item = document.createElement('input');
+        const label = document.createElement('label');
         item.id = "design-space-" + axis;
-        item.className = 'transition-all relative overflow-hidden hover:-translate-y-1 bg-gray-200 p-2 rounded-lg shadow-sm';
+        item.className = 'transition-all relative overflow-hidden hover:bg-gray-300 bg-gray-200 p-2 rounded-lg shadow-sm pt-6 w-full focus:outline-none focus:ring-2 focus:ring-gray-500';
+        label.className = 'text-xs text-gray-500 absolute top-2 left-2';
         if (isFirstRender) {
-            item.className = item.className + ' opacity-0 translate-y-4 scale-80 duration-500 filter blur-md';
+            container.className = container.className + ' opacity-0 translate-y-4 scale-80 duration-500 filter blur-md';
             setTimeout(() => {
-                item.classList.remove('opacity-0', 'translate-y-4', 'scale-80', 'filter', 'blur-md');
-                item.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+                container.classList.remove('opacity-0', 'translate-y-4', 'scale-80', 'filter', 'blur-md');
+                container.classList.add('opacity-100', 'translate-y-0', 'scale-100');
             }, index * 100);
         }
-        item.innerHTML = `<p class="text-xs text-gray-500">${axis}</p><p class="text-gray-900 text-sm font-semibold">${value}</p>`;
-        designSpaceContainer.appendChild(item);
+        item.value = value;
+        label.innerHTML = axis;
+        container.appendChild(item);
+        container.appendChild(label);
+        item.addEventListener('change', (event) => {
+            designSpace[index] = [axis, event.target.value];
+            console.log("designSpace updated", designSpace);
+        });
+        designSpaceContainer.appendChild(container);
     });
 }
 

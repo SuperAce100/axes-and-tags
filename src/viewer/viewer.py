@@ -221,6 +221,7 @@ class Viewer:
         
         return {"design_space": self.design_space}
     
+    
     async def close_viewer(self):
         """Close the viewer and return the feedback."""
         self.server_running = False
