@@ -1,3 +1,37 @@
+let isPromptVisible = false;
+
+function togglePrompt() {
+  isPromptVisible = !isPromptVisible;
+  const promptOverlays = document.querySelectorAll('.prompt-overlay');
+  promptOverlays.forEach(overlay => {
+    overlay.style.opacity = isPromptVisible ? 1 : 0;
+  });
+}
+
+// cmd + i
+document.addEventListener('keydown', (event) => {
+  if (event.metaKey && event.key === 'i') {
+    togglePrompt();
+  }
+});
+
+let isTagOverlayVisible = false;
+
+function toggleTagOverlay() {
+  isTagOverlayVisible = !isTagOverlayVisible;
+  const tagOverlays = document.querySelectorAll('.tag-overlay');
+  tagOverlays.forEach(overlay => {
+    overlay.style.opacity = isTagOverlayVisible ? 1 : 0;
+  });
+}
+
+// cmd + u
+document.addEventListener('keydown', (event) => {
+  if (event.metaKey && event.key === 'u') {
+    toggleTagOverlay();
+  }
+});
+
 function render(id, content, fileName) {
   const container = document.getElementById(id);
   container.className = 'relative';
@@ -9,7 +43,7 @@ function render(id, content, fileName) {
   
   // Create prompt overlay with gradient
   const promptOverlay = document.createElement('div');
-  promptOverlay.className = 'absolute top-0 left-0 w-full p-3 bg-gradient-to-b from-black/85 via-black/60 to-transparent';
+  promptOverlay.className = 'absolute top-0 left-0 w-full p-3 bg-gradient-to-b from-black/85 via-black/60 to-transparent prompt-overlay transition-all';
   
   // Create prompt text element
   const promptElement = document.createElement('div');
@@ -17,6 +51,8 @@ function render(id, content, fileName) {
   promptElement.className = 'text-white text-xs max-w-full overflow-hidden leading-tight font-sans max-h-[2.5em] hover:max-h-[200px] transition-all mask-b-from-0% mask-b-to-20%';
   
   promptOverlay.appendChild(promptElement);
+  promptOverlay.addEventListener('click', togglePrompt);
+  promptOverlay.style.opacity = isPromptVisible ? 1 : 0;
   container.appendChild(imgElement);
   container.appendChild(promptOverlay);
   
@@ -54,7 +90,7 @@ function renderTags(fileData, container) {
     }
 
     const tagOverlay = document.createElement('div');
-    tagOverlay.className = 'bg-gradient-to-t from-black/85 via-black/60 to-transparent p-3 absolute bottom-0 left-0 w-full z-12';
+    tagOverlay.className = 'bg-gradient-to-t from-black/85 via-black/60 to-transparent p-3 absolute bottom-0 left-0 w-full z-12 tag-overlay transition-all';
     tagOverlay.id = "tag-overlay";
     // Append elements
     tagOverlay.appendChild(tagsContainer);

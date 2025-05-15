@@ -119,7 +119,7 @@ Every tag you generate MUST NOT be in the old_tags list.
 image_gen_get_design_space_prompt = """
 Here is a concept that you will be generating an image of: {concept}
 
-Generate a list of axes of the design space that is relevant to the concept. For example, for a concept of "car", the design space could be "car_type", "car_color", "background", "camera_angle", etc... There should be between 5-10 axes. Each axis should be 1-4 words and not duplicate the others.
+Generate a list of axes of the design space that is relevant to the concept. For example, for a concept of "car", the design space could be "car_type", "car_color", "background", "camera_angle", etc... There should be between 4-6 concrete axes. Each axis should be 1-4 words and not duplicate the others.
 
 Return the list of axes in a <axes></axes> XML tag, like this:
 

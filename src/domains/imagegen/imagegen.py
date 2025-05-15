@@ -35,7 +35,7 @@ class ImageGen(Domain):
     def feedback_examples(self, feedback: Dict[str, List[str]], results_dir: str, design_space: Dict[str, Tuple[str, str]]) -> str:
         return load_image_from_feedback(self.concept, feedback, results_dir, design_space)
     
-    def extract_tags(self, prompt: str, old_tags: List[str], design_space: Dict[str, Tuple[str, str]] = None) -> List[str]:
+    def extract_tags(self, prompt: str, old_tags: List[str], design_space: Dict[str, Tuple[str, str]] = {}) -> List[str]:
         return extract_tags(prompt, old_tags, self.model, design_space)
 
     def generate_insights(self, feedback: str) -> str:

@@ -102,7 +102,7 @@ def generate_image_multiple(concept: str, examples: str, n: int, old_tags: list[
 
     return prompts, image_urls, tags
 
-def extract_tags(prompt: str, old_tags: list[str], model: str = language_model, design_space: Dict[str, Tuple[str, str]] = None) -> list[str]:
+def extract_tags(prompt: str, old_tags: list[str], model: str = language_model, design_space: Dict[str, Tuple[str, str]] = {}) -> list[str]:
     tags_xml = llm_call(image_gen_tags_format.format(prompt=prompt, old_tags=old_tags, design_space=design_space), model=model)
     tags = [tag.strip() for tag in tags_xml.split("<tag>")[1:] if tag.strip()]
     tags = [tag.split("</tag>")[0].strip() for tag in tags]
