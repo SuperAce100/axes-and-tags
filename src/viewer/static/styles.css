@@ -28,36 +28,11 @@ body {
   margin-bottom: 1.5rem;
 }
 
-button {
-  background: linear-gradient(135deg, var(--primary-color), #2980b9);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.3px;
-  transition: var(--transition);
-  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+
+@font-face {
+  font-family: 'LucideIcons';
+  src: url(https://unpkg.com/lucide-static@latest/font/Lucide.ttf) format('truetype');
 }
-
-button:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
-}
-
-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
-}
-
-button.close-btn {
-  background: linear-gradient(135deg, var(--danger-color), #c0392b);
-}
-
-
 
 /* Status Messages */
 .status {

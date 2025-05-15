@@ -322,6 +322,71 @@ async function fetchDesignSpace() {
     designSpace = data.design_space;
     console.log("designSpace", data);
 }
+let icons = {};
+async function fetchDesignSpaceIcons() {
+    const iconUrls = {
+        exploring: 'https://unpkg.com/lucide-static@latest/icons/telescope.svg',
+        unconstrained: 'https://unpkg.com/lucide-static@latest/icons/dices.svg',
+        constrained: 'https://unpkg.com/lucide-static@latest/icons/lock.svg'
+    };
+
+    await Promise.all(
+        Object.entries(iconUrls).map(async ([key, url]) => {
+            const response = await fetch(url);
+            icons[key] = await response.text();
+        })
+    );
+}
+
+function createDesignAxisControls(axis, status, value) {
+    const container = document.createElement('div');
+    container.className = 'absolute right-0 top-0 w-24 h-full flex gap-1 justify-end items-center p-2 hover:w-fit hover:min-w-24 transition-all z-10 group';
+    const exploreButton = document.createElement('button');
+    const unconstrainedButton = document.createElement('button');
+    const constrainedButton = document.createElement('button');
+    const baseButtonClassName = 'bg-transparent rounded-md group-hover:opacity-100 group-hover:w-8 w-0 group-hover:h-8 h-0 opacity-0 top-0 transition-all flex items-center justify-center';
+    exploreButton.className = baseButtonClassName + ' hover:bg-green-500/10 text-green-500';
+    unconstrainedButton.className = baseButtonClassName + ' hover:bg-red-500/10 text-red-500';
+    constrainedButton.className = baseButtonClassName + ' hover:bg-blue-500/10 text-blue-500';
+
+    exploreButton.innerHTML = icons["exploring"];
+    unconstrainedButton.innerHTML = icons["unconstrained"];
+    constrainedButton.innerHTML = icons["constrained"];
+
+    if (status === "exploring") {
+        exploreButton.classList.remove('bg-transparent', 'hover:bg-green-500/10');
+        exploreButton.classList.add('bg-green-500/30', 'hover:bg-green-500/50');
+    } else if (status === "unconstrained") {
+        unconstrainedButton.classList.remove('bg-transparent', 'hover:bg-red-500/10');
+        unconstrainedButton.classList.add('bg-red-500/30', 'hover:bg-red-500/50');
+    } else if (status === "constrained") {
+        constrainedButton.classList.remove('bg-transparent', 'hover:bg-blue-500/10');
+        constrainedButton.classList.add('bg-blue-500/30', 'hover:bg-blue-500/50');
+    }
+
+    exploreButton.addEventListener('click', async () => {
+        designSpace[axis] = ["exploring", value];
+        await saveDesignSpace();
+        renderDesignSpace();
+    });
+
+    unconstrainedButton.addEventListener('click', async () => {
+        designSpace[axis] = ["unconstrained", value];
+        await saveDesignSpace();
+        renderDesignSpace();
+    });
+
+    constrainedButton.addEventListener('click', async () => {
+        designSpace[axis] = ["constrained", value];
+        await saveDesignSpace();
+        renderDesignSpace();
+    });
+
+    container.appendChild(constrainedButton);
+    container.appendChild(unconstrainedButton);
+    container.appendChild(exploreButton);
+    return container;
+}
 
 async function renderDesignSpace() {
     const designSpaceContainer = document.getElementById('designSpaceList');
@@ -329,6 +394,9 @@ async function renderDesignSpace() {
     designSpaceContainer.className = 'p-0 space-y-3 mt-4';
 
     console.log("designSpaceList", designSpace);
+    if (isFirstRender) {
+        await fetchDesignSpaceIcons();
+    }
 
     for (const [index, [axis, [status, value]]] of Object.entries(Object.entries(designSpace))) {
         console.log("axis", axis, "value", value);
@@ -336,17 +404,28 @@ async function renderDesignSpace() {
         container.className = 'relative';
         const item = document.createElement('input');
         const label = document.createElement('label');
+        label.className = 'text-xs text-gray-500 absolute top-2 left-2 flex items-start justify-center gap-1';
+
+        const itemIcon = document.createElement('div');
+        itemIcon.innerHTML = icons[status];
+        const currentColor = status === "exploring" ? "green-500" : status === "unconstrained" ? "red-500" : "blue-500";
+        itemIcon.className = `text-${currentColor} scale-50 -translate-y-0.5 -translate-x-0.5 w-4 h-4`;
+        label.appendChild(itemIcon);
+        const itemLabel = document.createElement('span');
+        itemLabel.innerHTML = axis;
+        label.appendChild(itemLabel);
         item.id = "design-space-" + axis;
-        item.className = 'transition-all relative overflow-hidden hover:bg-gray-300 bg-gray-200 p-2 rounded-lg shadow-sm pt-6 w-full focus:outline-none focus:ring-2 focus:ring-gray-500';
+        item.className = 'transition-all relative overflow-hidden hover:bg-gray-300 bg-gray-200 p-2 rounded-lg shadow-sm pt-6 w-full focus:outline-none focus:ring-2 focus:ring-gray-400';
         item.value = value;
-        if (status === "exploring") {
-            item.className = item.className + ' border-2 border-green-500';
-        } else if (status === "unconstrained") {
-            item.className = item.className + ' border-2 border-red-500';
+        if (status === "unconstrained") {
             item.placeholder = value;
             item.value = "";
+        } else if (status === "exploring") {
+            item.value = "";
+            item.placeholder = "exploring";
+        } else if (status === "constrained") {
+            item.value = value;
         }
-        label.className = 'text-xs text-gray-500 absolute top-2 left-2';
         if (isFirstRender) {
             container.className = container.className + ' opacity-0 translate-y-4 scale-80 duration-500 filter blur-md';
             setTimeout(() => {
@@ -354,14 +433,14 @@ async function renderDesignSpace() {
                 container.classList.add('opacity-100', 'translate-y-0', 'scale-100');
             }, index * 100);
         }
-        label.innerHTML = axis;
         container.appendChild(item);
         container.appendChild(label);
-        item.addEventListener('change', (event) => {
+        item.addEventListener('change', async (event) => {
             designSpace[axis] = [status, event.target.value];
-            saveDesignSpace();
+            await saveDesignSpace();
             console.log("designSpace updated", designSpace);
         });
+        container.appendChild(createDesignAxisControls(axis, status, value));
         designSpaceContainer.appendChild(container);
     }
 }
