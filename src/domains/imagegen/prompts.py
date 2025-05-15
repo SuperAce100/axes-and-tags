@@ -21,7 +21,7 @@ Here are some examples:
 image_gen_expand_system_prompt_extend = """
 You must generate {n} new prompts for the user, ALL of which must follow EVERY piece of feedback provided. Make them all meaningfully different by varying styles, objects, camera angles, and adjectives while keeping specified details.
 
-If you've recieved feedback on any previous generations, make sure to include that feedback in each new prompt - EVERY NEW PROMPT MUST INCOPORATE ALL THE FEEDBACK.
+You might be given a specific list of features that are constrained in the new prompts. Keep these exactly the same across all new prompts. You might also be given a list of features that are to be explored. Each of your generations should significantly vary these features.
 
 IMPORTANT: You must surround each new prompt with <prompt></prompt> XML tags, like this:
 
@@ -139,7 +139,9 @@ Here is the design space:
 Here is the feedback from the user:
 {feedback_data}
 
-Update the design space based on the feedback, only updating axes that are not fixed based on the feedback itself, and only updating the value of the axis if the user has explicitly mentioned it in their feedback. YOU MUST leave axes blank if the user has not mentioned it in their feedback. Of the axes that are not constrained, choose two axes to explore, and leave the rest of the axes unconstrained. Don't set values for the axes that are unconstrained or exploring. If axes are already selected to explore, don't change them.
+Update the design space based on the feedback, only updating axes that are not fixed based on the feedback itself, and only updating the value of the axis if the user has explicitly mentioned it in their feedback. YOU MUST leave axes blank if the user has not mentioned it in their feedback. Update every axis that you take from the feedback. When you update an axis, make sure to set the status to "constrained".
+
+Of the axes that are not constrained, choose two axes to explore, and leave the rest of the axes unconstrained. 
 
 Return the updated design space in a <design_space></design_space> XML tag, with each axis represented as a key-value pair in the format <axis name="axis_name" status="constrained|unconstrained|exploring">axis_value</axis>. For example:
 

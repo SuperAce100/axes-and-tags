@@ -436,8 +436,9 @@ async function renderDesignSpace() {
         container.appendChild(item);
         container.appendChild(label);
         item.addEventListener('change', async (event) => {
-            designSpace[axis] = [status, event.target.value];
+            designSpace[axis] = ["constrained", event.target.value];
             await saveDesignSpace();
+            renderDesignSpace();
             console.log("designSpace updated", designSpace);
         });
         container.appendChild(createDesignAxisControls(axis, status, value));
