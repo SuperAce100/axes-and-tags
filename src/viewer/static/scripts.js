@@ -335,7 +335,8 @@ async function fetchDesignSpaceIcons() {
         exploring: 'https://unpkg.com/lucide-static@latest/icons/telescope.svg',
         unconstrained: 'https://unpkg.com/lucide-static@latest/icons/dices.svg',
         constrained: 'https://unpkg.com/lucide-static@latest/icons/lock.svg',
-        new: 'https://unpkg.com/lucide-static@latest/icons/plus.svg'
+        new: 'https://unpkg.com/lucide-static@latest/icons/plus.svg',
+        delete: 'https://unpkg.com/lucide-static@latest/icons/trash-2.svg'
     };
 
     await Promise.all(
@@ -352,21 +353,24 @@ function createDesignAxisControls(axis, status, value) {
     const exploreButton = document.createElement('button');
     const unconstrainedButton = document.createElement('button');
     const constrainedButton = document.createElement('button');
+    const deleteButton = document.createElement('button');
     const baseButtonClassName = 'bg-transparent rounded-md group-hover:opacity-100 group-hover:w-8 w-0 group-hover:h-8 h-0 opacity-0 top-0 transition-all flex items-center justify-center';
     exploreButton.className = baseButtonClassName + ' hover:bg-green-500/10 text-green-500';
-    unconstrainedButton.className = baseButtonClassName + ' hover:bg-red-500/10 text-red-500';
+    unconstrainedButton.className = baseButtonClassName + ' hover:bg-purple-500/10 text-purple-500';
     constrainedButton.className = baseButtonClassName + ' hover:bg-blue-500/10 text-blue-500';
+    deleteButton.className = baseButtonClassName + ' hover:bg-red-500/10 text-red-500';
 
     exploreButton.innerHTML = icons["exploring"];
     unconstrainedButton.innerHTML = icons["unconstrained"];
     constrainedButton.innerHTML = icons["constrained"];
+    deleteButton.innerHTML = icons["delete"];
 
     if (status === "exploring") {
         exploreButton.classList.remove('bg-transparent', 'hover:bg-green-500/10');
         exploreButton.classList.add('bg-green-500/30', 'hover:bg-green-500/50');
     } else if (status === "unconstrained") {
-        unconstrainedButton.classList.remove('bg-transparent', 'hover:bg-red-500/10');
-        unconstrainedButton.classList.add('bg-red-500/30', 'hover:bg-red-500/50');
+        unconstrainedButton.classList.remove('bg-transparent', 'hover:bg-purple-500/10');
+        unconstrainedButton.classList.add('bg-purple-500/30', 'hover:bg-purple-500/50');
     } else if (status === "constrained") {
         constrainedButton.classList.remove('bg-transparent', 'hover:bg-blue-500/10');
         constrainedButton.classList.add('bg-blue-500/30', 'hover:bg-blue-500/50');
@@ -390,6 +394,13 @@ function createDesignAxisControls(axis, status, value) {
         renderDesignSpace();
     });
 
+    deleteButton.addEventListener('click', async () => {
+        delete designSpace[axis];
+        await saveDesignSpace();
+        renderDesignSpace();
+    });
+
+    container.appendChild(deleteButton);
     container.appendChild(constrainedButton);
     container.appendChild(unconstrainedButton);
     container.appendChild(exploreButton);
@@ -483,7 +494,7 @@ async function renderDesignSpace() {
         label.className = 'text-xs text-gray-500 absolute top-2 left-2 flex items-start justify-center gap-1';
         const itemIcon = document.createElement('div');
         itemIcon.innerHTML = icons[status];
-        const currentColor = status === "exploring" ? "green-500" : status === "unconstrained" ? "red-500" : "blue-500";
+        const currentColor = status === "exploring" ? "green-500" : status === "unconstrained" ? "purple-500" : "blue-500";
         itemIcon.className = `text-${currentColor} scale-50 -translate-y-0.5 -translate-x-0.5 w-4 h-4`;
         label.appendChild(itemIcon);
         const itemLabel = document.createElement('span');
