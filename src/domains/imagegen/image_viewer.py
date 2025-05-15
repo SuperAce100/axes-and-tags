@@ -1,4 +1,5 @@
 from ast import Tuple
+from collections.abc import Callable
 import os
 from pathlib import Path
 from rich.console import Console
@@ -17,7 +18,8 @@ class ImageViewer(Viewer):
                  console: Console = None,
                  concept: str = "image",
                  used_examples: list[str] = None,
-                 design_space: dict[str, Tuple[str, str]] = None):
+                 design_space: dict[str, Tuple[str, str]] = None,
+                 update_design_space: Callable[[Dict[str, Tuple[str, str]], Dict[str, list[str]]], None] = None):
         """
         Initialize the ImageViewer.
         
@@ -38,7 +40,8 @@ class ImageViewer(Viewer):
             console=console,
             custom_scripts_path="domains/imagegen/image_scripts.js",
             used_examples=used_examples,
-            design_space=design_space
+            design_space=design_space,
+            update_design_space=update_design_space
         )
     
     

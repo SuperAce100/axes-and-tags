@@ -6,7 +6,7 @@ from pathlib import Path
 import threading
 import time
 import shutil
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional, Tuple, Callable
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
@@ -27,9 +27,10 @@ class Viewer:
                  port: int = 8001, 
                  console: Optional[Console] = None,
                  file_extension: str = ".json",
-                 custom_scripts_path: str = None,
+                 custom_scripts_path: str = "",
                  used_examples: Optional[Dict[str, List[str]]] = None,
-                 design_space: Optional[Dict[str, Tuple[str, str]]] = None):
+                 design_space: Optional[Dict[str, Tuple[str, str]]] = None,
+                 update_design_space: Callable[[Dict[str, Tuple[str, str]], Dict[str, List[str]]], Dict[str, Tuple[str, str]]] = None):
         """
         Initialize the generic viewer.
         
@@ -57,7 +58,7 @@ class Viewer:
         self.custom_scripts_path = custom_scripts_path
         self.used_examples = used_examples
         self.design_space = design_space
-        
+        self.update_design_space = update_design_space
         # Create FastAPI app
         self.app = FastAPI(title=title)
         
@@ -90,6 +91,7 @@ class Viewer:
         self.app.get("/api/all-feedback")(self.get_all_feedback)
         self.app.get("/api/design-space")(self.get_design_space)
         self.app.post("/api/save-designspace")(self.save_design_space)
+        self.app.post("/api/update-designspace")(self.update_design_space_api)
         self.console.print(f"[grey11]Initialized Viewer for [bold cyan]{self.concept or 'objects'}[/bold cyan][/grey11]")
     
     async def index(self, request: Request):
@@ -227,6 +229,13 @@ class Viewer:
         
         return {"design_space": self.design_space}
     
+    async def update_design_space_api(self):
+        """Update the design space."""
+
+        if self.update_design_space:
+            self.design_space = self.update_design_space(self.design_space, self.feedback_data)
+            print("Updated design space", self.design_space)
+        return {"design_space": self.design_space}
     
     async def close_viewer(self):
         """Close the viewer and return the feedback."""

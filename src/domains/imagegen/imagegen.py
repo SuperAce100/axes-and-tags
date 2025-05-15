@@ -1,3 +1,4 @@
+from collections.abc import Callable
 import os
 import random
 import time
@@ -5,7 +6,7 @@ from domains.domain import Domain
 from domains.imagegen.image_viewer import ImageViewer
 from domains.imagegen.generate_imagegen import generate_image, generate_image_multiple, collect_examples, load_image_from_feedback, save_images, expand_prompt, extract_tags, generate_insights, get_design_space, update_design_space
 from models.models import text_model
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Any, Callable
 from rich.console import Console
 
 class ImageGen(Domain):
@@ -13,7 +14,7 @@ class ImageGen(Domain):
         super().__init__(name="imagegen", display_name=concept, data_dir=data_dir, model=model, console=console)
         self.concept = concept
 
-    def run_viewer(self, title: str, port: int, path: str, used_examples: List[str] = None, design_space: List[Tuple[str, str]] = None) -> None:
+    def run_viewer(self, title: str, port: int, path: str, used_examples: List[str] = None, design_space: Dict[str, Tuple[str, str]] = None, update_design_space: Callable[[Dict[str, Tuple[str, str]], Dict[str, List[str]]], None] = None) -> None:
         viewer = ImageViewer(
             concept=self.concept,
             image_folder=path, 
@@ -22,7 +23,8 @@ class ImageGen(Domain):
             port=port, 
             console=self.console,
             used_examples=used_examples,
-            design_space=design_space
+            design_space=design_space,
+            update_design_space=update_design_space
         )
         return viewer.run()
 
@@ -38,7 +40,7 @@ class ImageGen(Domain):
     def extract_tags(self, prompt: str, old_tags: List[str], design_space: Dict[str, Tuple[str, str]] = {}) -> List[str]:
         return extract_tags(prompt, old_tags, self.model, design_space)
 
-    def generate_insights(self, feedback: str) -> str:
+    def generate_insights(self, feedback: str) -> Tuple[str, Dict[str, Tuple[str, str]]]:
         return generate_insights(feedback, self.model)
     
     def get_design_space(self) -> Dict[str, Tuple[str, str]]:
@@ -52,7 +54,7 @@ class ImageGen(Domain):
         random_suffix = random.randint(1000, 9999)
         return f"{self.output_dir}/{self.concept}_{timestamp}_{random_suffix}"
 
-    def save_result(self, results: List[Tuple[str, str]], path: str = None) -> str:
+    def save_result(self, results: Tuple[List[str], List[str], List[str]], path: str = None) -> str:
         if path is None:
             path = self.name_output_dir()
         

@@ -17,6 +17,8 @@ document.addEventListener('keydown', (event) => {
 
 let isTagOverlayVisible = false;
 
+
+
 function toggleTagOverlay() {
   isTagOverlayVisible = !isTagOverlayVisible;
   const tagOverlays = document.querySelectorAll('.tag-overlay');
@@ -84,6 +86,13 @@ function renderTags(fileData, container) {
                     await selectFile(fileData.name);
                     saveFeedback(tag);
                 }
+
+                tagElement.className = tagElement.className.replace('bg-white/20', 'bg-green-300/30')
+                    .replace('text-white', 'text-green-500')
+                    .replace('hover:bg-white/30', 'hover:bg-green-300/50');
+
+                renderTags(fileData, container);
+                updateDesignSpace();
             });
             tagsContainer.appendChild(tagElement);
         });
