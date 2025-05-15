@@ -68,7 +68,7 @@ function renderTags(fileData, container) {
 
     // Add each tag
     if (fileData.content.tags && Array.isArray(fileData.content.tags)) {
-        fileData.content.tags.forEach(tag => {
+        fileData.content.tags.forEach(([dimension, tag]) => {
             const tagElement = document.createElement('span');
             tagElement.textContent = tag;
             tagElement.className = 'tag bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] text-white hover:bg-white/30 hover:scale-105 cursor-pointer font-sans active:scale-95 transition-all';
@@ -91,8 +91,9 @@ function renderTags(fileData, container) {
                     .replace('text-white', 'text-green-500')
                     .replace('hover:bg-white/30', 'hover:bg-green-300/50');
 
+                updateDesignSpace(dimension, tag);
                 renderTags(fileData, container);
-                updateDesignSpace();
+                
             });
             tagsContainer.appendChild(tagElement);
         });

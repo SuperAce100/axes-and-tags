@@ -323,27 +323,10 @@ async function fetchDesignSpace() {
     console.log("designSpace", data);
 }
 
-async function updateDesignSpace() {
-    
-  const newDesignSpace = {};
-  for (const [axis, [status, value]] of Object.entries(designSpace)) {
-    if (status === "constrained" || status === "exploring") {
-      newDesignSpace[axis] = [status, value];
-    }
-  }
-
-  const response = await fetch('/api/update-designspace', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({designSpace})
-  });
-
-  const data = await response.json();
-  designSpace = data.design_space;
-
-  renderDesignSpace();
+async function updateDesignSpace(dimension, value) {
+    designSpace[dimension] = ["constrained", value];
+    await saveDesignSpace();
+    renderDesignSpace();
 }
 
 let icons = {};

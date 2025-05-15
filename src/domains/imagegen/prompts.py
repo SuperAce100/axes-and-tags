@@ -97,14 +97,14 @@ Extract a set of useful tags from the prompt. These could be objects, actions, a
 
 Each tag should be atomic and 1-3 words, and extremely brief, specific, and descriptive. They should be the building blocks on top of which the prompt is constucted. The tags should be based on any empty axes in the design space.
 
-The tags should be based on the design space, and there should be exactly ONE (1) tag for every axis labeled "exploring" or "unconstrained" in the design space.
+The tags should be based on the design space, and there should be exactly ONE (1) tag for every axis labeled "exploring" or "unconstrained" in the design space. Do not create tags that are not based on the design space.
 
 Enclose each tag in <tag></tag> XML tags, like this, and return the list of tags in a <tags></tags> XML tag:
 
 <tags>
-<tag>TAG HERE</tag>
-<tag>TAG HERE</tag>
-<tag>TAG HERE</tag>
+<tag dimension="dimension_name">TAG HERE</tag>
+<tag dimension="dimension_name">TAG HERE</tag>
+<tag dimension="dimension_name">TAG HERE</tag>
 </tags>
 
 Here are some tags that have already been used:
@@ -141,7 +141,7 @@ Here is the feedback from the user:
 
 Update the design space based on the feedback, only updating axes that are not fixed based on the feedback itself, and only updating the value of the axis if the user has explicitly mentioned it in their feedback. YOU MUST leave axes blank if the user has not mentioned it in their feedback. Update every axis that you take from the feedback. When you update an axis, make sure to set the status to "constrained".
 
-Of the axes that are not constrained, choose two axes to explore, and leave the rest of the axes unconstrained. 
+Of the axes that are not constrained, choose another axis to explore, and leave the rest of the axes unconstrained. If one is already exploring, don't change it.
 
 Return the updated design space in a <design_space></design_space> XML tag, with each axis represented as a key-value pair in the format <axis name="axis_name" status="constrained|unconstrained|exploring">axis_value</axis>. For example:
 

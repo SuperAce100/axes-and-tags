@@ -79,7 +79,7 @@ def generate_image(prompt: str, examples: str, image_model: str = img_model, tex
     return prompt, image_url
 
 
-def generate_image_multiple(concept: str, examples: str, n: int, old_tags: list[str], design_space: Dict[str, Tuple[str, str]], image_model: str = img_model, text_model: str = language_model):
+def generate_image_multiple(concept: str, examples: str, n: int, old_tags: list[Tuple[str, str]], design_space: Dict[str, Tuple[str, str]], image_model: str = img_model, text_model: str = language_model):
     image_urls = []
     prompts = []
 
@@ -102,10 +102,20 @@ def generate_image_multiple(concept: str, examples: str, n: int, old_tags: list[
 
     return prompts, image_urls, tags
 
-def extract_tags(prompt: str, old_tags: list[str], model: str = language_model, design_space: Dict[str, Tuple[str, str]] = {}) -> list[str]:
+def extract_tags(prompt: str, old_tags: list[Tuple[str, str]], model: str = language_model, design_space: Dict[str, Tuple[str, str]] = {}) -> list[Tuple[str, str]]:
     tags_xml = llm_call(image_gen_tags_format.format(prompt=prompt, old_tags=old_tags, design_space=design_space), model=model)
-    tags = [tag.strip() for tag in tags_xml.split("<tag>")[1:] if tag.strip()]
-    tags = [tag.split("</tag>")[0].strip() for tag in tags]
+    tags = []
+    # Parse the tags XML format
+    tags_parts = tags_xml.split("<tag")
+    if len(tags_parts) > 1:
+        for tag in tags_parts[1:]:
+            if "</tag>" in tag:
+                # Extract dimension and tag value
+                dimension_match = re.search(r'dimension="([^"]+)"', tag)
+                tag_value = tag.split(">", 1)[1].split("</tag>", 1)[0].strip()
+                if dimension_match:
+                    dimension = dimension_match.group(1)
+                    tags.append((dimension, tag_value))
     return tags
 
 def generate_insights(feedback: str, design_space: Dict[str, Tuple[str, str]], model: str = language_model) -> Tuple[str, Dict[str, Tuple[str, str]]]:
@@ -176,7 +186,7 @@ def load_image_from_feedback(concept: str, feedback_data: dict[str, list], resul
 
     return examples_str + "\n Here is what you need to include in every future generation: \n" + insights, temp_design_space
 
-def save_images(image_urls: list[str], prompts: list[str], tags: list[str], path: str):
+def save_images(image_urls: list[str], prompts: list[str], tags: list[Tuple[str, str]], path: str):
     os.makedirs(path, exist_ok=True)
     
     def save_one(args):
