@@ -243,6 +243,7 @@ class Viewer:
         self.console.print("[grey11]Viewer closed[/grey11]")
         return {"success": True}
     
+    
     def run(self, open_browser=True):
         """Run the FastAPI server and return the feedback when closed."""
         self.server_running = True
