@@ -59,14 +59,28 @@ Here are some prompts used to generate images
 {feedback}
 In a future prompt generation, which specific features need to be retained and which ones need to be changed. ONLY include a list of very specific features with detailed descriptions that must be constant in the future generation. (not "the elephant, the background" but "an african elephant with large ears, background: a clear night sky next to a lake")
 
-Here are the axes of the design space along which to explore. Do not explore axes that are fixed, only explore axes that do not have a value. If an axes has a value, it is fixed and you must include it in the list of features that must be consistent.
+Here are the axes of the design space along which to explore. Do not explore axes that are fixed, only explore axes that do not have a value and are labeled "exploring". If an axes has a value, it is fixed and you must include it in the list of features that must be consistent.
 {design_space}
 
-Think about it as a list of features and adjectives that must be consistent in the future generations, based on the preferences expressed by the user and the constraints set in the design space. If they say they like the cats in an image that includes a black cat, it means that all future generations must include a black cat. 
-
-DO not adlib anything the user did not specifically mention in their feedback. Extract only what the user explicitly said they liked.
+DO NOT adlib anything the user did not specifically mention in their feedback. Extract only what the user explicitly said they liked.
 
 After defining the list of features that must be consistent, present a list of 3-5 features that can be varied.
+"""
+
+image_gen_temp_design_space_format = """
+Here is a design space:
+{design_space}
+
+Based on the values in the design space, and the feedback from the user, fill in any axes specificaly labeled unconstrained in the design space with an arbitrarily chosen value.
+
+Return the updated design space in a <design_space></design_space> XML tag, with each axis represented as a key-value pair in the format <axis name="axis_name" status="constrained|unconstrained|exploring">axis_value</axis>. For example:
+
+<design_space>
+<axis name="car_type" status="constrained">sports</axis>
+<axis name="car_color" status="constrained">red</axis>
+<axis name="background" status="exploring"></axis>
+<axis name="camera_angle" status="unconstrained">wide angle</axis>
+</design_space>
 """
 
 image_gen_tags_format = """
@@ -83,7 +97,7 @@ Extract a set of useful tags from the prompt. These could be objects, actions, a
 
 Each tag should be atomic and 1-3 words, and extremely brief, specific, and descriptive. They should be the building blocks on top of which the prompt is constucted. The tags should be based on any empty axes in the design space.
 
-The tags should be based on the design space, and there should be exactly ONE (1) tag for every open axis in the design space.
+The tags should be based on the design space, and there should be exactly ONE (1) tag for every axis labeled "exploring" or "unconstrained" in the design space.
 
 Enclose each tag in <tag></tag> XML tags, like this, and return the list of tags in a <tags></tags> XML tag:
 
@@ -125,13 +139,14 @@ Here is the design space:
 Here is the feedback from the user:
 {feedback_data}
 
-Update the design space based on the feedback, only updating axes that are not fixed based on the feedback itself, and only updating the value of the axis if the user has explicitly mentioned it in their feedback. YOU MUST leave axes blank if the user has not mentioned it in their feedback.
+Update the design space based on the feedback, only updating axes that are not fixed based on the feedback itself, and only updating the value of the axis if the user has explicitly mentioned it in their feedback. YOU MUST leave axes blank if the user has not mentioned it in their feedback. Of the axes that are not constrained, choose two axes to explore, and leave the rest of the axes unconstrained. Don't set values for the axes that are unconstrained or exploring. If axes are already selected to explore, don't change them.
 
-Return the updated design space in a <design_space></design_space> XML tag, with each axis represented as a key-value pair in the format <axis name="axis_name">axis_value</axis>. For example:
+Return the updated design space in a <design_space></design_space> XML tag, with each axis represented as a key-value pair in the format <axis name="axis_name" status="constrained|unconstrained|exploring">axis_value</axis>. For example:
 
 <design_space>
-<axis name="car_type">sports</axis>
-<axis name="car_color">red</axis>
-<axis name="background">city street</axis>
+<axis name="car_type" status="constrained">sports</axis>
+<axis name="car_color" status="constrained">red</axis>
+<axis name="background" status="exploring"></axis>
+<axis name="camera_angle" status="unconstrained"></axis>
 </design_space>
 """

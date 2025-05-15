@@ -16,7 +16,7 @@ from typing import List, Tuple, Dict
 img_model = "fal-ai/flux/schnell"
 
 def expand_prompt(concept: str, model: str = language_model, examples: str = "") -> str:
-    return llm_call(image_gen_expand_user_prompt.format(concept=concept), system_prompt=image_gen_expand_system_prompt.format(examples=examples), temperature=2)
+    return llm_call(image_gen_expand_user_prompt.format(concept=concept), system_prompt=image_gen_expand_system_prompt.format(examples=examples), temperature=1)
 
 def collect_examples(concept: str,examples_dir: str = "examples", n: int = 5) -> list[str]:
     examples = ""
@@ -67,8 +67,8 @@ def generate_image(prompt: str, examples: str, image_model: str = img_model, tex
         arguments={
             "prompt": prompt,
             "image_size": {
-                "width": 1024,
-                "height": 1024
+                "width": 512,
+                "height": 512
             }
         },
         with_logs=True,
@@ -102,14 +102,42 @@ def generate_image_multiple(concept: str, examples: str, n: int, old_tags: list[
 
     return prompts, image_urls, tags
 
-def extract_tags(prompt: str, old_tags: list[str], model: str = language_model, design_space: List[Tuple[str, str]] = None) -> list[str]:
+def extract_tags(prompt: str, old_tags: list[str], model: str = language_model, design_space: Dict[str, Tuple[str, str]] = None) -> list[str]:
     tags_xml = llm_call(image_gen_tags_format.format(prompt=prompt, old_tags=old_tags, design_space=design_space), model=model)
     tags = [tag.strip() for tag in tags_xml.split("<tag>")[1:] if tag.strip()]
     tags = [tag.split("</tag>")[0].strip() for tag in tags]
     return tags
 
-def generate_insights(feedback: str, design_space: Dict[str, Tuple[str, str]], model: str = language_model) -> str:
-    return llm_call(image_gen_insights_format.format(feedback=feedback, design_space=design_space), model=model)
+def generate_insights(feedback: str, design_space: Dict[str, Tuple[str, str]], model: str = language_model) -> Tuple[str, Dict[str, Tuple[str, str]]]:
+    response = llm_call(image_gen_temp_design_space_format.format(feedback=feedback, design_space=design_space), model=model)
+    # Parse the design space XML format
+    temp_design_space = response.split("<design_space>")[1].split("</design_space>")[0].strip()
+    
+    # Extract axis information
+    design_space_updates = {}
+    for axis_line in temp_design_space.strip().split('\n'):
+        if '<axis' in axis_line and '</axis>' in axis_line:
+            name_match = re.search(r'name="([^"]+)"', axis_line)
+            status_match = re.search(r'status="([^"]+)"', axis_line)
+            if name_match:
+                axis_name = name_match.group(1)
+                axis_value = axis_line.split(">", 1)[1].split("</axis>", 1)[0].strip()
+                design_space_updates[axis_name] = (status_match.group(1) if status_match else "unconstrained", axis_value)
+
+    print(design_space_updates)
+
+    design_space_string = ""
+    constrained_string = ""
+    exploring_string = ""
+    for axis_name, (status, value) in design_space_updates.items():
+        if status == "constrained" or status == "unconstrained":
+            constrained_string += f"{axis_name}={value}\n"
+        elif status == "exploring":
+            exploring_string += f"{axis_name}\n"
+
+    design_space_string = f"Constrained: {constrained_string}\nAreas to explore: {exploring_string}"
+
+    return design_space_string, design_space_updates
 
 def get_design_space(concept: str, model: str = language_model) -> Dict[str, Tuple[str, str]]:
     response = llm_call(image_gen_get_design_space_prompt.format(concept=concept), model=model)
@@ -130,10 +158,11 @@ def update_design_space(design_space: Dict[str, Tuple[str, str]], feedback_data:
     for axis_entry in response.split("<axis")[1:]:
         if "</axis>" in axis_entry:
             name_match = re.search(r'name="([^"]+)"', axis_entry)
+            status_match = re.search(r'status="([^"]+)"', axis_entry)
             if name_match:
                 axis_name = name_match.group(1)
                 axis_value = axis_entry.split(">", 1)[1].split("</axis>", 1)[0].strip()
-                design_space[axis_name] = ("constrained" if axis_value else "unconstrained", axis_value)
+                design_space[axis_name] = (status_match.group(1) if status_match else "unconstrained", axis_value)
     return design_space
 
 def load_image_from_feedback(concept: str, feedback_data: dict[str, list], results_dir: str, design_space: dict[str, Tuple[str, str]]):
@@ -143,9 +172,9 @@ def load_image_from_feedback(concept: str, feedback_data: dict[str, list], resul
             prompt = json.load(f)["prompt"]
             examples_str += image_gen_feedback_format.format(concept=concept, example=prompt, feedback=feedbacks)
     
-    insights = generate_insights(examples_str, design_space)
+    insights, temp_design_space = generate_insights(examples_str, design_space)
 
-    return examples_str + "\n Here is what you need to include in every future generation: \n" + insights
+    return examples_str + "\n Here is what you need to include in every future generation: \n" + insights, temp_design_space
 
 def save_images(image_urls: list[str], prompts: list[str], tags: list[str], path: str):
     os.makedirs(path, exist_ok=True)

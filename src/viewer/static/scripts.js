@@ -338,6 +338,14 @@ async function renderDesignSpace() {
         const label = document.createElement('label');
         item.id = "design-space-" + axis;
         item.className = 'transition-all relative overflow-hidden hover:bg-gray-300 bg-gray-200 p-2 rounded-lg shadow-sm pt-6 w-full focus:outline-none focus:ring-2 focus:ring-gray-500';
+        item.value = value;
+        if (status === "exploring") {
+            item.className = item.className + ' border-2 border-green-500';
+        } else if (status === "unconstrained") {
+            item.className = item.className + ' border-2 border-red-500';
+            item.placeholder = value;
+            item.value = "";
+        }
         label.className = 'text-xs text-gray-500 absolute top-2 left-2';
         if (isFirstRender) {
             container.className = container.className + ' opacity-0 translate-y-4 scale-80 duration-500 filter blur-md';
@@ -346,7 +354,6 @@ async function renderDesignSpace() {
                 container.classList.add('opacity-100', 'translate-y-0', 'scale-100');
             }, index * 100);
         }
-        item.value = value;
         label.innerHTML = axis;
         container.appendChild(item);
         container.appendChild(label);

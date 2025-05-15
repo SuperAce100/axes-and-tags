@@ -36,17 +36,17 @@ class Domain(ABC):
         pass
 
     @abstractmethod
-    def feedback_examples(self, feedback: Dict[str, List[str]]) -> str:
+    def feedback_examples(self, feedback: Dict[str, List[str]], results_dir: str, design_space: Dict[str, Tuple[str, str]]) -> str:
         """Apply feedback to examples. Returns the feedback as a string."""
         pass
 
     @abstractmethod
-    def generate_insights(self, feedback: str) -> str:
+    def generate_insights(self, feedback: str, design_space: Dict[str, Tuple[str, str]]) -> Tuple[str, Dict[str, Tuple[str, str]]]:
         """Generate insights from feedback. Returns the insights as a string."""
         pass
 
     @abstractmethod
-    def extract_tags(self, prompt: str, old_tags: List[str], model: str = text_model) -> List[str]:
+    def extract_tags(self, prompt: str, old_tags: List[str], design_space: Dict[str, Tuple[str, str]]) -> List[str]:
         """Extract tags from a prompt. Returns a list of tags."""
         pass
 
@@ -107,7 +107,7 @@ class Domain(ABC):
 
             self.console.print(f"[grey11]Updated design space: {design_space}[/grey11]")
 
-            feedback_examples = self.feedback_examples(feedback_data, save_path, design_space)
+            feedback_examples, temp_design_space = self.feedback_examples(feedback_data, save_path, design_space)
 
             feedback_text = Text()
             feedback_text.append(feedback_examples, style="grey11")
@@ -116,12 +116,12 @@ class Domain(ABC):
 
             self.console.print(f"[grey11]Generating new layouts based on feedback...[/grey11]")
 
-            objects = self.generate_multiple(n, feedback_examples, tags, design_space)
+            objects = self.generate_multiple(n, feedback_examples, tags, temp_design_space)
 
             save_path = self.save_result(objects, os.path.join(save_path, "feedback"))
             self.console.print(f"[green]✓[/green] [grey11]Saved [bold]{len(objects)}[/bold] {self.display_name}s after reflection {i} to {self.output_dir}[/grey11]")
 
-            new_viewer_data = self.run_viewer(pretty_name(f"{self.display_name}s made with {len(feedback_data)} labels (iteration {i})"), 8003 + i, save_path, used_examples=feedback_data, design_space=design_space)
+            new_viewer_data = self.run_viewer(pretty_name(f"{self.display_name}s made with {len(feedback_data)} labels (iteration {i})"), 8003 + i, save_path, used_examples=feedback_data, design_space=temp_design_space)
 
             if not new_viewer_data["feedback"] and new_viewer_data["design_space"] == design_space:
                 break
