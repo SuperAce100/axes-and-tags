@@ -327,7 +327,8 @@ async function fetchDesignSpaceIcons() {
     const iconUrls = {
         exploring: 'https://unpkg.com/lucide-static@latest/icons/telescope.svg',
         unconstrained: 'https://unpkg.com/lucide-static@latest/icons/dices.svg',
-        constrained: 'https://unpkg.com/lucide-static@latest/icons/lock.svg'
+        constrained: 'https://unpkg.com/lucide-static@latest/icons/lock.svg',
+        new: 'https://unpkg.com/lucide-static@latest/icons/plus.svg'
     };
 
     await Promise.all(
@@ -388,6 +389,74 @@ function createDesignAxisControls(axis, status, value) {
     return container;
 }
 
+function createNewDesignAxis() {
+    // Create the wrapper first
+    const wrapper = document.createElement('div');
+    wrapper.className = 'relative';
+    
+    // Create the button
+    const newAxisTriggerButton = document.createElement('button');
+    newAxisTriggerButton.className = 'bg-transparent rounded-md w-8 h-8 opacity-100 transition-all flex items-center justify-center z-10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2';
+    newAxisTriggerButton.innerHTML = icons["new"];
+    wrapper.appendChild(newAxisTriggerButton);
+    
+    // Create the input container
+    const container = document.createElement('div');
+    container.className = 'w-0 h-9 opacity-0 transition-all duration-300';
+    wrapper.appendChild(container);
+    
+    const label = document.createElement('label');
+    label.className = 'text-xs text-gray-500 absolute top-2 left-2 flex items-start justify-center gap-1';
+    const itemIcon = document.createElement('div');
+    // itemIcon.innerHTML = icons["new"];
+    itemIcon.className = `text-gray-500 scale-50 -translate-y-0.5 -translate-x-0.5 w-4 h-4`;
+    label.appendChild(itemIcon);
+    const itemLabel = document.createElement('span');
+    itemLabel.innerHTML = "add new axis";
+    label.appendChild(itemLabel);
+    container.appendChild(label);
+    // Create the input
+    const item = document.createElement('input');
+    item.className = 'w-full pt-6 pb-2 px-2 bg-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400';
+    container.appendChild(item);
+    
+    // Handle button click to show input
+    wrapper.addEventListener('mouseenter', (event) => {
+        event.stopPropagation(); // Prevent document click from immediately closing it
+        newAxisTriggerButton.classList.remove('w-8', 'opacity-100', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2');
+        newAxisTriggerButton.classList.add('top-1', 'left-1', 'scale-50', '-translate-y-1');
+        container.classList.remove('w-0', 'opacity-0');
+        container.classList.add('w-full', 'opacity-100');
+        setTimeout(() => item.focus(), 50); // Small delay to ensure transition completes
+    });
+    
+    wrapper.addEventListener('mouseleave', (event) => {
+        newAxisTriggerButton.classList.remove('top-1', 'left-1', 'scale-50', '-translate-y-1');
+        newAxisTriggerButton.classList.add('w-8', 'opacity-100', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2');
+        container.classList.remove('w-full', 'opacity-100');
+        container.classList.add('w-0', 'opacity-0');
+    });
+
+    // Handle Enter key or blur to submit
+    const handleSubmit = async () => {
+        if (item.value.trim()) {
+            designSpace[item.value.trim()] = ["exploring", ""];
+            await saveDesignSpace();
+            renderDesignSpace();
+            
+            // Reset and collapse input after submission
+            item.value = '';
+            container.classList.remove('w-64', 'opacity-100');
+            container.classList.add('w-0', 'opacity-0');
+        }
+    };
+    
+    // Handle input submission with Enter key
+    item.addEventListener('change', handleSubmit);
+    
+    return wrapper;
+}
+
 async function renderDesignSpace() {
     const designSpaceContainer = document.getElementById('designSpaceList');
     designSpaceContainer.innerHTML = '';
@@ -405,7 +474,6 @@ async function renderDesignSpace() {
         const item = document.createElement('input');
         const label = document.createElement('label');
         label.className = 'text-xs text-gray-500 absolute top-2 left-2 flex items-start justify-center gap-1';
-
         const itemIcon = document.createElement('div');
         itemIcon.innerHTML = icons[status];
         const currentColor = status === "exploring" ? "green-500" : status === "unconstrained" ? "red-500" : "blue-500";
@@ -444,7 +512,9 @@ async function renderDesignSpace() {
         container.appendChild(createDesignAxisControls(axis, status, value));
         designSpaceContainer.appendChild(container);
     }
+    designSpaceContainer.appendChild(createNewDesignAxis());
 }
+
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
