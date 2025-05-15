@@ -414,7 +414,7 @@ function createNewDesignAxis() {
     
     // Create the button
     const newAxisTriggerButton = document.createElement('button');
-    newAxisTriggerButton.className = 'bg-transparent rounded-md w-8 h-8 opacity-100 transition-all flex items-center justify-center z-10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2';
+    newAxisTriggerButton.className = 'bg-transparent rounded-md w-8 h-8 opacity-100 transition-all duration-300 flex items-center justify-center z-10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-180';
     newAxisTriggerButton.innerHTML = icons["new"];
     wrapper.appendChild(newAxisTriggerButton);
     
@@ -441,16 +441,16 @@ function createNewDesignAxis() {
     // Handle button click to show input
     wrapper.addEventListener('mouseenter', (event) => {
         event.stopPropagation(); // Prevent document click from immediately closing it
-        newAxisTriggerButton.classList.remove('w-8', 'opacity-100', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2');
-        newAxisTriggerButton.classList.add('top-1', 'left-1', 'scale-50', '-translate-y-1');
+        newAxisTriggerButton.classList.remove('w-8', 'opacity-100', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2', 'rotate-180');
+        newAxisTriggerButton.classList.add('top-1', 'left-1', 'scale-50', '-translate-y-1', 'rotate-0');
         container.classList.remove('w-0', 'opacity-0');
         container.classList.add('w-full', 'opacity-100');
         setTimeout(() => item.focus(), 50); // Small delay to ensure transition completes
     });
     
     wrapper.addEventListener('mouseleave', (event) => {
-        newAxisTriggerButton.classList.remove('top-1', 'left-1', 'scale-50', '-translate-y-1');
-        newAxisTriggerButton.classList.add('w-8', 'opacity-100', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2');
+        newAxisTriggerButton.classList.remove('top-1', 'left-1', 'scale-50', '-translate-y-1', 'rotate-0');
+        newAxisTriggerButton.classList.add('w-8', 'opacity-100', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2', 'rotate-180');
         container.classList.remove('w-full', 'opacity-100');
         container.classList.add('w-0', 'opacity-0');
     });

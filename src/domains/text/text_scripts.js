@@ -24,7 +24,7 @@ function render(id, content, fileName) {
   // Create image element
   const textElement = document.createElement('div');
   textElement.textContent = content.text;
-  textElement.className = 'p-4 text-sm w-full overflow-y-auto aspect-square';
+  textElement.className = 'p-4 text-sm w-full overflow-y-auto aspect-square font-serif pb-24';
   
   container.appendChild(textElement);
   
@@ -41,13 +41,14 @@ function renderTags(fileData, container) {
         fileData.content.tags.forEach(([dimension, tag]) => {
             const tagElement = document.createElement('span');
             tagElement.textContent = tag;
-            tagElement.className = 'tag bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] text-white hover:bg-white/30 hover:scale-105 cursor-pointer font-sans active:scale-95 transition-all';
+            tagElement.className = 'tag bg-white/50 backdrop-blur-md px-2 py-1 rounded-full text-xs text-foreground hover:bg-white/30 hover:scale-105 cursor-pointer font-sans active:scale-95 transition-all border border-gray-900/30 shadow-sm hover:backdrop-blur-sm';
 
             if (feedbackData[fileData.name]) {
                 if (feedbackData[fileData.name].includes(tag)) {
-                tagElement.className = tagElement.className.replace('bg-white/20', 'bg-green-300/30')
+                tagElement.className = tagElement.className.replace('bg-white/50', 'bg-green-300/30')
                     .replace('text-white', 'text-green-500')
-                    .replace('hover:bg-white/30', 'hover:bg-green-300/50');
+                    .replace('hover:bg-white/30', 'hover:bg-green-300/50')
+                    .replace('border-gray-900/30', 'border-green-500/30');
                 }
             }
             
@@ -57,9 +58,10 @@ function renderTags(fileData, container) {
                     saveFeedback(tag);
                 }
 
-                tagElement.className = tagElement.className.replace('bg-white/20', 'bg-green-300/30')
+                tagElement.className = tagElement.className.replace('bg-white/50', 'bg-green-300/30')
                     .replace('text-white', 'text-green-500')
-                    .replace('hover:bg-white/30', 'hover:bg-green-300/50');
+                    .replace('hover:bg-white/30', 'hover:bg-green-300/50')
+                    .replace('border-gray-900/30', 'border-green-500/30');
 
                 updateDesignSpace(dimension, tag);
                 renderTags(fileData, container);
@@ -70,7 +72,7 @@ function renderTags(fileData, container) {
     }
 
     const tagOverlay = document.createElement('div');
-    tagOverlay.className = 'bg-gradient-to-t from-black/85 via-black/60 to-transparent p-3 absolute bottom-0 left-0 w-full z-12 tag-overlay transition-all';
+    tagOverlay.className = 'bg-transparent p-3 absolute bottom-0 left-0 w-full z-12 tag-overlay transition-all';
     tagOverlay.id = "tag-overlay";
     // Append elements
     tagOverlay.appendChild(tagsContainer);

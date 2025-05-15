@@ -73,11 +73,13 @@ Here is a text:
 And here is a design space:
 {design_space}
 
-Extract a set of useful tags from the text. These could be objects, actions, adjectives, etc all present in the text. 
+For each dimension in the design space, extract a tag from the text that is relevant to the dimension.
 
-Each tag should be atomic and 1-3 words, and extremely brief, specific, and descriptive. They should be the building blocks on top of which the prompt is constucted. The tags should be based on any empty axes in the design space.
+Each tag should be atomic and 1-3 words, and extremely brief, specific, and descriptive. They should be the building blocks on top of which the prompt is constucted. The tags should be based on any empty axes in the design space. Focus on the abstract qualities of the text, not the specific details, like the tone, level of complexity, etc. Never mention a specific part of the text in the tag, only the abstract quality.
 
-The tags should be based on the design space, and there should be exactly ONE (1) tag for every axis labeled "exploring" or "unconstrained" in the design space. Do not create tags that are not based on the design space.
+The tags should be based on the design space, and there should be exactly ONE (1) tag for every axis labeled "exploring" or "unconstrained" in the design space. Do not create tags that are not based on the design space. For example, if the design space has an axis for "technical complexity", the tag should be "high technical complexity". As simple as possible.
+
+IMPORTANT: Each tag must be extremely relevant to the dimension that it is assigned to, and it should be immediately obvious from the tag what the dimension is.
 
 Enclose each tag in <tag></tag> XML tags, like this, and return the list of tags in a <tags></tags> XML tag:
 
@@ -101,7 +103,9 @@ Here is a concept that you will be generating text about: {concept}
 
 Generate a list of axes of the design space that is relevant to the concept and can enable a wide variety of different outputs. They should explicitly define axes where diversity can be achieved. 
 
-For example, for a concept of "recipe", the design space could be "cuisine type", "dietary restrictions", "cooking skill level", "prep time", "serving size", "meal type". Or for "product review", it could be "technical depth", "comparison focus", "target audience", "writing style", "product category", "review length".
+For example, for a concept of "product review", it could be "technical depth", "comparison focus", "target audience", "writing style", "product category", "review length". Make sure the axes are specific things that can be more diverse. When reading a concept, focus on the specific thing that has been requested of you, not the context provided (**A SLACK MESSAGE** to my professor)
+
+The design space should be a list of axes that are relevant to the output FORMAT, not the content itself. For example, an abstract for a technical paper might necessitate a design space with axes like "technical depth", "audience", "length", "focus on methods vs results", etc.
 
 You could also propose something like "proposing time?" where what is varied is whether the user proposes a time to meet or waits for the recipient to respond.
 

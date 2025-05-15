@@ -5,6 +5,8 @@ tailwind.config = {
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
                 tight: ['Inter Tight', 'sans-serif'],
+                mono: ['monospace', 'sans-serif'],
+                serif: ['New York', 'serif'],
             },
             colors: {
                 primary: '#3498db',
