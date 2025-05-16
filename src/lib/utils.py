@@ -4,7 +4,7 @@ import time
 from models.models import llm_call
 
 def pretty_name(name: str) -> str:
-    return llm_call(f"Make the name {name} follow normal grammer and make sense. Only give the name, no other text.", model="openai/gpt-4.1-nano")
+    return llm_call(f"Make a joke about the name {name}, that's like 4-5 words.", model="openai/gpt-4.1-nano")
 
 def parse_svg(response: str) -> str:
     # Extract SVG content between <svg> tags

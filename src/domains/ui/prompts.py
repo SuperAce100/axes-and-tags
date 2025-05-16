@@ -67,16 +67,22 @@ Here are the things the user likes about the UI:
 
 {feedback}
 """
-ui_insights_format = """
-Here are some prompts used to generate UIs
-{feedback}
-In a future prompt generation, which specific features need to be retained and which ones need to be changed. ONLY include a list of very specific features with detailed descriptions that must be constant in the future generation. (not "the button layout" but "a primary action button centered at the bottom with rounded corners and a blue gradient background")
 
-Think about it as a list of features and adjectives that must be consistent in the future generations, based on the preferences expressed by the user. If they say they like the navigation in an interface that includes a side drawer menu, it means that all future generations must include a side drawer menu.
 
-DO not adlib anything the user did not specifically mention in their feedback. Extract only what the user explicitly said they liked. Focus on UI elements, layouts, colors, interactions and visual hierarchy.
+ui_temp_design_space_format = """
+Here is a design space:
+{design_space}
 
-After defining the list of features that must be consistent, present a list of 3-5 features that can be varied.
+Based on the values in the design space, and the feedback from the user, fill in any axes specificaly labeled unconstrained in the design space with an arbitrarily chosen value.
+
+Return the updated design space in a <design_space></design_space> XML tag, with each axis represented as a key-value pair in the format <axis name="axis_name" status="constrained|unconstrained|exploring">axis_value</axis>. For example:
+
+<design_space>
+<axis name="car_type" status="constrained">sports</axis>
+<axis name="car_color" status="constrained">red</axis>
+<axis name="background" status="exploring"></axis>
+<axis name="camera_angle" status="unconstrained">wide angle</axis>
+</design_space>
 """
 
 ui_tags_format = """
@@ -86,16 +92,21 @@ Here is a prompt:
 {prompt}
 </prompt>
 
-Extract a set of 3-5 useful tags from the prompt. These could be objects, actions, adjectives, etc all present in the prompt. 
+And here is a design space:
+{design_space}
 
-Each tag should be atomic and 1-3 words, and extremely brief, specific, and descriptive. They should be the building blocks on top of which the propmt is constucted.
+Extract a set of useful tags from the prompt. These could be objects, actions, adjectives, etc all present in the prompt. 
+
+Each tag should be atomic and 1-3 words, and extremely brief, specific, and descriptive. They should be the building blocks on top of which the prompt is constucted. The tags should be based on any empty axes in the design space.
+
+The tags should be based on the design space, and there should be exactly ONE (1) tag for every axis labeled "exploring" or "unconstrained" in the design space. Do not create tags that are not based on the design space.
 
 Enclose each tag in <tag></tag> XML tags, like this, and return the list of tags in a <tags></tags> XML tag:
 
 <tags>
-<tag>TAG HERE</tag>
-<tag>TAG HERE</tag>
-<tag>TAG HERE</tag>
+<tag dimension="dimension_name">TAG HERE</tag>
+<tag dimension="dimension_name">TAG HERE</tag>
+<tag dimension="dimension_name">TAG HERE</tag>
 </tags>
 
 Here are some tags that have already been used:
@@ -105,4 +116,41 @@ Here are some tags that have already been used:
 </old_tags>
 
 Every tag you generate MUST NOT be in the old_tags list.
+"""
+
+ui_get_design_space_prompt = """
+Here is a concept that you will be generating an image of: {concept}
+
+Generate a list of axes of the design space that is relevant to the concept. For example, for a concept of "car", the design space could be "car_type", "car_color", "background", "camera_angle", etc... There should be between 4-6 concrete axes. Each axis should be 1-4 words and not duplicate the others.
+
+Return the list of axes in a <axes></axes> XML tag, like this:
+
+<axes>
+<axis>AXIS HERE</axis>
+<axis>AXIS HERE</axis>
+<axis>AXIS HERE</axis>
+</axes>
+"""
+
+ui_update_design_space_prompt = """
+You are tasked with updating a design spaced based on a summary of what the user likes and dislikes.
+
+Here is the design space:
+{design_space}
+
+Here is the feedback from the user:
+{feedback_data}
+
+Update the design space based on the feedback, only updating axes that are not fixed based on the feedback itself, and only updating the value of the axis if the user has explicitly mentioned it in their feedback. YOU MUST leave axes blank if the user has not mentioned it in their feedback. Update every axis that you take from the feedback. When you update an axis, make sure to set the status to "constrained".
+
+Of the axes that are not constrained, choose another axis to explore, and leave the rest of the axes unconstrained. If one is already exploring, don't change it.
+
+Return the updated design space in a <design_space></design_space> XML tag, with each axis represented as a key-value pair in the format <axis name="axis_name" status="constrained|unconstrained|exploring">axis_value</axis>. For example:
+
+<design_space>
+<axis name="car_type" status="constrained">sports</axis>
+<axis name="car_color" status="constrained">red</axis>
+<axis name="background" status="exploring"></axis>
+<axis name="camera_angle" status="unconstrained"></axis>
+</design_space>
 """
