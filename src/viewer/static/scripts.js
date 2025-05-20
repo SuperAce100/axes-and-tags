@@ -534,12 +534,23 @@ async function renderDesignSpace() {
   let index = 0;
 
   // Render each status group
-  for (const status of ["exploring", "constrained", "unconstrained"]) {
+  for (const status of ["constrained", "exploring", "unconstrained"]) {
     if (grouped[status].length > 0) {
       // Add section header
       const header = document.createElement("div");
-      header.className = "text-lg font-medium tracking-tight text-gray-700 mb-2 mt-4 first:mt-0";
-      header.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+      header.className =
+        "text-lg font-medium tracking-tight text-gray-700 mb-2 mt-4 first:mt-0 opacity-0 translate-y-4 scale-80 duration-500 filter blur-md";
+      header.textContent =
+        status === "constrained"
+          ? "Filtered"
+          : status === "exploring"
+          ? "Exploring"
+          : "Suggestions for Exploration";
+
+      setTimeout(() => {
+        header.classList.remove("opacity-0", "translate-y-4", "scale-80", "filter", "blur-md");
+        header.classList.add("opacity-100", "translate-y-0", "scale-100");
+      }, index * 100);
       designSpaceContainer.appendChild(header);
 
       // Render items in this group
