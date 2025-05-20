@@ -7,6 +7,7 @@ let isClosing = false;
 let usedExamples = {};
 let isFirstRender = true;
 let designSpace = {};
+let highlightedAxis = null;
 // Select a file
 async function selectFile(file) {
   try {
@@ -544,7 +545,8 @@ async function renderDesignSpace() {
       // Render items in this group
       for (const { axis, value } of grouped[status]) {
         const container = document.createElement("div");
-        container.className = "relative";
+        container.id = "design-space-container-" + axis;
+        container.className = "relative rounded-lg overflow-hidden";
         const item = document.createElement("input");
         const label = document.createElement("label");
         label.className =
@@ -565,7 +567,6 @@ async function renderDesignSpace() {
         item.id = "design-space-" + axis;
         item.className =
           "transition-all relative overflow-hidden hover:bg-gray-300 bg-gray-200 p-2 rounded-lg shadow-sm pt-6 w-full focus:outline-none focus:ring-2 focus:ring-gray-400";
-
         if (status === "unconstrained") {
           item.placeholder = value;
           item.value = "";
