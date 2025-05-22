@@ -3,7 +3,7 @@ import json
 import numpy as np
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
-from models.models import llm_call, text_model as language_model
+from models.llms import llm_call, text_model as language_model
 import concurrent.futures
 from rich.progress import track
 from domains.shaders.prompts import *

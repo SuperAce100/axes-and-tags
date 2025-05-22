@@ -1,66 +1,18 @@
-from collections.abc import Callable
-import os
-import random
-import time
+from designspace import DesignSpace, Generation
 from domains.domain import Domain
-from domains.imagegen.image_viewer import ImageViewer
-from domains.imagegen.generate_imagegen import generate_image, generate_image_multiple, collect_examples, load_image_from_feedback, save_images, expand_prompt, extract_tags, generate_insights, get_design_space, update_design_space
-from models.models import text_model
-from typing import List, Tuple, Dict, Any, Callable
+from domains.imagegen.generate_imagegen import generate_image
+from models.llms import text_model
 from rich.console import Console
 
 class ImageGen(Domain):
-    def __init__(self, concept: str, data_dir: str, model: str = text_model, console: Console = Console()):
-        super().__init__(name="imagegen", display_name=concept, data_dir=data_dir, model=model, console=console)
-        self.concept = concept
+    def __init__(self, data_dir: str, model: str = text_model, console: Console = Console()):
+        super().__init__(
+            name="image", 
+            display_name="Image", 
+            data_dir=data_dir, 
+            model=model, 
+            console=console, 
+            scripts_path="domains/imagegen/image_scripts.js")
 
-    def run_viewer(self, title: str, port: int, path: str, used_examples: List[str] = None, design_space: Dict[str, Tuple[str, str]] = None, update_design_space: Callable[[Dict[str, Tuple[str, str]], Dict[str, List[str]]], None] = None) -> None:
-        viewer = ImageViewer(
-            concept=self.concept,
-            image_folder=path, 
-            output_path=self.examples_dir, 
-            title=title, 
-            port=port, 
-            console=self.console,
-            used_examples=used_examples,
-            design_space=design_space,
-            update_design_space=update_design_space
-        )
-        return viewer.run()
-
-    def generate_multiple(self, n: int, examples: str, old_tags: List[str], design_space: Dict[str, Tuple[str, str]]) -> List[str]:
-        return generate_image_multiple(self.concept, examples, n, old_tags, design_space, text_model=self.model)
-
-    def collect_examples(self, n: int) -> Tuple[str, List[str]]:
-        return collect_examples(self.concept, self.examples_dir, n)
-
-    def feedback_examples(self, feedback: Dict[str, List[str]], results_dir: str, design_space: Dict[str, Tuple[str, str]]) -> str:
-        return load_image_from_feedback(self.concept, feedback, results_dir, design_space)
-    
-    def extract_tags(self, prompt: str, old_tags: List[str], design_space: Dict[str, Tuple[str, str]] = {}) -> List[str]:
-        return extract_tags(prompt, old_tags, self.model, design_space)
-
-    def generate_insights(self, feedback: str) -> Tuple[str, Dict[str, Tuple[str, str]]]:
-        return generate_insights(feedback, self.model)
-    
-    def get_design_space(self) -> Dict[str, Tuple[str, str]]:
-        return get_design_space(self.concept, self.model)
-    
-    def update_design_space(self, design_space: Dict[str, Tuple[str, str]], feedback_data: Dict[str, List[str]]) -> Dict[str, Tuple[str, str]]:
-        return update_design_space(design_space, feedback_data, self.model)
-
-    def name_output_dir(self) -> str:
-        timestamp = int(time.time())
-        random_suffix = random.randint(1000, 9999)
-        return f"{self.output_dir}/{self.concept}_{timestamp}_{random_suffix}"
-
-    def save_result(self, results: Tuple[List[str], List[str], List[str]], path: str = None) -> str:
-        if path is None:
-            path = self.name_output_dir()
-        
-        prompts = [r for r in results[0]]
-        image_urls = [r for r in results[1]]
-        tags = [r for r in results[2]]
-
-        save_images(image_urls, prompts, tags, path)
-        return path
+    def generate_one(self, concept: str, design_space: DesignSpace, model: str = text_model) -> Generation:
+        return generate_image(concept, design_space, text_model=model)

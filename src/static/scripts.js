@@ -1,169 +1,12 @@
-// Global variables
-let files = [];
-let selectedFile = null;
-let selectedIndex = -1;
-let feedbackData = {};
-let isClosing = false;
-let usedExamples = {};
 let isFirstRender = true;
-let designSpace = {};
+
+let concept = null;
+let domain = null;
+let designSpace = null;
+let generations = [];
+
 let highlightedAxis = null;
-// Select a file
-async function selectFile(file) {
-  try {
-    const response = await fetch("/api/select", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ file }),
-    });
 
-    if (response.ok) {
-      selectedFile = file;
-
-      selectedIndex = files.findIndex((f) => f.name === file);
-      await loadFeedback(file);
-      renderGrid();
-    } else {
-      showStatus("Error selecting file", "error");
-    }
-  } catch (error) {
-    showStatus("Error selecting file: " + error.message, "error");
-  }
-}
-
-// Load feedback for a specific file
-async function loadFeedback(file) {
-  try {
-    const response = await fetch(`/api/feedback/${file}`);
-    const data = await response.json();
-
-    feedbackData[file] = data.feedback;
-  } catch (error) {
-    console.error("Error loading feedback:", error);
-  }
-}
-
-async function getFeedbackData() {
-  const response = await fetch("/api/all-feedback");
-  const data = await response.json();
-  feedbackData = data;
-  console.log("feedbackData", feedbackData);
-}
-
-// Save feedback for selected file
-async function saveFeedback(feedback) {
-  // if (!feedback) {
-  //     feedback = document.getElementById('feedbackInput').value.trim();
-  // }
-
-  if (!feedback) {
-    showStatus("Please enter feedback", "error");
-    return;
-  }
-
-  if (!selectedFile) {
-    showStatus("Please select an object first", "error");
-    return;
-  }
-
-  try {
-    const response = await fetch("/api/feedback", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ file: selectedFile, feedback }),
-    });
-
-    console.log({ file: selectedFile, feedback });
-
-    if (response.ok) {
-      showStatus(`Feedback saved for ${selectedFile}`, "success");
-      // document.getElementById('feedbackInput').value = '';
-
-      // Reload feedback for the selected file
-      await loadFeedback(selectedFile);
-
-      renderGrid();
-    } else {
-      showStatus("Error saving feedback", "error");
-    }
-  } catch (error) {
-    showStatus("Error saving feedback: " + error.message, "error");
-  }
-}
-
-async function saveDesignSpace() {
-  const response = await fetch("/api/save-designspace", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ designSpace }),
-  });
-
-  if (response.ok) {
-    showStatus("Design space saved", "success");
-  } else {
-    showStatus("Error saving design space", "error");
-  }
-}
-
-// Save selected file
-async function saveSelected() {
-  if (!selectedFile) {
-    showStatus("No object selected", "error");
-    return;
-  }
-
-  try {
-    const response = await fetch("/api/save-selected", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({}),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      showStatus(`Object ${selectedFile} saved to ${data.path}`, "success");
-    } else {
-      showStatus("Error saving object", "error");
-    }
-  } catch (error) {
-    showStatus("Error saving object: " + error.message, "error");
-  }
-}
-
-// Close the viewer
-async function closeViewer() {
-  if (isClosing) return;
-
-  isClosing = true;
-  try {
-    const response = await fetch("/api/close", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (response.ok) {
-      window.close();
-    } else {
-      showStatus("Error closing viewer", "error");
-      isClosing = false;
-    }
-  } catch (error) {
-    showStatus("Error closing viewer: " + error.message, "error");
-    isClosing = false;
-  }
-}
-
-// Show status message
 function showStatus(message, type = "info") {
   const status = document.getElementById("status");
   status.textContent = message;
@@ -175,69 +18,28 @@ function showStatus(message, type = "info") {
   }, 3000);
 }
 
-async function fetchFiles() {
-  try {
-    const response = await fetch("/api/files");
-    files = await response.json();
-    // renderGrid();
-  } catch (error) {
-    showStatus("Error loading files: " + error.message, "error");
-  }
-}
-
-if (typeof renderTags === "undefined") {
-  function renderTags(fileData, container) {
-    // Create tags container
-    const tagsContainer = document.createElement("div");
-    tagsContainer.className = "flex gap-1 flex-wrap mt-1";
-
-    // Add each tag
-    if (fileData.content.tags && Array.isArray(fileData.content.tags)) {
-      fileData.content.tags.forEach((tag) => {
-        const tagElement = document.createElement("span");
-        tagElement.textContent = tag;
-        tagElement.className =
-          "tag bg-gray-100 px-1.5 py-0.5 rounded-full text-[10px] text-gray-600 hover:bg-gray-200 hover:scale-105 cursor-pointer font-sans active:scale-95 transition-all";
-
-        if (feedbackData[fileData.name]) {
-          if (feedbackData[fileData.name].includes(tag)) {
-            tagElement.className = tagElement.className
-              .replace("bg-gray-100", "bg-green-100")
-              .replace("text-gray-600", "text-green-600")
-              .replace("hover:bg-gray-200", "hover:bg-green-200");
-          }
-        }
-
-        tagElement.addEventListener("click", async () => {
-          if (fileData.name) {
-            await selectFile(fileData.name);
-            saveFeedback(tag);
-          }
-        });
-        tagsContainer.appendChild(tagElement);
-      });
-    }
-
-    const tagOverlay = document.createElement("div");
-    tagOverlay.className = "bg-white/80 backdrop-blur-sm p-3 pt-0 w-full z-12";
-    tagOverlay.id = "tag-overlay";
-    // Append elements
-    tagOverlay.appendChild(tagsContainer);
-    container.appendChild(tagOverlay);
-  }
-}
-
-// Render files in the grid
 function renderGrid() {
   console.log("Rendering files");
   const grid = document.getElementById("mainGrid");
   grid.innerHTML = "";
 
-  files.forEach((fileData, index) => {
+  if (generations.length === 0) {
+    grid.innerHTML = `
+      <div class="flex flex-col items-center gap-4">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"></div>
+        <div class="text-gray-500">Generating designs...</div>
+      </div>
+    `;
+    grid.className = "col-span-3 flex flex-col items-center justify-center py-48";
+    return;
+  } else {
+    grid.className = "col-span-3 grid grid-cols-3 gap-4";
+  }
+
+  generations.forEach((generation, index) => {
     const item = document.createElement("div");
 
-    const fileName = fileData.name;
-    const fileContent = fileData.content;
+    const content = generation.content;
 
     const previewDiv = document.createElement("div");
     previewDiv.className =
@@ -254,8 +56,8 @@ function renderGrid() {
     }
     grid.appendChild(item);
 
-    render("preview-" + index, fileContent, fileName);
-    renderTags(fileData, previewDiv);
+    render("preview-" + index, content, generation.prompt);
+    renderTags(generation.tags, previewDiv);
 
     // Animate in with a delay based on index
     if (isFirstRender) {
@@ -264,76 +66,16 @@ function renderGrid() {
         item.classList.add("opacity-100", "translate-y-0", "scale-100");
       }, index * 100);
     }
-
-    item.addEventListener("click", () => {
-      selectFile(fileName);
-    });
-
-    item.addEventListener("dblclick", () => {
-      saveSelected();
-    });
   });
 }
 
-async function fetchUsedExamples() {
-  const response = await fetch("/api/used-examples");
-  const data = await response.json();
-  usedExamples = data.used_examples;
-  console.log("used examples", data);
-}
-
-function renderUsedExamples() {
-  usedExamplesContainer = document.getElementById("usedExamples");
-
-  console.log("usedExamples", usedExamples);
-
-  if (Object.keys(usedExamples).length === 0) {
-    console.log("No used examples");
-    usedExamplesContainer.classList.add("hidden");
-    return;
-  } else {
-    usedExamplesContainer.classList.remove("hidden");
+async function updateDesignSpace(dimension, value, status) {
+  const axis = designSpace.axes.find((axis) => axis.name === dimension);
+  if (axis) {
+    axis.value = value;
+    axis.status = status;
   }
 
-  const usedExamplesList = document.getElementById("usedExamplesList");
-  usedExamplesList.innerHTML = "";
-
-  for (const [file, feedbacks] of Object.entries(usedExamples)) {
-    const fileContent = feedbacks.content;
-    const newFeedbacks = feedbacks.feedback;
-    newFeedbacks.forEach((feedback, index) => {
-      const item = document.createElement("div");
-      item.id = "used-example-" + file;
-      item.className =
-        "aspect-square bg-white rounded-lg shadow-md transition-all relative overflow-hidden hover:-translate-y-0.5";
-      if (isFirstRender) {
-        item.className =
-          item.className + " opacity-0 translate-y-4 scale-80 duration-500 filter blur-md";
-      }
-      usedExamplesList.appendChild(item);
-
-      renderExample(item, fileContent, feedback);
-
-      if (isFirstRender) {
-        setTimeout(() => {
-          item.classList.remove("opacity-0", "translate-y-4", "scale-80", "filter", "blur-md");
-          item.classList.add("opacity-100", "translate-y-0", "scale-100");
-        }, index * 100);
-      }
-    });
-  }
-}
-
-async function fetchDesignSpace() {
-  const response = await fetch("/api/design-space");
-  const data = await response.json();
-  designSpace = data.design_space;
-  console.log("designSpace", data);
-}
-
-async function updateDesignSpace(dimension, value) {
-  designSpace[dimension] = ["constrained", value];
-  await saveDesignSpace();
   renderDesignSpace();
 }
 
@@ -354,8 +96,9 @@ async function fetchDesignSpaceIcons() {
     })
   );
 }
+fetchDesignSpaceIcons();
 
-function createDesignAxisControls(axis, status, value) {
+function createDesignAxisControls(axis, status) {
   const container = document.createElement("div");
   container.className =
     "absolute right-0 top-0 w-24 h-full flex gap-1 justify-end items-center p-2 hover:w-fit hover:min-w-24 transition-all z-10 group";
@@ -387,26 +130,19 @@ function createDesignAxisControls(axis, status, value) {
   }
 
   exploreButton.addEventListener("click", async () => {
-    designSpace[axis] = ["exploring", value];
-    await saveDesignSpace();
-    renderDesignSpace();
+    updateDesignSpace(axis.name, axis.value, "exploring");
   });
 
   unconstrainedButton.addEventListener("click", async () => {
-    designSpace[axis] = ["unconstrained", value];
-    await saveDesignSpace();
-    renderDesignSpace();
+    updateDesignSpace(axis.name, axis.value, "unconstrained");
   });
 
   constrainedButton.addEventListener("click", async () => {
-    designSpace[axis] = ["constrained", value];
-    await saveDesignSpace();
-    renderDesignSpace();
+    updateDesignSpace(axis.name, axis.value, "constrained");
   });
 
   deleteButton.addEventListener("click", async () => {
-    delete designSpace[axis];
-    await saveDesignSpace();
+    designSpace.axes = designSpace.axes.filter((a) => axis.name !== a.name);
     renderDesignSpace();
   });
 
@@ -418,18 +154,15 @@ function createDesignAxisControls(axis, status, value) {
 }
 
 function createNewDesignAxis() {
-  // Create the wrapper first
   const wrapper = document.createElement("div");
   wrapper.className = "relative";
 
-  // Create the button
   const newAxisTriggerButton = document.createElement("button");
   newAxisTriggerButton.className =
     "bg-transparent rounded-md w-8 h-8 opacity-100 transition-all duration-300 flex items-center justify-center z-10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-180";
   newAxisTriggerButton.innerHTML = icons["new"];
   wrapper.appendChild(newAxisTriggerButton);
 
-  // Create the input container
   const container = document.createElement("div");
   container.className = "w-0 h-9 opacity-0 transition-all duration-300";
   wrapper.appendChild(container);
@@ -438,22 +171,21 @@ function createNewDesignAxis() {
   label.className =
     "text-xs text-gray-500 absolute top-2 left-2 flex items-start justify-center gap-1";
   const itemIcon = document.createElement("div");
-  // itemIcon.innerHTML = icons["new"];
+
   itemIcon.className = `text-gray-500 scale-50 -translate-y-0.5 -translate-x-0.5 w-4 h-4`;
   label.appendChild(itemIcon);
   const itemLabel = document.createElement("span");
   itemLabel.innerHTML = "add new axis";
   label.appendChild(itemLabel);
   container.appendChild(label);
-  // Create the input
+
   const item = document.createElement("input");
   item.className =
     "w-full pt-6 pb-2 px-2 bg-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400";
   container.appendChild(item);
 
-  // Handle button click to show input
   wrapper.addEventListener("mouseenter", (event) => {
-    event.stopPropagation(); // Prevent document click from immediately closing it
+    event.stopPropagation();
     newAxisTriggerButton.classList.remove(
       "w-8",
       "opacity-100",
@@ -466,7 +198,7 @@ function createNewDesignAxis() {
     newAxisTriggerButton.classList.add("top-1", "left-1", "scale-50", "-translate-y-1", "rotate-0");
     container.classList.remove("w-0", "opacity-0");
     container.classList.add("w-full", "opacity-100");
-    setTimeout(() => item.focus(), 50); // Small delay to ensure transition completes
+    setTimeout(() => item.focus(), 50);
   });
 
   wrapper.addEventListener("mouseleave", (event) => {
@@ -490,45 +222,55 @@ function createNewDesignAxis() {
     container.classList.add("w-0", "opacity-0");
   });
 
-  // Handle Enter key or blur to submit
   const handleSubmit = async () => {
     if (item.value.trim()) {
-      designSpace[item.value.trim()] = ["exploring", ""];
-      await saveDesignSpace();
+      designSpace.axes.push({ name: item.value.trim(), status: "exploring", value: "" });
       renderDesignSpace();
 
-      // Reset and collapse input after submission
       item.value = "";
       container.classList.remove("w-64", "opacity-100");
       container.classList.add("w-0", "opacity-0");
     }
   };
 
-  // Handle input submission with Enter key
   item.addEventListener("change", handleSubmit);
 
   return wrapper;
 }
+
 async function renderDesignSpace() {
   const designSpaceContainer = document.getElementById("designSpaceList");
   designSpaceContainer.innerHTML = "";
   designSpaceContainer.className = "p-0 space-y-3 mt-4";
 
   console.log("designSpaceList", designSpace);
+
+  if (designSpace === null) {
+    designSpaceContainer.innerHTML = `
+      <div class="flex flex-col items-center gap-4">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"></div>
+        <div class="text-gray-500">Loading design space...</div>
+      </div>
+    `;
+    designSpaceContainer.className =
+      "flex flex-col items-center justify-center py-60 text-gray-500";
+    return;
+  } else {
+    designSpaceContainer.className = "p-0 space-y-3 mt-4";
+  }
+
   if (isFirstRender) {
     await fetchDesignSpaceIcons();
   }
 
-  // Group items by status
   const grouped = {
     exploring: [],
     constrained: [],
     unconstrained: [],
   };
 
-  // Sort items into groups
-  Object.entries(designSpace).forEach(([axis, [status, value]]) => {
-    grouped[status].push({ axis, value });
+  designSpace.axes.forEach((axis) => {
+    grouped[axis.status].push(axis);
   });
 
   let index = 0;
@@ -553,39 +295,38 @@ async function renderDesignSpace() {
       }, index * 100);
       designSpaceContainer.appendChild(header);
 
-      // Render items in this group
-      for (const { axis, value } of grouped[status]) {
+      for (const axis of grouped[status]) {
         const container = document.createElement("div");
-        container.id = "design-space-container-" + axis;
+        container.id = "design-space-container-" + axis.name;
         container.className = "relative rounded-lg overflow-hidden";
         const item = document.createElement("input");
         const label = document.createElement("label");
         label.className =
           "text-xs text-gray-500 absolute top-2 left-2 flex items-start justify-center gap-1";
         const itemIcon = document.createElement("div");
-        itemIcon.innerHTML = icons[status];
+        itemIcon.innerHTML = icons[axis.status];
         const currentColor =
-          status === "exploring"
+          axis.status === "exploring"
             ? "green-500"
-            : status === "unconstrained"
+            : axis.status === "unconstrained"
             ? "purple-500"
             : "blue-500";
         itemIcon.className = `text-${currentColor} scale-50 -translate-y-0.5 -translate-x-0.5 w-4 h-4`;
         label.appendChild(itemIcon);
         const itemLabel = document.createElement("span");
-        itemLabel.innerHTML = axis;
+        itemLabel.innerHTML = axis.name;
         label.appendChild(itemLabel);
-        item.id = "design-space-" + axis;
+        item.id = "design-space-" + axis.name;
         item.className =
           "transition-all relative overflow-hidden hover:bg-gray-300 bg-gray-200 p-2 rounded-lg shadow-sm pt-6 w-full focus:outline-none focus:ring-2 focus:ring-gray-400";
-        if (status === "unconstrained") {
-          item.placeholder = value;
+        if (axis.status === "unconstrained") {
+          item.placeholder = axis.value;
           item.value = "";
-        } else if (status === "exploring") {
+        } else if (axis.status === "exploring") {
           item.value = "";
           item.placeholder = "exploring";
-        } else if (status === "constrained") {
-          item.value = value;
+        } else if (axis.status === "constrained") {
+          item.value = axis.value;
         }
 
         if (isFirstRender) {
@@ -606,12 +347,13 @@ async function renderDesignSpace() {
         container.appendChild(item);
         container.appendChild(label);
         item.addEventListener("change", async (event) => {
-          designSpace[axis] = ["constrained", event.target.value];
-          await saveDesignSpace();
+          axis.value = event.target.value;
+          axis.status = "constrained";
+          await updateDesignSpace(axis.name, axis.value, axis.status);
           renderDesignSpace();
           console.log("designSpace updated", designSpace);
         });
-        container.appendChild(createDesignAxisControls(axis, status, value));
+        container.appendChild(createDesignAxisControls(axis, status));
         designSpaceContainer.appendChild(container);
         index++;
       }
@@ -621,26 +363,95 @@ async function renderDesignSpace() {
   designSpaceContainer.appendChild(createNewDesignAxis());
 }
 
+function regenerate() {
+  generations = [];
+  renderGrid();
+
+  fetch("/api/generate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      concept: concept,
+      domain: domain,
+      design_space: designSpace?.model_dump?.() || designSpace,
+    }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        if (response.status === 422) {
+          console.error("Invalid design space:", designSpace);
+          throw new Error("Invalid design space format - please check the console for details");
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("regenerated", data);
+      isFirstRender = true;
+      generations = data.generations;
+      if (data.design_space !== designSpace) {
+        designSpace = data.design_space;
+        renderDesignSpace();
+      }
+      renderGrid();
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      showStatus(error.message || "Failed to regenerate designs", "error");
+    });
+
+  setTimeout(() => {
+    isFirstRender = false;
+  }, 1000);
+}
+
 // Initialize
 document.addEventListener("DOMContentLoaded", async () => {
   isFirstRender = true;
 
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      closeViewer();
-    }
-  });
+  concept = window.location.pathname.split("/").pop();
+  domain = window.location.pathname.split("/")[window.location.pathname.split("/").length - 2];
 
-  await fetchFiles();
-  console.log(files);
-  await getFeedbackData();
-  console.log(feedbackData);
-  await fetchUsedExamples();
-  await fetchDesignSpace();
+  console.log("concept", concept);
+  console.log("domain", domain);
 
-  renderUsedExamples();
   renderDesignSpace();
   renderGrid();
+
+  fetch("/api/generate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      concept: concept,
+      domain: domain,
+      design_space: null,
+    }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      designSpace = data.design_space;
+      generations = data.generations;
+      console.log("generations", generations);
+      renderGrid();
+      renderDesignSpace();
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      showStatus("Failed to generate designs", "error");
+    });
+
+  const regenerateButton = document.getElementById("regenerateButton");
+  regenerateButton.addEventListener("click", regenerate);
 
   setTimeout(() => {
     isFirstRender = false;

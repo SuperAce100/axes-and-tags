@@ -2,20 +2,9 @@
 
 image_gen_expand_system_prompt = """
 You are a helpful assistant that expands prompts for image generation.
-
 You will be given a concept and a list of examples.
-
 You will need to expand the concept into a more detailed prompt that will be used to generate an image.
-
 The expanded prompt should be more specific and detailed than the original concept.
-
-The expanded prompt should be in the style of the examples.
-
-Here are some examples:
-
-<examples>
-{examples}
-</examples>
 """
 
 image_gen_expand_system_prompt_extend = """
@@ -31,8 +20,8 @@ EXAMPLE PROMPT HERE
 """
 
 image_gen_expand_one_prompt = """
+Generate a new prompt that is different from the original prompt, but follows the design space exactly.
 Your expansion must follow all axes of this design space exactly:
-
 <design_space>
 {design_space}
 </design_space>
@@ -67,6 +56,9 @@ Expand the following concept:
 <concept>
 {concept}
 </concept>
+
+Here is a precise description of what needs to be constrained in your expanded prompt:
+{design_space}
 """
 
 image_gen_examples_format = """

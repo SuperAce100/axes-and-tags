@@ -1,7 +1,7 @@
 import json
 from tqdm import tqdm
 from domains.threejs.prompts import *
-from models.models import llm_call, text_model
+from models.llms import llm_call, text_model
 from lib.utils import parse_threejs
 import os
 import concurrent.futures

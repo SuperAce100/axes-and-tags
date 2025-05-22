@@ -3,7 +3,7 @@ from rich.console import Console
 from domains.imagegen.imagegen import ImageGen
 from domains.text.textgen import TextGen
 from domains.ui.ui import UIGen
-from models.models import cerebras_model
+from models.llms import cerebras_model
 
 # Initialize rich console
 console = Console()

@@ -7,7 +7,7 @@ import numpy as np
 from pydantic import BaseModel
 import requests
 from sentence_transformers import SentenceTransformer
-from models.models import llm_call, text_model as language_model
+from models.llms import llm_call, text_model as language_model
 import fal_client
 import concurrent.futures
 from rich.progress import track

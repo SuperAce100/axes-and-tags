@@ -5,7 +5,7 @@ import time
 from domains.domain import Domain
 from domains.ui.generate_ui import generate_ui_multiple, collect_examples, load_ui_from_feedback, save_ui, expand_prompt, extract_tags, generate_insights, get_design_space, update_design_space
 from domains.ui.ui_viewer import UIViewer
-from models.models import text_model
+from models.llms import text_model
 from typing import List, Tuple, Dict
 from rich.console import Console
 

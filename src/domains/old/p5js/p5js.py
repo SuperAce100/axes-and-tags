@@ -4,7 +4,7 @@ import time
 from domains.domain import Domain
 from domains.p5js.generate_p5 import generate_p5js_multiple, load_p5js_from_feedback, collect_examples, extract_tags, generate_insights, save_p5js
 from domains.p5js.p5_viewer import P5JSViewer
-from models.models import text_model
+from models.llms import text_model
 from typing import List, Tuple, Dict
 from rich.console import Console
 

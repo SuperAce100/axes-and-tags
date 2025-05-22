@@ -4,7 +4,7 @@ import time
 from domains.domain import Domain
 from domains.dormroom.dormroom_viewer import DormRoomViewer
 from domains.dormroom.generate_dormroom import generate_dsl, generate_dsl_multiple, collect_examples, load_dsl_from_feedback, save_dsl
-from models.models import text_model
+from models.llms import text_model
 from typing import List, Tuple, Dict
 from rich.console import Console
 

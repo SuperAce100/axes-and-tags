@@ -4,7 +4,7 @@ import time
 from domains.domain import Domain
 from domains.shaders.generate_shader import generate_shader_multiple, collect_examples, load_shader_from_feedback, save_shader, expand_prompt, extract_tags, generate_insights
 from domains.shaders.shader_viewer import ShaderViewer
-from models.models import text_model
+from models.llms import text_model
 from typing import List, Tuple, Dict
 from rich.console import Console
 

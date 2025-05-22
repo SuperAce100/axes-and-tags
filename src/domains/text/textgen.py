@@ -5,7 +5,7 @@ import time
 from domains.domain import Domain
 from domains.text.text_viewer import TextViewer
 from domains.text.generate_text import generate_text_multiple, collect_examples, load_text_from_feedback, extract_tags, generate_insights, get_design_space, update_design_space, save_text
-from models.models import text_model
+from models.llms import text_model
 from typing import List, Tuple, Dict, Any, Callable
 from rich.console import Console
 

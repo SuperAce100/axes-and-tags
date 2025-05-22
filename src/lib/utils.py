@@ -1,7 +1,7 @@
 import random
 import re
 import time
-from models.models import llm_call
+from models.llms import llm_call
 
 def pretty_name(name: str) -> str:
     return llm_call(f"Make a joke about the name {name}, that's like 4-5 words.", model="openai/gpt-4.1-nano")

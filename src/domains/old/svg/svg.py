@@ -4,7 +4,7 @@ import time
 from domains.domain import Domain
 from domains.svg.svg_viewer import SVGViewer
 from domains.svg.generate_svg import collect_examples, extract_tags, generate_svg_multiple, generate_insights, load_svgs_from_feedback, save_svgs
-from models.models import text_model
+from models.llms import text_model
 from typing import List, Tuple, Dict
 from rich.console import Console
 

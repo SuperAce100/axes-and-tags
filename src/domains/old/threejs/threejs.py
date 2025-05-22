@@ -4,7 +4,7 @@ import time
 from domains.domain import Domain
 from domains.threejs.threejs_viewer import ThreeJSViewer
 from domains.threejs.generate_threejs import collect_examples, extract_tags, generate_threejs_multiple, generate_insights, load_models_from_feedback, save_models
-from models.models import text_model
+from models.llms import text_model
 from typing import List, Tuple, Dict
 from rich.console import Console
 

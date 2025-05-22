@@ -32,13 +32,13 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-function render(id, content, fileName) {
+function render(id, content, prompt) {
   const container = document.getElementById(id);
   container.className = "relative";
 
   // Create image element
   const imgElement = document.createElement("img");
-  imgElement.src = `data:image/png;base64,${content.data}`;
+  imgElement.src = `data:image/png;base64,${content}`;
   imgElement.className = "w-full h-full object-contain";
 
   // Create prompt overlay with gradient
@@ -48,7 +48,7 @@ function render(id, content, fileName) {
 
   // Create prompt text element
   const promptElement = document.createElement("div");
-  promptElement.textContent = content.prompt;
+  promptElement.textContent = prompt;
   promptElement.className =
     "text-white text-xs max-w-full overflow-hidden leading-tight font-sans max-h-[2.5em] hover:max-h-[200px] transition-all mask-b-from-0% mask-b-to-20%";
 
@@ -61,55 +61,52 @@ function render(id, content, fileName) {
   return imgElement;
 }
 
-function renderTags(fileData, container) {
+function renderTags(tags, container) {
+  console.log("tags", tags);
   // Create tags container
   const tagsContainer = document.createElement("div");
   tagsContainer.className = "flex gap-1 flex-wrap mt-1";
 
   // Add each tag
-  if (fileData.content.tags && Array.isArray(fileData.content.tags)) {
-    fileData.content.tags.forEach(([dimension, tag]) => {
+  if (tags && Array.isArray(tags)) {
+    tags.forEach((tag) => {
       const tagElement = document.createElement("span");
-      tagElement.textContent = tag;
+      tagElement.textContent = tag.value;
       tagElement.className =
         "tag bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] text-white hover:bg-white/30 hover:scale-105 cursor-pointer font-sans active:scale-95 transition-all";
 
-      if (feedbackData[fileData.name]) {
-        if (feedbackData[fileData.name].includes(tag)) {
-          tagElement.className = tagElement.className
-            .replace("bg-white/20", "bg-green-300/30")
-            .replace("text-white", "text-green-500")
-            .replace("hover:bg-white/30", "hover:bg-green-300/50");
-        }
+      if (
+        designSpace.axes.find((axis) => axis.name === tag.dimension).value === tag.value &&
+        designSpace.axes.find((axis) => axis.name === tag.dimension).status === "constrained"
+      ) {
+        tagElement.className = tagElement.className
+          .replace("bg-white/20", "bg-green-300/30")
+          .replace("text-white", "text-green-500")
+          .replace("hover:bg-white/30", "hover:bg-green-300/50");
       }
 
       tagElement.addEventListener("click", async () => {
-        if (fileData.name) {
-          await selectFile(fileData.name);
-          saveFeedback(tag);
-        }
-
         tagElement.className = tagElement.className
           .replace("bg-white/20", "bg-green-300/30")
           .replace("text-white", "text-green-500")
           .replace("hover:bg-white/30", "hover:bg-green-300/50");
 
-        updateDesignSpace(dimension, tag);
-        renderTags(fileData, container);
+        await updateDesignSpace(tag.dimension, tag.value, "constrained");
+        renderTags(tags, container);
       });
 
       tagElement.addEventListener("mouseenter", () => {
-        highlightedAxis = dimension;
+        highlightedAxis = tag.dimension;
         document
-          .getElementById("design-space-container-" + dimension)
-          .classList.add("scale-105", "shadow-md");
+          .getElementById("design-space-container-" + tag.dimension)
+          .classList.add("scale-105", "shadow-md", "ring-2", "ring-green-500", "ring");
       });
 
       tagElement.addEventListener("mouseleave", () => {
         highlightedAxis = null;
         document
-          .getElementById("design-space-container-" + dimension)
-          .classList.remove("scale-105", "shadow-md");
+          .getElementById("design-space-container-" + tag.dimension)
+          .classList.remove("scale-105", "shadow-md", "ring-2", "ring-green-500", "ring");
       });
 
       tagsContainer.appendChild(tagElement);
