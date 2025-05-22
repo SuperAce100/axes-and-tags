@@ -6,25 +6,25 @@ from rich.console import Console
 import argparse
 from viewer.viewer import Viewer
 from typing import Dict, Tuple
-class ImageViewer(Viewer):
+class TextViewer(Viewer):
     """
     A specialized viewer for SVG files.
     """
     def __init__(self, 
-                 image_folder: str, 
+                 text_folder: str, 
                  output_path: str = None, 
-                 title: str = "Image Viewer", 
+                 title: str = "Text Viewer", 
                  port: int = 8002, 
                  console: Console = None,
-                 concept: str = "image",
+                 concept: str = "text",
                  used_examples: list[str] = None,
                  design_space: dict[str, Tuple[str, str]] = None,
                  update_design_space: Callable[[Dict[str, Tuple[str, str]], Dict[str, list[str]]], None] = None):
         """
-        Initialize the ImageViewer.
+        Initialize the TextViewer.
         
         Args:
-            image_folder (str): Path to the folder containing image files
+            text_folder (str): Path to the folder containing text files
             output_path (str, optional): Path to save the selected object
             title (str, optional): Title for the viewer
             port (int, optional): Port to run the server on
@@ -32,13 +32,13 @@ class ImageViewer(Viewer):
         """
         
         super().__init__(
-            data_folder=str(image_folder),
+            data_folder=str(text_folder),
             output_path=output_path,
             concept=concept,
             title=title,
             port=port,
             console=console,
-            custom_scripts_path="domains/imagegen/image_scripts.js",
+            custom_scripts_path="domains/text/text_scripts.js",
             used_examples=used_examples,
             design_space=design_space,
             update_design_space=update_design_space

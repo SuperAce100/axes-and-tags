@@ -10,14 +10,11 @@ from models.models import llm_call, text_model as language_model
 import fal_client
 import concurrent.futures
 from rich.progress import track
-from domains.imagegen.prompts import *
+from domains.text.prompts import *
 from typing import List, Tuple, Dict
-from rich.console import Console
 
 img_model = "fal-ai/flux/schnell"
 
-def expand_prompt(concept: str, model: str = language_model, examples: str = "") -> str:
-    return llm_call(image_gen_expand_user_prompt.format(concept=concept), system_prompt=image_gen_expand_system_prompt.format(examples=examples), temperature=1)
 
 def collect_examples(concept: str,examples_dir: str = "examples", n: int = 5) -> list[str]:
     examples = ""
@@ -48,7 +45,7 @@ def collect_examples(concept: str,examples_dir: str = "examples", n: int = 5) ->
 
         example_concept = os.path.splitext(chosen_file)[0].split("_")[0]
 
-        formatted_example = image_gen_examples_format.format(
+        formatted_example = text_gen_examples_format.format(
             concept=example_concept, example=prompt
         )
 
@@ -57,77 +54,28 @@ def collect_examples(concept: str,examples_dir: str = "examples", n: int = 5) ->
     return examples, example_names
 
 
-def generate_image(prompt: str, examples: str, image_model: str = img_model, text_model: str = language_model):
-    def on_queue_update(update):
-        if isinstance(update, fal_client.InProgress):
-            for log in update.logs:
-                print(log["message"])
-
-    result = fal_client.subscribe(
-        image_model,
-        arguments={
-            "prompt": prompt,
-            "image_size": {
-                "width": 512,
-                "height": 512
-            }
-        },
-        with_logs=True,
-        on_queue_update=on_queue_update,
-    )
-    image_url = result['images'][0]['url']
-    # metadata = {"time": result['timings']['inference'], "width": result['images'][0]['width'], "height": result['images'][0]['height']}
-    return prompt, image_url
-
-def explore_design_space(design_space: Dict[str, Tuple[str, str]], n: int, model: str = language_model) -> List[Dict[str, Tuple[str, str]]]:
-    Console().print("Initial design space:", design_space)
-    response = llm_call(image_gen_explore_design_space_prompt.format(design_space=design_space, n=n), model=model)
-    
-    # Parse the options XML format
-    all_options = {}
-    for options_block in response.split("<options")[1:]:
-        if "</options>" in options_block:
-            axis_name = re.search(r'axis_name="([^"]+)"', options_block).group(1)
-            option_values = re.findall(r'<option>([^<]+)</option>', options_block)
-            all_options[axis_name] = option_values
-
-    # Create n random combinations of options
-    design_spaces = []
-    for i in range(n):
-        new_design_space = design_space.copy()
-        for axis_name, values in all_options.items():
-            value = values[i]
-            new_design_space[axis_name] = ("exploring", value.strip())
-        design_spaces.append(new_design_space)
-
-    Console().print("Design spaces:", design_spaces)
-    return design_spaces
-
-def generate_image_multiple(concept: str, examples: str, n: int, old_tags: list[Tuple[str, str]], design_space: Dict[str, Tuple[str, str]], image_model: str = img_model, text_model: str = language_model):
-    image_urls = []
+def generate_text_multiple(concept: str, examples: str, n: int, old_tags: list[Tuple[str, str]], design_space: Dict[str, Tuple[str, str]], text_model: str = language_model):
     prompts = []
 
-    design_spaces = explore_design_space(design_space, n)
+    text_gens = llm_call(text_gen_multiple_user_prompt.format(concept=concept), system_prompt=text_gen_multiple_system_prompt.format(examples=examples, n=n))
 
-    def process_prompt(ds):
-        ds_str = ""
-        for axis, (status, value) in ds.items():
-            ds_str += f"{axis}={value}\n"
-        expanded_prompt = llm_call(image_gen_expand_one_prompt.format(design_space=ds_str), system_prompt=image_gen_expand_system_prompt.format(examples=examples))
-        tags = extract_tags(expanded_prompt, old_tags, design_space=ds)
-        image_result = generate_image(expanded_prompt, examples, image_model, text_model)
-        return image_result, tags
+    text_gens = [p.strip() for p in text_gens.split("<text>")[1:] if p.strip()]
+    text_gens = [p.split("</text>")[0].strip() for p in text_gens]
+
+    def process_prompt(prompt):
+        tags = extract_tags(prompt, old_tags, design_space=design_space)
+        return tags
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(process_prompt, design_space) for design_space in design_spaces]
-        results = [future.result() for future in track(concurrent.futures.as_completed(futures), total=len(design_spaces), description=f"[grey11]Generating [bold cyan]{len(design_spaces)}[/bold cyan] images[/grey11]", style="grey15")]
-        image_results, tags = zip(*results)
-        prompts, image_urls = zip(*image_results)
+        futures = [executor.submit(process_prompt, prompt) for prompt in text_gens]
+        results = [future.result() for future in track(concurrent.futures.as_completed(futures), total=len(text_gens), description=f"[grey11]Generating [bold cyan]{len(text_gens)}[/bold cyan] text[/grey11]", style="grey15")]
+        print(results)
+        tags = results
 
-    return prompts, image_urls, tags
+    return text_gens, tags
 
-def extract_tags(prompt: str, old_tags: list[Tuple[str, str]], model: str = language_model, design_space: Dict[str, Tuple[str, str]] = {}) -> list[Tuple[str, str]]:
-    tags_xml = llm_call(image_gen_tags_format.format(prompt=prompt, old_tags=old_tags, design_space=design_space), model=model)
+def extract_tags(text: str, old_tags: list[Tuple[str, str]], model: str = language_model, design_space: Dict[str, Tuple[str, str]] = {}) -> list[Tuple[str, str]]:
+    tags_xml = llm_call(text_gen_tags_format.format(text=text, old_tags=old_tags, design_space=design_space), model=model)
     tags = []
     # Parse the tags XML format
     tags_parts = tags_xml.split("<tag")
@@ -139,19 +87,14 @@ def extract_tags(prompt: str, old_tags: list[Tuple[str, str]], model: str = lang
                 tag_value = tag.split(">", 1)[1].split("</tag>", 1)[0].strip()
                 if dimension_match:
                     dimension = dimension_match.group(1)
-                    tags.append((dimension, tag_value.lower()))
-
-    for axis, (status, value) in design_space.items():
-        if value and not any(t[0] == axis for t in tags):
-            tags.append((axis, value.lower()))
-
+                    tags.append((dimension, tag_value))
     return tags
 
 def generate_insights(feedback: str, design_space: Dict[str, Tuple[str, str]], model: str = language_model) -> Tuple[str, Dict[str, Tuple[str, str]]]:
-    response = llm_call(image_gen_temp_design_space_format.format(feedback=feedback, design_space=design_space), model=model)
+    response = llm_call(text_gen_temp_design_space_format.format(feedback=feedback, design_space=design_space), model=model)
     # Parse the design space XML format
     temp_design_space = response.split("<design_space>")[1].split("</design_space>")[0].strip()
-
+    
     # Extract axis information
     design_space_updates = {}
     for axis_line in temp_design_space.strip().split('\n'):
@@ -179,7 +122,7 @@ def generate_insights(feedback: str, design_space: Dict[str, Tuple[str, str]], m
     return design_space_string, design_space_updates
 
 def get_design_space(concept: str, model: str = language_model) -> Dict[str, Tuple[str, str]]:
-    response = llm_call(image_gen_get_design_space_prompt.format(concept=concept), model=model)
+    response = llm_call(text_gen_get_design_space_prompt.format(concept=concept), model=model)
     # Extract axes from the response, handling potential parsing errors
     design_space = {}
     axes_parts = response.split("<axis>")
@@ -192,8 +135,8 @@ def get_design_space(concept: str, model: str = language_model) -> Dict[str, Tup
                 continue
     return design_space
     
-def update_design_space(design_space: Dict[str, Tuple[str, str]], feedback_data: dict[str, List[str]], model: str = language_model) -> Dict[str, Tuple[str, str]]:
-    response = llm_call(image_gen_update_design_space_prompt.format(design_space=design_space, feedback_data=feedback_data), model=model)
+def update_design_space(design_space: Dict[str, Tuple[str, str]], feedback_data: Dict[str, List[str]], model: str = language_model) -> Dict[str, Tuple[str, str]]:
+    response = llm_call(text_gen_update_design_space_prompt.format(design_space=design_space, feedback_data=feedback_data), model=model)
     for axis_entry in response.split("<axis")[1:]:
         if "</axis>" in axis_entry:
             name_match = re.search(r'name="([^"]+)"', axis_entry)
@@ -204,29 +147,27 @@ def update_design_space(design_space: Dict[str, Tuple[str, str]], feedback_data:
                 design_space[axis_name] = (status_match.group(1) if status_match else "unconstrained", axis_value)
     return design_space
 
-def load_image_from_feedback(concept: str, feedback_data: dict[str, list], results_dir: str, design_space: dict[str, Tuple[str, str]]):
+def load_text_from_feedback(concept: str, feedback_data: Dict[str, List[str]], results_dir: str, design_space: Dict[str, Tuple[str, str]]):
     examples_str = ""
     for filename, feedbacks in feedback_data.items():
         with open(os.path.join(results_dir, filename), "r") as f:
-            prompt = json.load(f)["prompt"]
-            examples_str += image_gen_feedback_format.format(concept=concept, example=prompt, feedback=feedbacks)
+            text = json.load(f)["text"]
+            examples_str += text_gen_feedback_format.format(concept=concept, example=text, feedback=feedbacks)
     
     insights, temp_design_space = generate_insights(examples_str, design_space)
 
     return examples_str + "\n Here is what you need to include in every future generation: \n" + insights, temp_design_space
 
-def save_images(image_urls: list[str], prompts: list[str], tags: list[Tuple[str, str]], path: str):
+def save_text(text_gens: list[str], tags: list[Tuple[str, str]], path: str):
     os.makedirs(path, exist_ok=True)
     
     def save_one(args):
-        i, (image_url, prompt, tag) = args
-        response = requests.get(image_url)
-        image_data = base64.b64encode(response.content).decode('utf-8').replace('"', '\\"')
+        i, (text_gen, tag) = args
         with open(os.path.join(path, f"{i}.json"), "w") as f:
-            json.dump({"prompt": prompt, "data": image_data, "tags": tag}, f)
+            json.dump({"text": text_gen, "tags": tag}, f)
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        list(executor.map(save_one, enumerate(zip(image_urls, prompts, tags))))
+        list(executor.map(save_one, enumerate(zip(text_gens, tags))))
 
 
 def main():

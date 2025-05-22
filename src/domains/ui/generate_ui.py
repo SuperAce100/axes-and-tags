@@ -1,6 +1,8 @@
+from ast import Dict, List, Tuple
 import base64
 import os
 import json
+import re
 import numpy as np
 from pydantic import BaseModel
 import requests
@@ -59,18 +61,18 @@ def generate_ui(prompt: str, examples: str, text_model: str = language_model):
     return prompt,result
 
 
-def generate_ui_multiple(concept: str, examples: str, n: int, old_tags: list[str], text_model: str = language_model):
+def generate_ui_multiple(concept: str, examples: str, n: int, old_tags: list[str], design_space: dict[str, tuple[str, str]], text_model: str = language_model):
     ui_results = []
     prompts = []
 
-    expanded_prompts = llm_call(ui_expand_user_prompt.format(concept=concept), system_prompt=ui_expand_system_prompt.format(examples=examples) + ui_expand_system_prompt_extend.format(n=n))
+    expanded_prompts = llm_call(ui_expand_user_prompt.format(concept=concept), system_prompt=ui_expand_system_prompt.format(examples=examples) + ui_expand_system_prompt_extend.format(n=n, design_space=design_space))
 
 
     expanded_prompts = [p.strip() for p in expanded_prompts.split("<prompt>")[1:] if p.strip()]
     expanded_prompts = [p.split("</prompt>")[0].strip() for p in expanded_prompts]
 
     def process_prompt(prompt):
-        tags = extract_tags(prompt, old_tags)
+        tags = extract_tags(prompt, old_tags, design_space)
         ui_result = generate_ui(prompt, examples, text_model)
         return ui_result, tags
 
@@ -82,25 +84,89 @@ def generate_ui_multiple(concept: str, examples: str, n: int, old_tags: list[str
 
     return prompts, uis, tags
 
-def extract_tags(prompt: str, old_tags: list[str], model: str = language_model) -> list[str]:
-    tags_xml = llm_call(ui_tags_format.format(prompt=prompt, old_tags=old_tags), model=model)
-    tags = [tag.strip() for tag in tags_xml.split("<tag>")[1:] if tag.strip()]
-    tags = [tag.split("</tag>")[0].strip() for tag in tags]
+def extract_tags(prompt: str, old_tags: list[tuple[str, str]], design_space: dict[str, tuple[str, str]], model: str = language_model) -> list[tuple[str, str]]:
+    tags_xml = llm_call(ui_tags_format.format(prompt=prompt, old_tags=old_tags, design_space=design_space), model=model)
+    tags = []
+    # Parse the tags XML format
+    tags_parts = tags_xml.split("<tag")
+    if len(tags_parts) > 1:
+        for tag in tags_parts[1:]:
+            if "</tag>" in tag:
+                # Extract dimension and tag value
+                dimension_match = re.search(r'dimension="([^"]+)"', tag)
+                tag_value = tag.split(">", 1)[1].split("</tag>", 1)[0].strip()
+                if dimension_match:
+                    dimension = dimension_match.group(1)
+                    tags.append((dimension, tag_value))
     return tags
 
-def generate_insights(feedback: str, model: str = language_model) -> str:
-    return llm_call(ui_insights_format.format(feedback=feedback), model=model)
+def generate_insights(feedback: str, design_space: dict[str, tuple[str, str]], model: str = language_model) -> tuple[str, dict[str, tuple[str, str]]]:
+    response = llm_call(ui_temp_design_space_format.format(feedback=feedback, design_space=design_space), model=model)
+    # Parse the design space XML format
+    temp_design_space = response.split("<design_space>")[1].split("</design_space>")[0].strip()
+    
+    # Extract axis information
+    design_space_updates = {}
+    for axis_line in temp_design_space.strip().split('\n'):
+        if '<axis' in axis_line and '</axis>' in axis_line:
+            name_match = re.search(r'name="([^"]+)"', axis_line)
+            status_match = re.search(r'status="([^"]+)"', axis_line)
+            if name_match:
+                axis_name = name_match.group(1)
+                axis_value = axis_line.split(">", 1)[1].split("</axis>", 1)[0].strip()
+                design_space_updates[axis_name] = (status_match.group(1) if status_match else "unconstrained", axis_value)
 
-def load_ui_from_feedback(concept: str, feedback_data: dict[str, list], results_dir: str):
+    print(design_space_updates)
+
+    design_space_string = ""
+    constrained_string = ""
+    exploring_string = ""
+    for axis_name, (status, value) in design_space_updates.items():
+        if status == "constrained" or status == "unconstrained":
+            constrained_string += f"{axis_name}={value}\n"
+        elif status == "exploring":
+            exploring_string += f"{axis_name}\n"
+
+    design_space_string = f"Constrained: {constrained_string}\nAreas to explore: {exploring_string}"
+
+    return design_space_string, design_space_updates
+
+def load_ui_from_feedback(concept: str, feedback_data: dict[str, list], results_dir: str, design_space: dict[str, tuple[str, str]]):
     examples_str = ""
     for filename, feedbacks in feedback_data.items():
         with open(os.path.join(results_dir, filename), "r") as f:
             data = json.load(f)
             examples_str += ui_feedback_format.format(concept=concept, example=data["prompt"] + ": \n" + data["data"], feedback=feedbacks)
     
-    insights = generate_insights(examples_str)
+    insights, temp_design_space = generate_insights(examples_str, design_space)
 
-    return examples_str + "\n Here is what you need to include in every future generation: \n" + insights
+    return examples_str + "\n Here is what you need to include in every future generation: \n" + insights, temp_design_space
+
+def get_design_space(concept: str, model: str = language_model) -> dict[str, tuple[str, str]]:
+    response = llm_call(ui_get_design_space_prompt.format(concept=concept), model=model)
+    # Extract axes from the response, handling potential parsing errors
+    design_space = {}
+    axes_parts = response.split("<axis>")
+    if len(axes_parts) > 1:
+        for axis in axes_parts[1:]:
+            if "</axis>" in axis:
+                axis_name = axis.split("</axis>")[0].strip()
+                design_space[axis_name] = ("unconstrained", "")
+            else:
+                continue
+    return design_space
+    
+def update_design_space(design_space: dict[str, tuple[str, str]], feedback_data: dict[str, list[str]], model: str = language_model) -> dict[str, tuple[str, str]]:
+    response = llm_call(ui_update_design_space_prompt.format(design_space=design_space, feedback_data=feedback_data), model=model)
+    for axis_entry in response.split("<axis")[1:]:
+        if "</axis>" in axis_entry:
+            name_match = re.search(r'name="([^"]+)"', axis_entry)
+            status_match = re.search(r'status="([^"]+)"', axis_entry)
+            if name_match:
+                axis_name = name_match.group(1)
+                axis_value = axis_entry.split(">", 1)[1].split("</axis>", 1)[0].strip()
+                design_space[axis_name] = (status_match.group(1) if status_match else "unconstrained", axis_value)
+    return design_space
 
 def save_ui(ui_results: list[str], prompts: list[str], tags: list[str], path: str):
     os.makedirs(path, exist_ok=True)
@@ -117,7 +183,8 @@ def save_ui(ui_results: list[str], prompts: list[str], tags: list[str], path: st
 def main():
     concept = "elephant"
     examples, example_names = collect_examples(concept, "../.data/ui/examples", 5)
-    prompts, ui_results, tags = generate_ui_multiple(concept, examples, 5)
+    design_space = get_design_space(concept)
+    prompts, ui_results, tags = generate_ui_multiple(concept, examples, 5, [], design_space)
 
     save_ui(ui_results, prompts, tags, "../.data/ui/results")
 

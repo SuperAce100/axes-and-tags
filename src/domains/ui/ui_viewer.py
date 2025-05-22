@@ -14,7 +14,10 @@ class UIViewer(Viewer):
                  port: int = 8002, 
                  console: Console = None,
                  concept: str = "ui",
-                 used_examples: List[str] = None):
+                 used_examples: List[str] = None,
+                 design_space: dict[str, tuple[str, str]] = None,
+                 update_design_space: callable = None,
+                 ):
         """
         Initialize the UIViewer.
         
@@ -34,7 +37,9 @@ class UIViewer(Viewer):
             port=port,
             console=console,
             custom_scripts_path="domains/ui/ui_scripts.js",
-            used_examples=used_examples
+            used_examples=used_examples,
+            design_space=design_space,
+            update_design_space=update_design_space
         )
     
     
