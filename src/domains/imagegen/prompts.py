@@ -30,6 +30,37 @@ EXAMPLE PROMPT HERE
 </prompt>
 """
 
+image_gen_expand_one_prompt = """
+Your expansion must follow all axes of this design space exactly:
+
+<design_space>
+{design_space}
+</design_space>
+"""
+
+image_gen_explore_design_space_prompt = """
+You are tasked with exploring the design space.
+
+Here is the design space:
+{design_space}
+
+Some of these axes will be fixed, and some will be exploring. For each axis that is labeled "exploring", you must generate a new value for the axis. DO NOT DO THIS FOR AXES THAT ARE LABELED UNCONSTRAINED OR CONSTRAINED.
+
+You must generate {n} new values for the exploring axes.
+
+Each new value must be significantly different from the other generated values, so the design space is meaningfully explored.
+
+Return all your new axis options in a <options></options> XML tag, like this:
+
+<options axis_name="axis_name">
+<option>OPTION 1</option>
+<option>OPTION 2</option>
+<option>OPTION 3</option>
+</options>
+
+You must generate {n} options for each exploring axis. Sort them in a logical way (if you are organizing by height, make sure the options are in order of height, if you are organizing by color, make sure the options are in order of hue, etc).
+"""
+
 image_gen_expand_user_prompt = """
 Expand the following concept:
 
@@ -97,7 +128,7 @@ Extract a set of useful tags from the prompt. These could be objects, actions, a
 
 Each tag should be atomic and 1-3 words, and extremely brief, specific, and descriptive. They should be the building blocks on top of which the prompt is constucted. The tags should be based on any empty axes in the design space.
 
-The tags should be based on the design space, and there should be exactly ONE (1) tag for every axis labeled "exploring" or "unconstrained" in the design space. Do not create tags that are not based on the design space.
+The tags should be based on the design space, and there should be exactly ONE (1) tag for every axis labeled "exploring" or "unconstrained" in the design space. DANGER: Do not create tags that are not EXACTLY LINKED to one dimension in the design space. Even if the design space has a value listed, create a tag that exactly matches the value in the dimension.
 
 Enclose each tag in <tag></tag> XML tags, like this, and return the list of tags in a <tags></tags> XML tag:
 
@@ -141,7 +172,7 @@ Here is the feedback from the user:
 
 Update the design space based on the feedback, only updating axes that are not fixed based on the feedback itself, and only updating the value of the axis if the user has explicitly mentioned it in their feedback. YOU MUST leave axes blank if the user has not mentioned it in their feedback. Update every axis that you take from the feedback. When you update an axis, make sure to set the status to "constrained".
 
-Of the axes that are not constrained, choose another axis to explore, and leave the rest of the axes unconstrained. If one is already exploring, don't change it.
+Of the axes that are not constrained, choose EXACTLY ONE axis to explore, and leave the rest of the axes unconstrained. If one is already exploring, don't change it or add another exploring axis.
 
 Return the updated design space in a <design_space></design_space> XML tag, with each axis represented as a key-value pair in the format <axis name="axis_name" status="constrained|unconstrained|exploring">axis_value</axis>. For example:
 

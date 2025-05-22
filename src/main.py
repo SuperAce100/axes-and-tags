@@ -20,6 +20,7 @@ def parse_args():
     parser.add_argument('--max-iterations', type=int, default=10, help='Maximum number of iterations')
     parser.add_argument('--concept', type=str, default='elephant', help='Concept to generate')
     parser.add_argument('--input-file', type=str, default=None, help='Input file to use')
+    parser.add_argument('--vary-initial', action='store_true', help='Vary the initial design space')
     return parser.parse_args()
 
 def main():
@@ -53,7 +54,7 @@ def main():
     else:
         raise ValueError(f"Domain {args.domain} not supported")
 
-    domain.run_experiment(n, n_examples, args.max_iterations)
+    domain.run_experiment(n, args.vary_initial, args.max_iterations)
 
 if __name__ == "__main__":
     main()

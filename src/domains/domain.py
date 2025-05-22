@@ -74,14 +74,17 @@ class Domain(ABC):
         """
         pass
 
-    def run_experiment(self, n: int, n_examples: int, max_iterations: int = 10):
+    def run_experiment(self, n: int, vary_initial_design_space: bool = False, max_iterations: int = 10):
         self.console.print(Rule(f"[bold green]Starting initial {self.name} generation[/bold green]", style="green", align="left"))
 
         design_space = self.get_design_space()
         self.console.print(f"[grey11]Design space: {design_space}[/grey11]")
 
-        objects = self.generate_multiple(n, design_space, [], design_space)
+        if vary_initial_design_space:
+            design_space = self.update_design_space(design_space, {})
 
+        objects = self.generate_multiple(n, design_space, [], design_space)
+        
         self.console.print(objects, style="grey11")
 
         save_path = self.save_result(objects)

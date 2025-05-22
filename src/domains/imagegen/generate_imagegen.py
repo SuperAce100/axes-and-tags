@@ -12,6 +12,7 @@ import concurrent.futures
 from rich.progress import track
 from domains.imagegen.prompts import *
 from typing import List, Tuple, Dict
+from rich.console import Console
 
 img_model = "fal-ai/flux/schnell"
 
@@ -78,25 +79,48 @@ def generate_image(prompt: str, examples: str, image_model: str = img_model, tex
     # metadata = {"time": result['timings']['inference'], "width": result['images'][0]['width'], "height": result['images'][0]['height']}
     return prompt, image_url
 
+def explore_design_space(design_space: Dict[str, Tuple[str, str]], n: int, model: str = language_model) -> List[Dict[str, Tuple[str, str]]]:
+    Console().print("Initial design space:", design_space)
+    response = llm_call(image_gen_explore_design_space_prompt.format(design_space=design_space, n=n), model=model)
+    
+    # Parse the options XML format
+    all_options = {}
+    for options_block in response.split("<options")[1:]:
+        if "</options>" in options_block:
+            axis_name = re.search(r'axis_name="([^"]+)"', options_block).group(1)
+            option_values = re.findall(r'<option>([^<]+)</option>', options_block)
+            all_options[axis_name] = option_values
+
+    # Create n random combinations of options
+    design_spaces = []
+    for i in range(n):
+        new_design_space = design_space.copy()
+        for axis_name, values in all_options.items():
+            value = values[i]
+            new_design_space[axis_name] = ("exploring", value.strip())
+        design_spaces.append(new_design_space)
+
+    Console().print("Design spaces:", design_spaces)
+    return design_spaces
 
 def generate_image_multiple(concept: str, examples: str, n: int, old_tags: list[Tuple[str, str]], design_space: Dict[str, Tuple[str, str]], image_model: str = img_model, text_model: str = language_model):
     image_urls = []
     prompts = []
 
-    expanded_prompts = llm_call(image_gen_expand_user_prompt.format(concept=concept), system_prompt=image_gen_expand_system_prompt.format(examples=examples) + image_gen_expand_system_prompt_extend.format(n=n))
+    design_spaces = explore_design_space(design_space, n)
 
-
-    expanded_prompts = [p.strip() for p in expanded_prompts.split("<prompt>")[1:] if p.strip()]
-    expanded_prompts = [p.split("</prompt>")[0].strip() for p in expanded_prompts]
-
-    def process_prompt(prompt):
-        tags = extract_tags(prompt, old_tags, design_space=design_space)
-        image_result = generate_image(prompt, examples, image_model, text_model)
+    def process_prompt(ds):
+        ds_str = ""
+        for axis, (status, value) in ds.items():
+            ds_str += f"{axis}={value}\n"
+        expanded_prompt = llm_call(image_gen_expand_one_prompt.format(design_space=ds_str), system_prompt=image_gen_expand_system_prompt.format(examples=examples))
+        tags = extract_tags(expanded_prompt, old_tags, design_space=ds)
+        image_result = generate_image(expanded_prompt, examples, image_model, text_model)
         return image_result, tags
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(process_prompt, prompt) for prompt in expanded_prompts]
-        results = [future.result() for future in track(concurrent.futures.as_completed(futures), total=len(expanded_prompts), description=f"[grey11]Generating [bold cyan]{len(expanded_prompts)}[/bold cyan] images[/grey11]", style="grey15")]
+        futures = [executor.submit(process_prompt, design_space) for design_space in design_spaces]
+        results = [future.result() for future in track(concurrent.futures.as_completed(futures), total=len(design_spaces), description=f"[grey11]Generating [bold cyan]{len(design_spaces)}[/bold cyan] images[/grey11]", style="grey15")]
         image_results, tags = zip(*results)
         prompts, image_urls = zip(*image_results)
 
@@ -115,14 +139,19 @@ def extract_tags(prompt: str, old_tags: list[Tuple[str, str]], model: str = lang
                 tag_value = tag.split(">", 1)[1].split("</tag>", 1)[0].strip()
                 if dimension_match:
                     dimension = dimension_match.group(1)
-                    tags.append((dimension, tag_value))
+                    tags.append((dimension, tag_value.lower()))
+
+    for axis, (status, value) in design_space.items():
+        if value and not any(t[0] == axis for t in tags):
+            tags.append((axis, value.lower()))
+
     return tags
 
 def generate_insights(feedback: str, design_space: Dict[str, Tuple[str, str]], model: str = language_model) -> Tuple[str, Dict[str, Tuple[str, str]]]:
     response = llm_call(image_gen_temp_design_space_format.format(feedback=feedback, design_space=design_space), model=model)
     # Parse the design space XML format
     temp_design_space = response.split("<design_space>")[1].split("</design_space>")[0].strip()
-    
+
     # Extract axis information
     design_space_updates = {}
     for axis_line in temp_design_space.strip().split('\n'):
