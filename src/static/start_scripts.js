@@ -1,24 +1,49 @@
 var selectedDomain = null;
 var domains = [];
 
+let icons = {};
+async function fetchIcons() {
+  const iconUrls = {
+    image: "https://unpkg.com/lucide-static@latest/icons/image.svg",
+    text: "https://unpkg.com/lucide-static@latest/icons/text-cursor.svg",
+  };
+
+  await Promise.all(
+    Object.entries(iconUrls).map(async ([key, url]) => {
+      const response = await fetch(url);
+      icons[key] = await response.text();
+    })
+  );
+}
+
 function renderDomains() {
   const domainContainer = document.getElementById("domains");
   domainContainer.innerHTML = "";
-  domainContainer.classList.add("flex", "flex-row", "gap-2", "bg-gray-100", "p-2", "rounded-full");
+  domainContainer.classList.add("flex", "flex-row", "gap-2", "p-4");
   domains.forEach((domain) => {
     const domainElement = document.createElement("div");
-    domainElement.textContent = domain.display_name;
+    domainElement.innerHTML = icons[domain.name];
+    // domainElement.textContent = domain.display_name;
     domainElement.classList.add(
-      "px-4",
-      "py-2",
-      "rounded-full",
+      "p-2",
+      "w-10",
+      "h-10",
+      "flex",
+      "items-center",
+      "justify-center",
+      "rounded-xl",
       "cursor-pointer",
       "transition-all",
       "font-medium"
     );
 
     if (selectedDomain === domain.name) {
-      domainElement.classList.add("bg-blue-500", "text-white", "scale-105", "hover:bg-blue-400");
+      domainElement.classList.add(
+        "bg-blue-500/30",
+        "text-blue-500",
+        "scale-105",
+        "hover:bg-blue-500/60"
+      );
     } else {
       domainElement.classList.add("bg-gray-200", "hover:bg-gray-300");
     }
@@ -31,7 +56,8 @@ function renderDomains() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await fetchIcons();
   fetch("/api/domains")
     .then((res) => res.json())
     .then((data) => {
@@ -39,6 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
         domains = [...domains, domain];
       });
       selectedDomain = domains[0].name;
+
       renderDomains();
     });
 

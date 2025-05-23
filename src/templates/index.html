@@ -14,24 +14,24 @@
   <body>
     <div id="app" class="container h-full w-full">
       <div class="flex flex-col gap-6 justify-center items-center h-screen w-screen mx-auto">
-        <h1 class="text-6xl font-light text-gray-900 mb-8 font-sans tracking-tight">
+        <h1 class="text-7xl font-light text-gray-900 mb-8 font-sans tracking-tighter">
           Design Galleries
         </h1>
-        <div class="relative w-3/5">
+        <div
+          class="relative w-3/5 hover:-translate-y-0.5 transition-all hover:shadow-lg shadow-md rounded-3xl overflow-hidden border"
+        >
           <input
             type="text"
-            class="transition-all w-full p-6 rounded-full border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none hover:border-blue-500 hover:bg-blue-50/50 text-lg pr-16 placeholder:text-gray-400 shadow-sm backdrop-blur-sm bg-white/80"
+            class="transition-all w-full p-5 pb-20 bg-gray-100 text-lg pr-16 placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="What would you like to explore?"
           />
           <button
             id="generateButton"
-            class="bg-blue-500 text-white text-lg p-4 rounded-full absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer transition-all hover:bg-blue-400 hover:scale-105"
+            class="bg-blue-500 text-white text-lg p-2 px-4 rounded-2xl absolute right-3 bottom-3 cursor-pointer transition-all hover:bg-blue-400 hover:scale-105"
           >
             Generate
           </button>
-        </div>
-        <div id="domains" class="flex flex-row gap-4">
-            
+          <div id="domains" class="flex flex-row gap-4 absolute bottom-0 left-0 w-fit"></div>
         </div>
       </div>
     </div>

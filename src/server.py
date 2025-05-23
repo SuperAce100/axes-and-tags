@@ -9,6 +9,7 @@ import uvicorn
 import argparse
 from designgalleries import generate
 from designspace import DesignSpace, Generation, Tag, Example
+from domains.ui.ui import UIGen
 from domains.domain import Domain
 from domains.imagegen.imagegen import ImageGen
 from domains.text.textgen import TextGen
@@ -129,7 +130,7 @@ def main():
     else:
         model = args.model
 
-    domains = [ImageGen(data_dir=args.data_dir, console=console, model=model), TextGen(data_dir=args.data_dir, console=console, model=model)]
+    domains = [ImageGen(data_dir=args.data_dir, console=console, model=model), TextGen(data_dir=args.data_dir, console=console, model=model), UIGen(data_dir=args.data_dir, console=console, model=model)]
 
     server = Server(n=args.n, domains=domains, model=model)
     server.run(reload=False, port=args.port)

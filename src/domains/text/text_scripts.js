@@ -1,5 +1,4 @@
-function render(id, content, prompt) {
-  const container = document.getElementById(id);
+function render(container, content) {
   container.className = "relative";
 
   // Create image element
@@ -8,6 +7,4 @@ function render(id, content, prompt) {
   textElement.className = "p-4 text-sm w-full overflow-y-auto aspect-square font-serif pb-24";
 
   container.appendChild(textElement);
-
-  return textElement;
 }
