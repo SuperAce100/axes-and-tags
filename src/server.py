@@ -152,9 +152,15 @@ class Server:
             )
             database.update_session(session_id, design_space, generations)
         else:
-            design_space = session["current_design_space"]
+            design_space = DesignSpace.model_validate_json(
+                session["current_design_space"]
+            )
+
             generations = (
-                session["generations"][-1]["generations"]
+                [
+                    Example.model_validate_json(gen)
+                    for gen in session["generations"][-1]["generations"]
+                ]
                 if session["generations"]
                 else []
             )

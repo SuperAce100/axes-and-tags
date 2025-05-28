@@ -478,8 +478,16 @@ async function renderDesignSpace() {
 }
 
 async function regenerate() {
+  const exploringAxes = designSpace.axes.filter(axis => axis.status === "exploring");
+  if (exploringAxes.length === 0) {
+    showStatus("Please select an axis to explore", "error");
+    return;
+  }
+
+  
   generations = [];
   renderGrid();
+
 
   try {
     const response = await fetch(`/api/generation/${sessionId}/regenerate`, {
