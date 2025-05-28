@@ -146,7 +146,7 @@ function renderGrid() {
     grid.className = "col-span-3 flex flex-col items-center justify-center py-48";
     return;
   } else {
-    grid.className = "col-span-3 grid grid-cols-3 gap-4";
+    grid.className = "col-span-3 grid grid-cols-3 gap-4 items-start";
   }
 
   generations.forEach((generation, index) => {
