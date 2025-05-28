@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }}</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/tailwind.config.js"></script>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div id="app" class="container mx-auto h-screen w-screen">
+      <div class="flex flex-col gap-6 justify-center items-center h-full w-full mx-auto">
+        <h1 class="text-7xl font-light text-gray-900 mb-4 font-sans tracking-tighter">
+          Design Galleries
+        </h1>
+        <div
+          class="relative w-3/5 transition-all hover:border-blue-500/50 border-2 border-gray-200 rounded-3xl overflow-hidden"
+        >
+          <input
+            type="text"
+            class="transition-all w-full p-5 pb-20 text-lg pr-16 placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="What would you like to explore?"
+            id="generateInput"
+          />
+          <button
+            id="generateButton"
+            class="bg-blue-500 text-white text-lg p-2 px-4 rounded-xl absolute right-3 bottom-3 cursor-pointer transition-all hover:bg-blue-400 hover:scale-105 border"
+          >
+            Generate
+          </button>
+          <div id="domains" class="flex flex-row gap-4 absolute bottom-0 left-0 w-fit"></div>
+        </div>
+      </div>
+    </div>
+    <script src="/static/start_scripts.js"></script>
+  </body>
+</html>

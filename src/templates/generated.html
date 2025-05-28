@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }}</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/tailwind.config.js"></script>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="container mx-auto w-10/12 space-y-8">
+      <div class="flex flex-row justify-between items-end gap-8">
+        <h1 class="text-4xl font-bold text-gray-900 mt-10 font-tight" id="concept">{{ concept }}</h1>
+        <div class="flex flex-row gap-2">
+          <a
+            class="bg-blue-200/50 text-blue-500 hover:bg-blue-200 transition-all duration-300 text-lg py-2 pl-3 px-4 rounded-xl"
+            id="backButton"
+            href="/"
+          >
+            <div class="flex flex-row items-center justify-center">
+              <i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+              </i>
+              New
+            </div>
+          </a>
+          <button
+            class="bg-blue-500 text-white hover:bg-blue-400 transition-all duration-300 text-lg py-2 px-4 rounded-xl"
+            id="regenerateButton"
+          >
+            Regenerate
+          </button>
+          
+        </div>
+      </div>
+
+      <div id="status" class="status" style="display: none"></div>
+
+      <div class="grid grid-cols-4 gap-6 sm:grid-cols-1 md:grid-cols-4 lg:grid-cols-4">
+        <div class="col-span-3 grid grid-cols-3 gap-4" id="mainGrid">
+          <!-- Objects will be loaded here -->
+        </div>
+
+        <div class="col-span-1 space-y-4">
+          <div id="designSpace">
+            <h3 class="text-2xl font-medium text-gray-900 font-tight">Design Space</h3>
+            <div id="designSpaceList" class="mt-4">
+              <!-- Design space will be loaded here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    <script src="/static/scripts.js"></script>
+    <script src="{{ scripts_path }}"></script>
+  </body>
+</html>
