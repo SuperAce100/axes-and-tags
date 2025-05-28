@@ -38,24 +38,45 @@ The outer level of the UI must be a div element, with the w-full and h-full clas
 Make sure to follow every single instruction provided in the prompt carefully, and comment your code extensively.
 """
 
-def expand_prompt(concept: str, design_space: DesignSpace, model: str = text_model, examples: str = "") -> str:
-    return llm_call(ui_gen_expand_user_prompt.format(concept=concept, design_space=design_space, examples=examples), system_prompt=ui_gen_expand_system_prompt, temperature=1, model=model)
 
-def generate_ui(concept: str, design_space: DesignSpace, text_model: str = text_model) -> Generation:
+def expand_prompt(
+    concept: str, design_space: DesignSpace, model: str = text_model, examples: str = ""
+) -> str:
+    return llm_call(
+        ui_gen_expand_user_prompt.format(
+            concept=concept, design_space=design_space, examples=examples
+        ),
+        system_prompt=ui_gen_expand_system_prompt,
+        temperature=1,
+        model=model,
+    )
+
+
+def generate_ui(
+    concept: str, design_space: DesignSpace, text_model: str = text_model
+) -> Generation:
     prompt = expand_prompt(concept, design_space, text_model)
-    result = llm_call(prompt, model="anthropic/claude-3-7-sonnet", system_prompt=ui_gen_system_prompt)
+    result = llm_call(
+        prompt, model="anthropic/claude-sonnet-4", system_prompt=ui_gen_system_prompt
+    )
     result = result.split("<ui>")[1].split("</ui>")[0].strip()
     return Generation(prompt=prompt, content=result)
 
-class UIGen(Domain):
-    def __init__(self, data_dir: str, model: str = text_model, console: Console = Console()):
-        super().__init__(
-            name="ui", 
-            display_name="UI", 
-            data_dir=data_dir, 
-            model=model, 
-            console=console, 
-            scripts_path="domains/ui/ui_scripts.js")
 
-    def generate_one(self, concept: str, design_space: DesignSpace, model: str = text_model) -> Generation:
+class UIGen(Domain):
+    def __init__(
+        self, data_dir: str, model: str = text_model, console: Console = Console()
+    ):
+        super().__init__(
+            name="ui",
+            display_name="UI",
+            data_dir=data_dir,
+            model=model,
+            console=console,
+            scripts_path="domains/ui/ui_scripts.js",
+        )
+
+    def generate_one(
+        self, concept: str, design_space: DesignSpace, model: str = text_model
+    ) -> Generation:
         return generate_ui(concept, design_space, text_model=model)

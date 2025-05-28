@@ -87,6 +87,7 @@ class Server:
             raise HTTPException(status_code=404, detail="Domain not found")
 
         custom_scripts_path = domain.scripts_path
+        print(custom_scripts_path, domain)
         self.app.mount(
             "/custom",
             StaticFiles(directory=str(Path(custom_scripts_path).parent)),
