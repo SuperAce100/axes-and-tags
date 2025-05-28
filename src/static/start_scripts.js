@@ -57,6 +57,31 @@ function renderDomains() {
   });
 }
 
+async function startGeneration(concept) {
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        concept: concept,
+        domain: selectedDomain,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error at startGeneration ${response.status} status: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    window.location.href = data.url;
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Failed to start generation. Please try again.");
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   await fetchIcons();
   fetch("/api/domains")
@@ -75,7 +100,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   button.addEventListener("click", (e) => {
     const concept = input.value;
     if (concept.length > 0 && selectedDomain) {
-      window.location.href = `/generated/${selectedDomain}/${concept}`;
+      startGeneration(concept);
     } else {
       alert("Please enter a concept and select a domain");
     }
@@ -84,8 +109,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && input.value.length > 0 && selectedDomain) {
       e.preventDefault();
-      console.log("generating", input.value);
-      window.location.href = `/generated/${selectedDomain}/${input.value}`;
+      startGeneration(input.value);
     } else if (e.key === "Enter" && input.value.length === 0) {
       e.preventDefault();
       alert("Please enter a concept");

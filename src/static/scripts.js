@@ -1,9 +1,9 @@
 let isFirstRender = true;
 
 let concept = null;
-let domain = null;
 let designSpace = null;
 let generations = [];
+let sessionId = null;
 
 let highlightedAxis = null;
 
@@ -477,45 +477,42 @@ async function renderDesignSpace() {
   designSpaceContainer.appendChild(createNewDesignAxis());
 }
 
-function regenerate() {
+async function regenerate() {
   generations = [];
   renderGrid();
 
-  fetch("/api/generate", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      concept: concept,
-      domain: domain,
-      design_space: designSpace?.model_dump?.() || designSpace,
-    }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        if (response.status === 422) {
-          console.error("Invalid design space:", designSpace);
-          throw new Error("Invalid design space format - please check the console for details");
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      console.log("regenerated", data);
-      isFirstRender = true;
-      generations = data.generations;
-      if (data.design_space !== designSpace) {
-        designSpace = data.design_space;
-        renderDesignSpace();
-      }
-      renderGrid();
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      showStatus(error.message || "Failed to regenerate designs", "error");
+  try {
+    const response = await fetch(`/api/generation/${sessionId}/regenerate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        design_space: designSpace?.model_dump?.() || designSpace,
+      }),
     });
+
+    if (!response.ok) {
+      if (response.status === 422) {
+        console.error("Invalid design space:", designSpace);
+        throw new Error("Invalid design space format - please check the console for details");
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("regenerated", data);
+    isFirstRender = true;
+    generations = data.generations;
+    if (data.design_space !== designSpace) {
+      designSpace = data.design_space;
+      renderDesignSpace();
+    }
+    renderGrid();
+  } catch (error) {
+    console.error("Error:", error);
+    showStatus(error.message || "Failed to regenerate designs", "error");
+  }
 
   setTimeout(() => {
     isFirstRender = false;
@@ -526,43 +523,35 @@ function regenerate() {
 document.addEventListener("DOMContentLoaded", async () => {
   isFirstRender = true;
 
-  concept = window.location.pathname.split("/").pop();
-  domain = window.location.pathname.split("/")[window.location.pathname.split("/").length - 2];
+  // Get session ID from URL
+  sessionId = window.location.pathname.split("/").pop();
+  concept = document.getElementById("concept").textContent;
 
+  console.log("sessionId", sessionId);
   console.log("concept", concept);
-  console.log("domain", domain);
 
   renderDesignSpace();
   renderGrid();
 
-  fetch("/api/generate", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      concept: concept,
-      domain: domain,
-      design_space: null,
-    }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      designSpace = data.design_space;
-      generations = data.generations;
-      console.log("generations", generations);
-      renderGrid();
-      renderDesignSpace();
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      showStatus("Failed to generate designs", "error");
+  try {
+    const response = await fetch(`/api/generation/${sessionId}`, {
+      method: "GET",
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    designSpace = data.design_space;
+    generations = data.generations;
+    console.log("generations", generations);
+    renderGrid();
+    renderDesignSpace();
+  } catch (error) {
+    console.error("Error:", error);
+    showStatus("Failed to load generation", "error");
+  }
 
   const regenerateButton = document.getElementById("regenerateButton");
   regenerateButton.addEventListener("click", regenerate);
