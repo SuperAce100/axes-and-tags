@@ -244,6 +244,11 @@ function createDesignAxisControls(axis, status) {
   }
 
   exploreButton.addEventListener("click", async () => {
+    designSpace.axes.forEach(axis => {
+      if (axis.status === "exploring") {
+        axis.status = "unconstrained";
+      }
+    });
     updateDesignSpace(axis.name, axis.value, "exploring");
   });
 
