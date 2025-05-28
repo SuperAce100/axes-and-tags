@@ -139,7 +139,9 @@ function renderGrid() {
   if (generations.length === 0) {
     grid.innerHTML = `
       <div class="flex flex-col items-center gap-4">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"></div>
+        <div class="animate-spin text-gray-500"><svg xmlns="http://www.w3.org/2000/svg" class="lucide lucide-loader-circle stroke-gray-500" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+        </svg></div>
         <div class="text-gray-500">Generating designs...</div>
       </div>
     `;
@@ -201,6 +203,7 @@ async function fetchDesignSpaceIcons() {
     constrained: "https://unpkg.com/lucide-static@latest/icons/lock.svg",
     new: "https://unpkg.com/lucide-static@latest/icons/plus.svg",
     delete: "https://unpkg.com/lucide-static@latest/icons/trash-2.svg",
+    loading: "https://unpkg.com/lucide-static@0.511.0/icons/loader-circle.svg",
   };
 
   await Promise.all(
@@ -367,8 +370,10 @@ async function renderDesignSpace() {
   if (designSpace === null) {
     designSpaceContainer.innerHTML = `
       <div class="flex flex-col items-center gap-4">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"></div>
-        <div class="text-gray-500">Loading design space...</div>
+        <div class="animate-spin"><svg xmlns="http://www.w3.org/2000/svg" class="lucide lucide-loader-circle" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+        </svg></div>
+        <div class="text-gray-500">Generating designs...</div>
       </div>
     `;
     designSpaceContainer.className =
