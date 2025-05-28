@@ -9,3 +9,5 @@ results/
 data/
 .ruff_cache/
 .data/
+
+*.egg-info/

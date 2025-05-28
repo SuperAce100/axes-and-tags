@@ -459,7 +459,7 @@ wheels = [
 [[package]]
 name = "svgrl"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "fal-client" },
     { name = "fastapi" },
