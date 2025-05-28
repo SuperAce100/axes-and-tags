@@ -6,6 +6,7 @@ async function fetchIcons() {
   const iconUrls = {
     image: "https://unpkg.com/lucide-static@latest/icons/image.svg",
     text: "https://unpkg.com/lucide-static@latest/icons/text-cursor.svg",
+    ui: "https://unpkg.com/lucide-static@latest/icons/code-xml.svg",
   };
 
   await Promise.all(
@@ -69,7 +70,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderDomains();
     });
 
-  const input = document.querySelector("input");
+  const input = document.getElementById("generateInput");
   const button = document.getElementById("generateButton");
   button.addEventListener("click", (e) => {
     const concept = input.value;
@@ -85,6 +86,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       e.preventDefault();
       console.log("generating", input.value);
       window.location.href = `/generated/${selectedDomain}/${input.value}`;
+    } else if (e.key === "Enter" && input.value.length === 0) {
+      e.preventDefault();
+      alert("Please enter a concept");
+    } else if (e.key === "Enter" && selectedDomain === null) {
+      e.preventDefault();
+      alert("Please select a domain");
     }
   });
 });
