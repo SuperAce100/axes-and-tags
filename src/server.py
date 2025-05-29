@@ -1,4 +1,5 @@
 import os
+import time
 from pathlib import Path
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -60,6 +61,13 @@ class Server:
         self.app.mount(
             "/static", StaticFiles(directory=str(self.static_dir)), name="static"
         )
+        for domain in self.domains:
+            custom_scripts_path = domain.scripts_path
+            self.app.mount(
+                f"/{domain.name}",
+                StaticFiles(directory=str(Path(custom_scripts_path).parent)),
+                name=f"{domain.name}",
+            )
 
         self.app.get("/")(self.start_page)
         self.app.get("/generation/{session_id}")(self.generation_page)
@@ -75,7 +83,10 @@ class Server:
     #########################################################
 
     async def start_page(self, request: Request):
-        return self.templates.TemplateResponse("index.html", {"request": request})
+        return self.templates.TemplateResponse(
+            "index.html",
+            {"request": request},
+        )
 
     async def generation_page(self, request: Request, session_id: str):
         session = database.get_session(session_id)
@@ -87,12 +98,6 @@ class Server:
             raise HTTPException(status_code=404, detail="Domain not found")
 
         custom_scripts_path = domain.scripts_path
-        print(custom_scripts_path, domain)
-        self.app.mount(
-            "/custom",
-            StaticFiles(directory=str(Path(custom_scripts_path).parent)),
-            name="custom",
-        )
 
         return self.templates.TemplateResponse(
             "generated.html",
@@ -100,7 +105,7 @@ class Server:
                 "request": request,
                 "domain_name": domain.display_name,
                 "scripts_path": os.path.join(
-                    "/custom", custom_scripts_path.split("/")[-1]
+                    f"/{domain.name}", custom_scripts_path.split("/")[-1]
                 ),
                 "concept": session["concept"],
                 "session_id": session_id,
