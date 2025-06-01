@@ -67,6 +67,7 @@ function renderTags(tags, container) {
         "tag bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] text-white hover:bg-white/30 hover:scale-105 cursor-pointer font-sans active:scale-95 transition-all";
 
       if (
+        designSpace.axes.find((axis) => axis.name === tag.dimension) &&
         designSpace.axes.find((axis) => axis.name === tag.dimension).value === tag.value &&
         designSpace.axes.find((axis) => axis.name === tag.dimension).status === "constrained"
       ) {
