@@ -1,35 +1,41 @@
-import json
 import os
 import uuid
 from typing import Any, Dict, List, Optional
 from datetime import datetime
+import firebase_admin
+from firebase_admin import credentials, db
 
-DB_FILE_PATH = "../.data/db.json"
+# Initialize Firebase Admin SDK
+firebase_admin.initialize_app(
+    options={
+        "databaseURL": "https://svgrl-33939-default-rtdb.firebaseio.com",
+        "credential": firebase_admin.credentials.ApplicationDefault(),
+    }
+)
 
 
 class Database:
-    def __init__(self, db_file_path: str = DB_FILE_PATH):
-        self.db_file_path = db_file_path
-        self.db = {}
-        if not os.path.exists(db_file_path):
-            os.makedirs(os.path.dirname(db_file_path), exist_ok=True)
-            with open(db_file_path, "w") as f:
-                json.dump({}, f)
-        with open(db_file_path, "r") as f:
-            self.db = json.load(f)
+    def __init__(self):
+        self.ref = db.reference("/")
 
     def get(self, key: str) -> Any:
-        return self.db.get(key, None)
+        try:
+            return self.ref.child(key).get()
+        except Exception as e:
+            print(f"Error getting key {key}: {e}")
+            return None
 
     def set(self, key: str, value: Any) -> None:
-        self.db[key] = value
-        with open(self.db_file_path, "w") as f:
-            json.dump(self.db, f, indent=2)
+        try:
+            self.ref.child(key).set(value)
+        except Exception as e:
+            print(f"Error setting key {key}: {e}")
 
     def delete(self, key: str) -> None:
-        del self.db[key]
-        with open(self.db_file_path, "w") as f:
-            json.dump(self.db, f, indent=2)
+        try:
+            self.ref.child(key).delete()
+        except Exception as e:
+            print(f"Error deleting key {key}: {e}")
 
     def create_session(self, concept: str, domain: str) -> str:
         """Create a new generation session and return its ID"""
@@ -47,7 +53,13 @@ class Database:
 
     def get_session(self, session_id: str) -> Optional[Dict]:
         """Get a session by ID"""
-        return self.get(f"sessions/{session_id}")
+        session = self.get(f"sessions/{session_id}")
+        if not session:
+            return None
+        # Ensure all required fields exist
+        session.setdefault("generations", [])
+        session.setdefault("current_design_space", None)
+        return session
 
     def update_session(
         self, session_id: str, design_space: Any, generations: List[Any]
