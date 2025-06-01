@@ -11,3 +11,4 @@ data/
 .data/
 
 *.egg-info/
+cred.json
