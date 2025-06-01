@@ -6,12 +6,22 @@ import firebase_admin
 from firebase_admin import credentials, db
 
 # Initialize Firebase Admin SDK
-firebase_admin.initialize_app(
-    options={
-        "databaseURL": "https://svgrl-33939-default-rtdb.firebaseio.com",
-        "credential": firebase_admin.credentials.ApplicationDefault(),
+cred = credentials.Certificate(
+    {
+        "type": "service_account",
+        "project_id": os.getenv("FIREBASE_PROJECT_ID"),
+        "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
+        "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace("\\n", "\n"),
+        "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
+        "client_id": os.getenv("FIREBASE_CLIENT_ID"),
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_CERT_URL"),
     }
 )
+
+firebase_admin.initialize_app(cred, {"databaseURL": os.getenv("FIREBASE_DATABASE_URL")})
 
 
 class Database:
@@ -21,21 +31,14 @@ class Database:
     def get(self, key: str) -> Any:
         try:
             return self.ref.child(key).get()
-        except Exception as e:
-            print(f"Error getting key {key}: {e}")
+        except Exception:
             return None
 
     def set(self, key: str, value: Any) -> None:
-        try:
-            self.ref.child(key).set(value)
-        except Exception as e:
-            print(f"Error setting key {key}: {e}")
+        self.ref.child(key).set(value)
 
     def delete(self, key: str) -> None:
-        try:
-            self.ref.child(key).delete()
-        except Exception as e:
-            print(f"Error deleting key {key}: {e}")
+        self.ref.child(key).delete()
 
     def create_session(self, concept: str, domain: str) -> str:
         """Create a new generation session and return its ID"""
@@ -67,6 +70,8 @@ class Database:
         """Update a session with new generations and design space"""
         session = self.get_session(session_id)
         if session:
+            if "generations" not in session:
+                session["generations"] = []
             session["generations"].append(
                 {
                     "timestamp": datetime.now().isoformat(),
