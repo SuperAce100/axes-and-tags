@@ -89,5 +89,88 @@ class Database:
         sessions = self.get("sessions") or {}
         return list(sessions.values())
 
+    # ------------------------------------------------------------------
+    # Ablation utilities
+    # ------------------------------------------------------------------
+
+    def create_ablation(self, user_name: str, domain: str, prompts: List[str]) -> str:
+        """Create a new ablation experiment and return its ID"""
+        ablation_id = str(uuid.uuid4())
+        ablation_record = {
+            "id": ablation_id,
+            "user_name": user_name,
+            "domain": domain,
+            "created_at": datetime.now().isoformat(),
+            # Which variant the user is currently on (0-indexed)
+            "variant_index": 0,
+            # Which prompt inside the current variant (0-indexed)
+            "prompt_index": 0,
+            "prompts": prompts,
+            # History of generations: list of {variant, prompt, generations, design_space}
+            "history": [],
+            "current_design_space": None,
+        }
+        self.set(f"ablations/{ablation_id}", ablation_record)
+        return ablation_id
+
+    def get_ablation(self, ablation_id: str) -> Optional[Dict]:
+        """Fetch an ablation record by ID"""
+        ablation = self.get(f"ablations/{ablation_id}")
+        return ablation
+
+    def update_ablation_generation(
+        self,
+        ablation_id: str,
+        variant_index: int,
+        prompt_index: int,
+        design_space: Any,
+        generations: List[Any],
+    ) -> None:
+        """Append a generation result for a particular prompt inside the ablation"""
+        ablation = self.get_ablation(ablation_id)
+        if not ablation:
+            return
+
+        # Append to history
+        ablation.setdefault("history", []).append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "variant_index": variant_index,
+                "prompt_index": prompt_index,
+                "design_space": design_space.model_dump_json(),
+                "generations": [g.model_dump_json() for g in generations],
+            }
+        )
+
+        # Persist current design space for quick reloads
+        ablation["current_design_space"] = design_space.model_dump_json()
+        self.set(f"ablations/{ablation_id}", ablation)
+
+    def advance_ablation(
+        self, ablation_id: str, total_variants: int, total_prompts: int
+    ) -> None:
+        """Advance the ablation progress to the next prompt / variant."""
+        ablation = self.get_ablation(ablation_id)
+        if not ablation:
+            return
+
+        prompt_index = ablation.get("prompt_index", 0) + 1
+        variant_index = ablation.get("variant_index", 0)
+
+        # Move to next variant if all prompts completed
+        if prompt_index >= total_prompts:
+            prompt_index = 0
+            variant_index += 1
+
+        # Cap variant index at total_variants
+        if variant_index >= total_variants:
+            variant_index = total_variants  # indicates completion
+
+        ablation["prompt_index"] = prompt_index
+        ablation["variant_index"] = variant_index
+        # Reset current design space so that a fresh one is created on next request
+        ablation["current_design_space"] = None
+        self.set(f"ablations/{ablation_id}", ablation)
+
 
 database = Database()

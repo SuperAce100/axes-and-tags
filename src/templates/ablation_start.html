@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ablation Study</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/tailwind.config.js"></script>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="icon" href="/static/favicon.ico" />
+  </head>
+  <body>
+    <div id="app" class="container mx-auto h-screen w-screen flex flex-col gap-6 justify-center items-center">
+      <h1 class="text-5xl font-light tracking-tight">Ablation Study</h1>
+      <p class="max-w-lg text-center text-gray-600">
+        We will ask you to complete three short design tasks. Please enter your name below to begin.
+      </p>
+      <div class="relative w-3/5 transition-all hover:border-blue-500/50 border-2 border-gray-200 rounded-3xl overflow-hidden">
+        <input
+          type="text"
+          class="transition-all w-full p-5 text-lg pr-16 placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Your name"
+          id="nameInput"
+        />
+        <button
+          id="startAblationButton"
+          class="bg-blue-500 text-white text-lg p-2 px-4 rounded-xl absolute right-3 bottom-3 cursor-pointer transition-all hover:bg-blue-400 hover:scale-105 border"
+        >
+          Start
+        </button>
+      </div>
+    </div>
+    <script>
+      document.getElementById("startAblationButton").addEventListener("click", async () => {
+        const name = document.getElementById("nameInput").value.trim();
+        if (!name) {
+          alert("Please enter your name to continue");
+          return;
+        }
+        try {
+          const res = await fetch("/api/ablation/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_name: name })
+          });
+          const data = await res.json();
+          window.location.href = data.url;
+        } catch (err) {
+          console.error(err);
+          alert("Failed to start ablation – please try again.");
+        }
+      });
+    </script>
+  </body>
+</html> 
