@@ -6,6 +6,7 @@ let generations = [];
 let sessionId = null;
 
 let highlightedAxis = null;
+let initialExploringAxis = null;
 
 function showStatus(message, type = "info") {
   const status = document.getElementById("status");
@@ -53,65 +54,66 @@ document.addEventListener("keydown", (event) => {
 });
 
 function renderTags(tags, container) {
-  console.log("tags", tags);
-  // Create tags container
-  const tagsContainer = document.createElement("div");
-  tagsContainer.className = "flex gap-1 flex-wrap mt-1";
+  // Remove any previous overlay
+  const existing = container.querySelector("#tag-overlay");
+  if (existing) existing.remove();
 
-  // Add each tag
-  if (tags && Array.isArray(tags)) {
-    tags.forEach((tag) => {
-      const tagElement = document.createElement("span");
-      tagElement.textContent = tag.value;
-      tagElement.className =
-        "tag bg-white/20 px-1.5 py-0.5 rounded-full text-[10px] text-white hover:bg-white/30 hover:scale-105 cursor-pointer font-sans active:scale-95 transition-all";
+  // Determine which axis should be shown
+  const axisToShow =
+    initialExploringAxis ||
+    (designSpace?.axes?.find((axis) => axis.status === "exploring")?.name ?? null);
 
-      if (
-        designSpace.axes.find((axis) => axis.name === tag.dimension) &&
-        designSpace.axes.find((axis) => axis.name === tag.dimension).value === tag.value &&
-        designSpace.axes.find((axis) => axis.name === tag.dimension).status === "constrained"
-      ) {
-        tagElement.className = tagElement.className
-          .replace("bg-white/20", "bg-green-300/30")
-          .replace("text-white", "text-green-500")
-          .replace("hover:bg-white/30", "hover:bg-green-300/50");
-      }
+  if (!tags || !Array.isArray(tags) || tags.length === 0) return;
 
-      tagElement.addEventListener("click", async () => {
-        tagElement.className = tagElement.className
-          .replace("bg-white/20", "bg-green-300/30")
-          .replace("text-white", "text-green-500")
-          .replace("hover:bg-white/30", "hover:bg-green-300/50");
+  // Find the tag corresponding to the axis we want to display (fallback to first tag if none)
+  const displayTag = tags.find((t) => t.dimension === axisToShow) || tags[0];
 
-        await updateDesignSpace(tag.dimension, tag.value, "constrained");
-        renderTags(tags, container);
-      });
-
-      tagElement.addEventListener("mouseenter", () => {
-        highlightedAxis = tag.dimension;
-        document
-          .getElementById("design-space-container-" + tag.dimension)
-          .classList.add("scale-105", "shadow-md", "ring-2", "ring-green-500", "ring");
-      });
-
-      tagElement.addEventListener("mouseleave", () => {
-        highlightedAxis = null;
-        document
-          .getElementById("design-space-container-" + tag.dimension)
-          .classList.remove("scale-105", "shadow-md", "ring-2", "ring-green-500", "ring");
-      });
-
-      tagsContainer.appendChild(tagElement);
-    });
-  }
-
+  // Build overlay
   const tagOverlay = document.createElement("div");
   tagOverlay.className =
-    "bg-gradient-to-t from-black/85 via-black/60 to-transparent p-3 absolute bottom-0 left-0 w-full z-12 tag-overlay transition-all";
+    "bg-gradient-to-t from-black/85 via-black/60 to-transparent p-4 absolute bottom-0 left-0 w-full z-12 tag-overlay transition-all";
   tagOverlay.id = "tag-overlay";
-  // Append elements
-  tagOverlay.appendChild(tagsContainer);
+
+  const tagElement = document.createElement("span");
+  tagElement.textContent = displayTag.value;
+  tagElement.className =
+    "tag bg-white/20 p-2 rounded-xl text-xl tracking-tight font-bold text-white font-sans transition-all w-full text-center inline-block backdrop-blur-sm group-hover:text-2xl group-hover:duration-300 group-hover:ring-2 group-hover:ring-white/50";
+
+  // Apply selected styling if already constrained
+  const axisState = designSpace?.axes?.find((axis) => axis.name === displayTag.dimension);
+  if (axisState && axisState.value === displayTag.value && axisState.status === "constrained") {
+    tagElement.className = tagElement.className
+      .replace("bg-white/20", "bg-green-300/30")
+      .replace("text-white", "text-green-500")
+      .replace("hover:bg-white/30", "hover:bg-green-300/50");
+  }
+
+  tagElement.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    tagElement.className = tagElement.className
+      .replace("bg-white/20", "bg-green-300/30")
+      .replace("text-white", "text-green-500")
+      .replace("hover:bg-white/30", "hover:bg-green-300/50");
+    await updateDesignSpace(displayTag.dimension, displayTag.value, "constrained");
+  });
+
+  tagOverlay.appendChild(tagElement);
   container.appendChild(tagOverlay);
+
+  // Make the whole preview clickable & hoverable
+  container.addEventListener("click", () => tagElement.click());
+
+  container.addEventListener("mouseenter", () => {
+    highlightedAxis = displayTag.dimension;
+    const axisEl = document.getElementById("design-space-container-" + displayTag.dimension);
+    axisEl?.classList?.add("scale-105", "shadow-md", "ring-2", "ring-green-500", "ring");
+  });
+
+  container.addEventListener("mouseleave", () => {
+    highlightedAxis = null;
+    const axisEl = document.getElementById("design-space-container-" + displayTag.dimension);
+    axisEl?.classList?.remove("scale-105", "shadow-md", "ring-2", "ring-green-500", "ring");
+  });
 }
 
 function renderPrompt(prompt, container) {
@@ -127,7 +129,7 @@ function renderPrompt(prompt, container) {
     "text-white text-xs max-w-full overflow-hidden leading-tight font-sans max-h-[2.5em] hover:max-h-[200px] transition-all mask-b-from-0% mask-b-to-20%";
 
   promptOverlay.appendChild(promptElement);
-  promptOverlay.addEventListener("click", togglePrompt);
+  // promptOverlay.addEventListener("click", togglePrompt);
   promptOverlay.style.opacity = isPromptVisible ? 1 : 0;
   container.appendChild(promptOverlay);
 }
@@ -165,7 +167,7 @@ function renderGrid() {
 
     item.className =
       item.className +
-      " bg-white rounded-lg shadow-md transition-all relative overflow-hidden aspect-square hover:-translate-y-0.5 hover:shadow-lg";
+      " bg-white rounded-2xl shadow-md transition-all relative overflow-hidden aspect-square hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg cursor-pointer group";
     if (isFirstRender) {
       item.className =
         item.className + " opacity-0 translate-y-4 scale-80 duration-500 filter blur-md";
@@ -494,7 +496,7 @@ async function regenerate() {
     showStatus("Please select an axis to explore", "error");
     return;
   }
-
+  initialExploringAxis = exploringAxes[0].name;
   
   generations = [];
   renderGrid();
@@ -567,6 +569,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("generations", generations);
     renderGrid();
     renderDesignSpace();
+
+    // SECOND_EDIT: capture the axis that was exploring at first load
+    if (!initialExploringAxis) {
+      const exploringAxisObj = designSpace.axes.find((axis) => axis.status === "exploring");
+      initialExploringAxis = exploringAxisObj ? exploringAxisObj.name : null;
+    }
   } catch (error) {
     console.error("Error:", error);
     showStatus("Failed to load generation", "error");
