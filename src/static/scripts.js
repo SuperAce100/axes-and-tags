@@ -151,7 +151,7 @@ function renderGrid() {
     grid.className = "col-span-3 flex flex-col items-center justify-center py-48";
     return;
   } else {
-    grid.className = "col-span-3 grid grid-cols-3 gap-4 items-start";
+    grid.className = "col-span-3 grid grid-cols-3 gap-6 items-start";
   }
 
   generations.forEach((generation, index) => {
@@ -167,7 +167,7 @@ function renderGrid() {
 
     item.className =
       item.className +
-      " bg-white rounded-2xl shadow-md transition-all relative overflow-hidden aspect-square hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg cursor-pointer group";
+      " bg-white rounded-3xl shadow-md transition-all relative overflow-hidden aspect-square hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg cursor-pointer group";
     if (isFirstRender) {
       item.className =
         item.className + " opacity-0 translate-y-4 scale-80 duration-500 filter blur-md";
