@@ -239,27 +239,27 @@ class Server:
 
     # Constants for ablation configuration
     ABLATION_PROMPTS: list[str] = [
-        "A futuristic city at dusk with flying cars",
-        "A serene beach sunrise with palm trees",
-        "A steampunk-inspired airship over clouds",
-        "A neon-lit cyberpunk alley at night",
-        "A majestic dragon soaring above mountains",
-        "A close-up of a dewdrop on a leaf",
-        "A retro 80s style arcade room",
-        "An elegant ballet dancer mid-jump",
-        "A photorealistic red apple on marble",
-        "A vibrant coral reef teeming with fish",
-        "A snow-covered cabin in a forest",
-        "A mystical portal in an ancient ruin",
-        "A minimalist black and white spiral",
-        "A cozy coffee shop interior",
-        "A golden retriever wearing sunglasses",
-        "A high-speed race car drifting",
-        "A whimsical floating island landscape",
-        "A microscopic view of a cell dividing",
+        "A car",
+        "A dog",
+        "A helmet",
+        "A house",
+        "A living room",
+        "A kitchen",
+        "A bedroom",
+        "A desk setup",
+        "A flower",
+        "A beach",
+        "A mountain",
+        "A city skyline",
+        "A cat",
+        "A coffee shop",
+        "A jacket",
+        "A race car",
+        "A floating island",
+        "A bird",
     ]
 
-    PROMPTS_PER_VARIANT = 1  # each ablation uses 6 prompts, 3 variants => 18 total
+    PROMPTS_PER_VARIANT = 4  # each ablation uses 6 prompts, 3 variants => 18 total
 
     ABLATION_VARIANTS = [
         {"name": "no_sort", "sort_results": False, "explore_all_axes": False},
