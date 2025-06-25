@@ -54,12 +54,36 @@ def generate(
     n: int,
     model: str = text_model,
     console: Console = None,
+    *,
+    sort_results: bool = True,
+    explore_all_axes: bool = False,
 ) -> List[Example]:
-    explorations = design_space.explore(n)
+    # ------------------------------------------------------------------
+    # Decide how we obtain exploration variants depending on ablation mode
+    # ------------------------------------------------------------------
+
+    if explore_all_axes:
+        # In this mode we want to explore all design axes simultaneously.
+        # The existing DesignSpace.explore method only works with a single
+        # axis marked as "exploring", so here we approximate multi-axis
+        # exploration by generating n independent fills of the entire
+        # design space.
+        explorations = [f"exploration_{i}" for i in range(n)]  # dummy placeholders
+    else:
+        explorations = design_space.explore(n)
 
     if console:
         console.print("Explorations:", style="dim")
         console.print(explorations, style="dim")
+
+    # If we are in the all-axes exploration mode we will perform a full space
+    # fill for every generation rather than varying a single axis.
+    def _prepare_design_space_for_all_axes():
+        # Mark every axis as unconstrained so that `.fill()` assigns values.
+        for axis in design_space.axes:
+            axis.status = "unconstrained"
+            axis.value = ""
+        design_space.fill()
 
     def generate_one(
         concept: str,
@@ -67,9 +91,12 @@ def generate(
         exploration: str,
         model: str = text_model,
     ) -> Example:
-        for axis in design_space.axes:
-            if axis.status == "exploring":
-                axis.value = exploration
+        if explore_all_axes:
+            _prepare_design_space_for_all_axes()
+        else:
+            for axis in design_space.axes:
+                if axis.status == "exploring":
+                    axis.value = exploration
 
         example = domain.generate_one(concept, design_space, model)
         tags = extract_tags(example.prompt, design_space, model)
@@ -90,8 +117,10 @@ def generate(
         ):
             results.append((futures[future], future.result()))
 
-        # Sort results by original exploration order
-        results.sort(key=lambda x: explorations.index(x[0]))
+        # Sort results by original exploration order if requested
+        if sort_results and explorations:
+            results.sort(key=lambda x: explorations.index(x[0]))
+        # Strip exploration keys, keep only Example objects
         results = [r[1] for r in results]
 
     save_path = os.path.join(

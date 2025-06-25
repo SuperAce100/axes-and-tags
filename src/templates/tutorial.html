@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Design Galleries – Tutorial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/tailwind.config.js"></script>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="icon" href="/static/favicon.ico" />
+  </head>
+  <body>
+    <div class="container mx-auto w-9/12 py-12 space-y-12">
+      <header class="flex items-end justify-between">
+        <h1 class="text-5xl font-light tracking-tight text-gray-900 font-sans">
+          Get started with Design Galleries
+        </h1>
+        <a
+          href="/"
+          class="bg-blue-100 text-blue-500 hover:bg-blue-400 transition-all duration-300 text-lg py-2 px-4 rounded-xl"
+        >
+          Start Exploring
+        </a>
+      </header>
+
+      <!-- Introduction -->
+      <section class="space-y-4 text-gray-800 leading-relaxed text-lg">
+        <p>
+          This short guide walks you through <span class="font-semibold">Design Galleries</span>
+          - an interface for rapidly exploring large creative spaces. In just a
+          few clicks you&#39;ll learn how to move through ideas, control axes, and
+          regenerate fresh variations.
+        </p>
+      </section>
+
+      
+
+      <!-- Step-by-step -->
+      <section class="space-y-10">
+        <!-- Step 1 -->
+        <div class="flex flex-col md:flex-row gap-8 items-start">
+          <div class="text-7xl font-bold text-blue-500/20 self-start">1</div>
+          <div class="space-y-2 flex-1">
+            <h2 class="text-2xl font-medium text-gray-900">Enter a prompt &amp; pick a domain</h2>
+            <p class="text-lg text-gray-700">
+              On the home page, describe what you&#39;d like to explore (for example
+              <em>&quot;a futuristic city at dusk&quot;</em>) and select a generation
+              domain such as <span class="font-semibold">Images</span>,
+              <span class="font-semibold">UIs</span>, or
+              <span class="font-semibold">Text</span>. Click
+              <span class="font-semibold">Generate</span> to create the first
+              gallery of possibilities.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="flex flex-col md:flex-row gap-8 items-start">
+          <div class="text-7xl font-bold text-blue-500/20 self-start">2</div>
+          <div class="space-y-2 flex-1">
+            <h2 class="text-2xl font-medium text-gray-900">Pick a value for the current axis</h2>
+            <p class="text-lg text-gray-700">
+              Hover any preview to reveal a <span class="italic">tag</span>
+              representing the value being explored along the current design
+              axis. Click the tag (or the preview itself) to
+              <span class="text-green-600 font-semibold">constrain</span> the
+              design space to that value.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="flex flex-col md:flex-row gap-8 items-start">
+          <div class="text-7xl font-bold text-blue-500/20 self-start">3</div>
+          <div class="space-y-2 flex-1">
+            <h2 class="text-2xl font-medium text-gray-900">Choose the next axis to explore</h2>
+            <p class="text-lg text-gray-700">
+              In the <span class="font-semibold">Design Space</span> panel you
+              can set any axis to <span class="italic">Exploring</span>,
+              <span class="italic">Unconstrained</span>, or
+              <span class="italic">Constrained</span>. Pick a new axis to
+              <span class="text-green-600 font-semibold">explore</span> next by
+              clicking the telescope icon.
+            </p>
+            <p class="text-sm text-gray-500">
+              Tip: Want to explore something that isn&#39;t listed yet? Click the
+              <span class="italic">+&nbsp;Add&nbsp;Axis</span> button to define a
+              brand-new dimension and provide a few example values.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="flex flex-col md:flex-row gap-8 items-start">
+          <div class="text-7xl font-bold text-blue-500/20 self-start">4</div>
+          <div class="space-y-2 flex-1">
+            <h2 class="text-2xl font-medium text-gray-900">Regenerate for fresh results</h2>
+            <p class="text-lg text-gray-700">
+              Hit the <span class="font-semibold">Regenerate</span> button to
+              sample new designs that honor your constraints while introducing
+              variation along the axis you&#39;ve chosen to explore.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Demo -->
+      <section class="space-y-4">
+        <h2 class="text-2xl font-medium text-gray-900 tracking-tight">See it in action</h2>
+
+        <div class="relative overflow-hidden bg-gray-50">
+          <iframe
+            id="demoFrame"
+            title="Design Galleries demo"
+            class="w-full h-[650px] bg-white"
+            loading="lazy"
+            src="/generation/5ed84688-f77c-4f94-b732-6c631e62399b"
+          ></iframe>
+
+          <!-- Overlay guide labels -->
+          <div class="pointer-events-none absolute inset-0">
+            <!-- Preview grid label -->
+            <div class="absolute top-6 left-6 ">
+              <div class="px-6 py-4 bg-white/60 backdrop-blur-md rounded-2xl shadow-md text-gray-900 text-xl border">Click a tile to constrain an axis</div>
+            </div>
+
+            <!-- Design space label -->
+            <div class="absolute bottom-6 right-0 flex flex-col items-end gap-2 text-sm text-gray-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-move-up"><path d="M8 6L12 2L16 6"></path><path d="M12 2V22"></path></svg>
+              <div class="px-6 py-4 bg-white/60 backdrop-blur-md rounded-2xl shadow-md text-gray-900 text-xl border">Click the telescope icon to explore a new axis</div>
+            </div>
+          </div>
+          <script>
+            document.addEventListener("DOMContentLoaded", () => {
+              const iframe = document.getElementById("demoFrame");
+              iframe.addEventListener("load", () => {
+                try {
+                  const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                  // Hide the entire header row (concept + buttons)
+                  const headerEl = iframeDoc.querySelector("h1#concept")?.parentElement;
+                  headerEl && (headerEl.style.display = "none");
+                  const main = iframeDoc.getElementById("main");
+                  main.style.width = "100%";
+                  main.classList.remove("w-10/12", "container", "mx-auto", "space-y-8");
+                } catch (err) {
+                  console.warn("Could not modify iframe contents", err);
+                }
+              });
+            });
+          </script>
+        </div>
+
+      </section>
+
+      <!-- Outro -->
+      <section class="space-y-4 text-gray-800 leading-relaxed text-lg">
+        <p>
+          That&#39;s it! You&#39;re ready to explore. Click
+          <span class="font-semibold">Start Exploring</span> above to jump back to
+          the generator and try it yourself.
+        </p>
+      </section>
+    </div>
+  </body>
+</html> 
