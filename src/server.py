@@ -92,6 +92,11 @@ class Server:
         )
         self.app.post("/api/ablation/{ablation_id}/next")(self.ablation_next)
 
+        # ------------------------------------------------------------------
+        # Tutorial route
+        # ------------------------------------------------------------------
+        self.app.get("/tutorial")(self.tutorial_page)
+
     #################################################################
     # HTML endpoints
     #################################################################
@@ -124,6 +129,17 @@ class Server:
                 "concept": session["concept"],
                 "session_id": session_id,
             },
+        )
+
+    async def tutorial_page(self, request: Request):
+        """Render the interactive tutorial page that walks new users through the
+        exploration workflow. The page itself is kept intentionally static – it
+        explains the four-step loop and links back to the home page so users
+        can try it themselves."""
+
+        return self.templates.TemplateResponse(
+            "tutorial.html",
+            {"request": request},
         )
 
     #################################################################
