@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ablation Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/tailwind.config.js"></script>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="icon" href="/static/favicon.ico" />
+  </head>
+  <body>
+    <div class="container mx-auto w-10/12 space-y-6" id="main">
+      <!-- Header -->
+      <div class="flex flex-row items-end justify-between gap-8 mt-8">
+        <div>
+          <h1 class="text-4xl font-bold text-gray-900 font-tight" id="concept">Loading…</h1>
+          <p class="text-gray-600 text-sm" id="detailText">Participant: {{ user_name }}</p>
+        </div>
+        <div class="flex flex-row gap-2">
+          <button class="bg-blue-200/50 text-blue-500 hover:bg-blue-200 transition-all duration-300 text-lg py-2 pl-3 px-4 rounded-xl" id="backButton" onclick="history.back()">
+            Back
+          </button>
+          <button class="bg-blue-500 text-white hover:bg-blue-400 transition-all duration-300 text-lg py-2 px-4 rounded-xl" id="prevButton">Prev</button>
+          <button class="bg-blue-500 text-white hover:bg-blue-400 transition-all duration-300 text-lg py-2 px-4 rounded-xl" id="nextButton">Next</button>
+        </div>
+      </div>
+
+      <div id="status" class="status" style="display: none"></div>
+
+      <div class="grid grid-cols-4 gap-6 sm:grid-cols-1 md:grid-cols-4 lg:grid-cols-4">
+        <div class="col-span-3 grid grid-cols-3 gap-4" id="mainGrid"></div>
+
+        <div class="col-span-1 space-y-4">
+          <div id="designSpace">
+            <h3 class="text-2xl font-medium text-gray-900 font-tight">Design Space</h3>
+            <div id="designSpaceList" class="mt-4"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inject viewer context -->
+    <script>
+      window.__ABLATION_VIEWER__ = {
+        id: "{{ ablation_id }}",
+      };
+    </script>
+    <script src="/static/ablation_viewer_scripts.js"></script>
+    <!-- We include the generic renderer after our viewer script so that our fetch patch is in place -->
+    <script src="/static/scripts.js"></script>
+    <script src="{{ scripts_path }}"></script>
+  </body>
+</html> 

@@ -97,6 +97,12 @@ class Server:
         # ------------------------------------------------------------------
         self.app.get("/tutorial")(self.tutorial_page)
 
+        # ------------------------------------------------------------------
+        # Ablation viewer routes (read-only replay)
+        # ------------------------------------------------------------------
+        self.app.get("/ablation-viewer/{ablation_id}")(self.ablation_viewer_page)
+        self.app.get("/api/ablation/{ablation_id}/history")(self.get_ablation_history)
+
     #################################################################
     # HTML endpoints
     #################################################################
@@ -472,6 +478,56 @@ class Server:
             total_prompts=self.PROMPTS_PER_VARIANT,
         )
         return {"status": "ok"}
+
+    async def ablation_viewer_page(self, request: Request, ablation_id: str):
+        """Read-only page to replay an ablation run after completion."""
+        ablation = database.get_ablation(ablation_id)
+        if not ablation:
+            raise HTTPException(status_code=404, detail="Ablation not found")
+
+        domain = next((d for d in self.domains if d.name == ablation["domain"]), None)
+        if domain is None:
+            raise HTTPException(status_code=404, detail="Domain not found")
+
+        custom_scripts_path = domain.scripts_path
+
+        return self.templates.TemplateResponse(
+            "ablation_viewer.html",
+            {
+                "request": request,
+                "ablation_id": ablation_id,
+                "user_name": ablation.get("user_name", ""),
+                "scripts_path": os.path.join(
+                    f"/{domain.name}", custom_scripts_path.split("/")[-1]
+                ),
+            },
+        )
+
+    async def get_ablation_history(self, ablation_id: str):
+        """Return the full, parsed generation history for a finished ablation."""
+        import json
+
+        ablation = database.get_ablation(ablation_id)
+        if not ablation:
+            raise HTTPException(status_code=404, detail="Ablation not found")
+
+        history = ablation.get("history", [])
+        parsed_history = []
+        for record in history:
+            # Parse stored JSON strings back into objects/dicts that can be sent over the wire
+            design_space = json.loads(record["design_space"])
+            generations = [json.loads(g) for g in record.get("generations", [])]
+            parsed_history.append(
+                {
+                    "variant_index": record.get("variant_index"),
+                    "prompt_index": record.get("prompt_index"),
+                    "timestamp": record.get("timestamp"),
+                    "design_space": design_space,
+                    "generations": generations,
+                }
+            )
+
+        return parsed_history
 
     def run(self, reload: bool = False, port: int = 8000):
         uvicorn.run(self.app, host="0.0.0.0", port=port, reload=reload)
