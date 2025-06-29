@@ -27,7 +27,14 @@ from io import BytesIO
 # keeps static analysers from flagging unresolved imports.
 try:
     import matplotlib.pyplot as plt  # type: ignore
-    from matplotlib.patches import Rectangle  # type: ignore
+    from matplotlib.patches import Rectangle, FancyBboxPatch  # type: ignore
+    import matplotlib.font_manager as fm  # type: ignore
+
+    # ------------------------------------------------------------------
+    # Set up custom font
+    # ------------------------------------------------------------------
+    font_path = Path(__file__).parent / "static" / "fonts" / "Inter-Medium.ttf"
+    font_prop = fm.FontProperties(fname=str(font_path))
 except ModuleNotFoundError:  # pragma: no cover – handled at runtime
     plt = None  # type: ignore
     Rectangle = None  # type: ignore
@@ -673,15 +680,24 @@ class Server:
         # --------------------------
         # Draw the figure
         # --------------------------
-        COL_SPACING = 2.0  # horizontal space between left edges of squares
-        ROW_SPACING = 3.0  # add extra space for row heading ("Exploring ...")
-        SQUARE_SIZE = 1.8
+        # ------------------------------------------------------------------
+        # Global aesthetic tweaks
+        # ------------------------------------------------------------------
+        plt.rcParams["font.family"] = ["Inter", "DejaVu Sans", "sans-serif"]
 
-        fig_width = max_cols * COL_SPACING
-        fig_height = len(rows) * ROW_SPACING
+        COL_SPACING = 2.0  # horizontal space between left edges of squares
+        LEFT_MARGIN = 0.1  # slight shift right to avoid clipping
+        ROW_SPACING = 2.7  # vertical space between successive rows
+        SQUARE_SIZE = 1.9
+        BOTTOM_MARGIN = -0.9
+
+        fig_width = LEFT_MARGIN + max_cols * COL_SPACING
+        fig_height = len(rows) * ROW_SPACING + BOTTOM_MARGIN
         fig, ax = plt.subplots(figsize=(fig_width, fig_height))
         ax.set_xlim(0, fig_width)
-        ax.set_ylim(0, fig_height)
+        ax.set_ylim(
+            -0.2, fig_height + 0.2
+        )  # slight negative bottom to reduce whitespace
         ax.set_axis_off()
 
         from base64 import b64decode  # local import to avoid overhead if not needed
@@ -700,57 +716,62 @@ class Server:
                         break
 
             for col_idx, (label, image_b64) in enumerate(cells):
-                x = col_idx * COL_SPACING
+                x = LEFT_MARGIN + col_idx * COL_SPACING
                 # Check if this cell's label matches the selected value
                 is_selected = (
                     selected_value is not None
                     and label.lower() == selected_value.lower()
                 )
 
-                # Always draw a border rectangle (highlight if selected)
-                rect = Rectangle(
+                # ------------------------------------------------------------------
+                # Render image and rounded-corner border together
+                # ------------------------------------------------------------------
+
+                # Create rounded box that doubles as border and clipping mask
+                rect = FancyBboxPatch(
                     (x, y),
                     SQUARE_SIZE,
                     SQUARE_SIZE,
                     facecolor="none",
                     edgecolor="#2ecc71" if is_selected else "black",
                     linewidth=3.0 if is_selected else 1.0,
+                    boxstyle="round,pad=0.02,rounding_size=0.15",
                     zorder=2,
                 )
                 ax.add_patch(rect)
 
-                # Try to render the image if available
-                if image_b64:
-                    try:
-                        img_bytes = b64decode(image_b64)
-                        img = Image.open(BytesIO(img_bytes))
-                        ax.imshow(
-                            img,
-                            extent=(
-                                x,
-                                x + SQUARE_SIZE,
-                                y,
-                                y + SQUARE_SIZE,
-                            ),
-                            zorder=1,
-                        )
-                    except Exception:
-                        # fall back to grey fill if image fails to load
-                        rect.set_facecolor("#d3d3d3")
-                else:
-                    rect.set_facecolor("#d3d3d3")
+                # Render image clipped to the rounded rectangle
+                img_bytes = b64decode(image_b64)
+                img = Image.open(BytesIO(img_bytes))
+                im = ax.imshow(
+                    img,
+                    extent=(
+                        x - 0.01,
+                        x + SQUARE_SIZE + 0.01,
+                        y - 0.01,
+                        y + SQUARE_SIZE + 0.01,
+                    ),
+                    zorder=1,
+                )
+                im.set_clip_path(rect)
 
                 # Overlay label on image with semi-transparent background
                 ax.text(
                     x + SQUARE_SIZE / 2,
-                    y + 0.1,
+                    y + 0.2,
                     label,
                     ha="center",
                     va="bottom",
                     fontsize=12,
                     color="white",
-                    family="serif",
-                    bbox=dict(facecolor="black", alpha=0.6, pad=2, edgecolor="none"),
+                    fontweight="bold",
+                    bbox=dict(
+                        facecolor="black",
+                        alpha=0.6,
+                        pad=8,
+                        edgecolor="none",
+                        boxstyle="round,pad=0.75,rounding_size=1",
+                    ),
                     zorder=3,
                 )
 
@@ -758,14 +779,21 @@ class Server:
             # Row heading: "Exploring <axis>"
             # ------------------------------------------------------------------
             ax.text(
-                (max_cols * COL_SPACING) / 2,
-                y + SQUARE_SIZE + 0.5,
+                LEFT_MARGIN + (max_cols * COL_SPACING) / 2,
+                y + SQUARE_SIZE + 0.35,
                 f"Exploring {axis_name.replace('_', ' ')}",
                 ha="center",
                 va="bottom",
                 fontsize=14,
-                family="serif",
-                bbox=dict(facecolor="white", alpha=1.0, pad=2, edgecolor="none"),
+                fontproperties=font_prop,
+                fontweight="bold",
+                bbox=dict(
+                    facecolor="white",
+                    alpha=1.0,
+                    pad=4,
+                    edgecolor="none",
+                    boxstyle="round,pad=0.25,rounding_size=0.15",
+                ),
                 zorder=4,
             )
 
@@ -774,9 +802,11 @@ class Server:
             # ------------------------------------------------------------------
             if row_idx < len(rows) - 1:
                 if selected_col_idx is not None:
-                    arrow_x = selected_col_idx * COL_SPACING + SQUARE_SIZE / 2
+                    arrow_x = (
+                        LEFT_MARGIN + selected_col_idx * COL_SPACING + SQUARE_SIZE / 2
+                    )
                 else:
-                    arrow_x = (max_cols * COL_SPACING) / 2
+                    arrow_x = LEFT_MARGIN + (max_cols * COL_SPACING) / 2
                 arrow_start_y = y - 0.1
                 arrow_end_y = arrow_start_y - (ROW_SPACING - SQUARE_SIZE) + 0.2
                 ax.annotate(
