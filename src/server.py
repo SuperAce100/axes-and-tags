@@ -4,7 +4,7 @@ from pathlib import Path
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 from pydantic import BaseModel
 import uvicorn
 import argparse
@@ -18,6 +18,19 @@ from models.llms import text_model
 from typing import List, Optional
 from rich.console import Console
 from db import database
+from datetime import datetime
+from io import BytesIO
+
+# Matplotlib is an optional dependency used only for rendering the generation
+# history figure. Importing it in a try/except ensures the server can still
+# start even if the library is not yet installed (e.g. during cold starts) and
+# keeps static analysers from flagging unresolved imports.
+try:
+    import matplotlib.pyplot as plt  # type: ignore
+    from matplotlib.patches import Rectangle  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover – handled at runtime
+    plt = None  # type: ignore
+    Rectangle = None  # type: ignore
 
 
 class StartRequest(BaseModel):
@@ -72,6 +85,11 @@ class Server:
         self.app.get("/")(self.start_page)
         self.app.get("/generation/{session_id}")(self.generation_page)
 
+        # ------------------------------------------------------------------
+        # Figure route: visualize the full generation history as an image
+        # ------------------------------------------------------------------
+        self.app.get("/generation/{session_id}/figure")(self.generation_figure)
+
         #################################################################
         self.app.get("/api/domains")(self.get_domains)
         self.app.post("/api/generate")(self.generate)
@@ -102,6 +120,11 @@ class Server:
         # ------------------------------------------------------------------
         self.app.get("/ablation-viewer/{ablation_id}")(self.ablation_viewer_page)
         self.app.get("/api/ablation/{ablation_id}/history")(self.get_ablation_history)
+
+        # ------------------------------------------------------------------
+        # Ablations overview page
+        # ------------------------------------------------------------------
+        self.app.get("/ablations")(self.ablations_overview_page)
 
     #################################################################
     # HTML endpoints
@@ -528,6 +551,248 @@ class Server:
             )
 
         return parsed_history
+
+    async def ablations_overview_page(self, request: Request):
+        """List all ablation runs with a preview image."""
+        import json
+
+        ablations = database.list_ablations()
+        overview_items = []
+        for record in ablations:
+            sample_img = None
+            if record.get("history"):
+                first_gen = (
+                    record["history"][0]["generations"][0]
+                    if record["history"][0]["generations"]
+                    else None
+                )
+                if first_gen:
+                    try:
+                        gen_obj = json.loads(first_gen)
+                        sample_img = gen_obj.get("content")
+                    except Exception:
+                        sample_img = None
+            overview_items.append(
+                {
+                    "id": record["id"],
+                    "user_name": record.get("user_name", ""),
+                    "created_at": (
+                        datetime.fromisoformat(record["created_at"]).strftime(
+                            "%Y-%m-%d %H:%M"
+                        )
+                        if record.get("created_at")
+                        else ""
+                    ),
+                    "sample_img": (
+                        f"data:image/png;base64,{sample_img}" if sample_img else None
+                    ),
+                }
+            )
+
+        return self.templates.TemplateResponse(
+            "ablations_overview.html",
+            {"request": request, "ablations": overview_items},
+        )
+
+    async def generation_figure(self, session_id: str):
+        """Return a PNG image visualising the full generation history.
+
+        The figure shows each generation step as a row of grey squares. The text
+        inside the square corresponds to the value explored for the axis that
+        was marked as "exploring" during that step. Between rows an arrow and
+        a caption "Exploring <axis>" indicate which design dimension was being
+        iterated on.
+        """
+        if plt is None or Rectangle is None:  # Matplotlib missing – user must install
+            raise HTTPException(
+                status_code=500,
+                detail="matplotlib is required for this endpoint. Add it to your environment.",
+            )
+
+        session = database.get_session(session_id)
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+
+        history = session.get("generations", [])
+        if not history:
+            raise HTTPException(status_code=404, detail="No generation history found")
+
+        # Each row: axis name, list of (label, image_b64 | None)
+        rows: list[tuple[str, list[tuple[str, str | None]], str | None]] = []
+        max_cols = 0
+
+        total_steps = len(history)
+        for idx, step in enumerate(history):
+            # Reconstruct DesignSpace to find the currently explored axis
+            design_space_json = step.get("design_space")
+            try:
+                design_space = DesignSpace.model_validate_json(design_space_json)
+            except Exception:
+                continue  # skip malformed entries
+
+            exploring_axis = next(
+                (axis for axis in design_space.axes if axis.status == "exploring"),
+                None,
+            )
+            axis_name = exploring_axis.name if exploring_axis else ""
+
+            # Decode examples and extract tag values for the exploring axis
+            examples_json = step.get("generations", [])
+            example_objs = [
+                Example.model_validate_json(ej) for ej in examples_json if ej
+            ]
+
+            cells: list[tuple[str, str | None]] = []
+            for ex in example_objs:
+                match = next(
+                    (t.value for t in ex.tags if t.dimension == axis_name),
+                    None,
+                )
+                label = match if match is not None else ""
+                image_b64: str | None = ex.content if ex.content else None
+                cells.append((label, image_b64))
+
+            # Determine which value was selected for this axis by looking ahead
+            selected_value: str | None = None
+            for later_step in history[idx + 1 :]:
+                later_ds_json = later_step.get("design_space")
+                try:
+                    later_ds = DesignSpace.model_validate_json(later_ds_json)
+                except Exception:
+                    continue
+                later_axis = next(
+                    (a for a in later_ds.axes if a.name == axis_name), None
+                )
+                if later_axis and later_axis.value:
+                    selected_value = later_axis.value.lower()
+                    break
+
+            max_cols = max(max_cols, len(cells))
+            rows.append((axis_name, cells, selected_value))
+
+        # --------------------------
+        # Draw the figure
+        # --------------------------
+        COL_SPACING = 2.0  # horizontal space between left edges of squares
+        ROW_SPACING = 3.0  # add extra space for row heading ("Exploring ...")
+        SQUARE_SIZE = 1.8
+
+        fig_width = max_cols * COL_SPACING
+        fig_height = len(rows) * ROW_SPACING
+        fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+        ax.set_xlim(0, fig_width)
+        ax.set_ylim(0, fig_height)
+        ax.set_axis_off()
+
+        from base64 import b64decode  # local import to avoid overhead if not needed
+        from PIL import Image  # pillow dependency
+
+        for row_idx, (axis_name, cells, selected_value) in enumerate(rows):
+            # y coordinate of the top-left corner of the row (invert because matplotlib's origin is bottom-left)
+            y = fig_height - (row_idx + 1) * ROW_SPACING + (ROW_SPACING - SQUARE_SIZE)
+
+            # Determine which column is selected (if any)
+            selected_col_idx: int | None = None
+            if selected_value is not None:
+                for c_idx, (lbl, _img) in enumerate(cells):
+                    if lbl.lower() == selected_value.lower():
+                        selected_col_idx = c_idx
+                        break
+
+            for col_idx, (label, image_b64) in enumerate(cells):
+                x = col_idx * COL_SPACING
+                # Check if this cell's label matches the selected value
+                is_selected = (
+                    selected_value is not None
+                    and label.lower() == selected_value.lower()
+                )
+
+                # Always draw a border rectangle (highlight if selected)
+                rect = Rectangle(
+                    (x, y),
+                    SQUARE_SIZE,
+                    SQUARE_SIZE,
+                    facecolor="none",
+                    edgecolor="#2ecc71" if is_selected else "black",
+                    linewidth=3.0 if is_selected else 1.0,
+                    zorder=2,
+                )
+                ax.add_patch(rect)
+
+                # Try to render the image if available
+                if image_b64:
+                    try:
+                        img_bytes = b64decode(image_b64)
+                        img = Image.open(BytesIO(img_bytes))
+                        ax.imshow(
+                            img,
+                            extent=(
+                                x,
+                                x + SQUARE_SIZE,
+                                y,
+                                y + SQUARE_SIZE,
+                            ),
+                            zorder=1,
+                        )
+                    except Exception:
+                        # fall back to grey fill if image fails to load
+                        rect.set_facecolor("#d3d3d3")
+                else:
+                    rect.set_facecolor("#d3d3d3")
+
+                # Overlay label on image with semi-transparent background
+                ax.text(
+                    x + SQUARE_SIZE / 2,
+                    y + 0.1,
+                    label,
+                    ha="center",
+                    va="bottom",
+                    fontsize=12,
+                    color="white",
+                    family="serif",
+                    bbox=dict(facecolor="black", alpha=0.6, pad=2, edgecolor="none"),
+                    zorder=3,
+                )
+
+            # ------------------------------------------------------------------
+            # Row heading: "Exploring <axis>"
+            # ------------------------------------------------------------------
+            ax.text(
+                (max_cols * COL_SPACING) / 2,
+                y + SQUARE_SIZE + 0.5,
+                f"Exploring {axis_name.replace('_', ' ')}",
+                ha="center",
+                va="bottom",
+                fontsize=14,
+                family="serif",
+                bbox=dict(facecolor="white", alpha=1.0, pad=2, edgecolor="none"),
+                zorder=4,
+            )
+
+            # ------------------------------------------------------------------
+            # Arrow pointing to the next row (except for the last row)
+            # ------------------------------------------------------------------
+            if row_idx < len(rows) - 1:
+                if selected_col_idx is not None:
+                    arrow_x = selected_col_idx * COL_SPACING + SQUARE_SIZE / 2
+                else:
+                    arrow_x = (max_cols * COL_SPACING) / 2
+                arrow_start_y = y - 0.1
+                arrow_end_y = arrow_start_y - (ROW_SPACING - SQUARE_SIZE) + 0.2
+                ax.annotate(
+                    "",
+                    xy=(arrow_x, arrow_end_y),
+                    xytext=(arrow_x, arrow_start_y),
+                    arrowprops=dict(arrowstyle="->", lw=1.5),
+                    zorder=1,
+                )
+
+        fig.tight_layout()
+        buf = BytesIO()
+        fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+        plt.close(fig)
+        buf.seek(0)
+        return StreamingResponse(buf, media_type="image/png")
 
     def run(self, reload: bool = False, port: int = 8000):
         uvicorn.run(self.app, host="0.0.0.0", port=port, reload=reload)

@@ -89,6 +89,16 @@ class Database:
         sessions = self.get("sessions") or {}
         return list(sessions.values())
 
+    def list_ablations(self) -> List[Dict]:
+        """Return all ablation records as a list sorted by created_at desc."""
+        ablations = self.get("ablations") or {}
+        # Flatten to list and sort (newest first)
+        return sorted(
+            ablations.values(),
+            key=lambda a: a.get("created_at", ""),
+            reverse=True,
+        )
+
     # ------------------------------------------------------------------
     # Ablation utilities
     # ------------------------------------------------------------------
