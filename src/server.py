@@ -20,6 +20,7 @@ from rich.console import Console
 from db import database
 from datetime import datetime
 from io import BytesIO
+import random
 
 # Matplotlib is an optional dependency used only for rendering the generation
 # history figure. Importing it in a try/except ensures the server can still
@@ -373,8 +374,6 @@ class Server:
 
         # Shuffle prompts so each participant gets a random order
         prompts = self.ABLATION_PROMPTS.copy()
-        import random
-
         random.shuffle(prompts)
 
         # Keep only as many prompts as needed (PROMPTS_PER_VARIANT * variants)
@@ -675,6 +674,12 @@ class Server:
                     break
 
             max_cols = max(max_cols, len(cells))
+
+            # If this is the last row and no value was selected, choose one randomly
+            is_last_row = idx == total_steps - 1
+            if is_last_row and selected_value is None and cells:
+                selected_value = random.choice(cells)[0].lower()
+
             rows.append((axis_name, cells, selected_value))
 
         # --------------------------
@@ -819,10 +824,10 @@ class Server:
 
         fig.tight_layout()
         buf = BytesIO()
-        fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+        fig.savefig(buf, format="pdf", bbox_inches="tight")
         plt.close(fig)
         buf.seek(0)
-        return StreamingResponse(buf, media_type="image/png")
+        return StreamingResponse(buf, media_type="application/pdf")
 
     def run(self, reload: bool = False, port: int = 8000):
         uvicorn.run(self.app, host="0.0.0.0", port=port, reload=reload)
