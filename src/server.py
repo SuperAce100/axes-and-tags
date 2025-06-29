@@ -783,7 +783,10 @@ class Server:
                     try:
                         from html2image import Html2Image  # type: ignore
 
-                        hti = Html2Image(output_path=None)  # saves to temp dir
+                        hti = Html2Image(
+                            output_path="/tmp/html2image",
+                            browser_executable="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+                        )
                         size = 1024
 
                         html_doc = (
@@ -799,15 +802,15 @@ class Server:
                         img_paths = hti.screenshot(
                             html_str=html_doc,
                             size=(size, size),
-                            delay=1,  # seconds
                         )
                         if img_paths:
                             with open(img_paths[0], "rb") as _f:
                                 img_bytes = _f.read()
                         else:
                             raise RuntimeError("html2image failed")
-                    except Exception:
+                    except Exception as e:
                         # Fallback: render text-as-image
+                        print("html2image failed, falling back to text-as-image", e)
                         from PIL import Image, ImageDraw, ImageFont  # type: ignore
 
                         pil_img = Image.new("RGB", (512, 512), "white")
@@ -845,13 +848,16 @@ class Server:
                     )
                     im.set_clip_path(rect)
                 # Overlay label on image with semi-transparent background (for all domains)
+
+                label = textwrap.fill(label, width=24)
                 ax.text(
                     x + SQUARE_SIZE / 2,
                     y + 0.2,
                     label,
                     ha="center",
                     va="bottom",
-                    fontsize=12,
+                    fontsize=12 if domain_type != "image" else 9,
+                    wrap=True,
                     color="white",
                     fontweight="bold",
                     bbox=dict(
