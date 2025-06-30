@@ -1,4 +1,5 @@
 import os
+import textwrap
 import time
 from pathlib import Path
 from fastapi import FastAPI, Request, HTTPException
@@ -20,6 +21,7 @@ from rich.console import Console
 from db import database
 from datetime import datetime
 from io import BytesIO
+import random
 
 # Matplotlib is an optional dependency used only for rendering the generation
 # history figure. Importing it in a try/except ensures the server can still
@@ -373,8 +375,6 @@ class Server:
 
         # Shuffle prompts so each participant gets a random order
         prompts = self.ABLATION_PROMPTS.copy()
-        import random
-
         random.shuffle(prompts)
 
         # Keep only as many prompts as needed (PROMPTS_PER_VARIANT * variants)
@@ -649,15 +649,14 @@ class Server:
                 Example.model_validate_json(ej) for ej in examples_json if ej
             ]
 
-            cells: list[tuple[str, str | None]] = []
+            cells: list[tuple[str, str]] = []
             for ex in example_objs:
                 match = next(
                     (t.value for t in ex.tags if t.dimension == axis_name),
                     None,
                 )
                 label = match if match is not None else ""
-                image_b64: str | None = ex.content if ex.content else None
-                cells.append((label, image_b64))
+                cells.append((label, ex.content))
 
             # Determine which value was selected for this axis by looking ahead
             selected_value: str | None = None
@@ -675,6 +674,12 @@ class Server:
                     break
 
             max_cols = max(max_cols, len(cells))
+
+            # If this is the last row and no value was selected, choose one randomly
+            is_last_row = idx == total_steps - 1
+            if is_last_row and selected_value is None and cells:
+                selected_value = random.choice(cells)[0].lower()
+
             rows.append((axis_name, cells, selected_value))
 
         # --------------------------
@@ -700,8 +705,7 @@ class Server:
         )  # slight negative bottom to reduce whitespace
         ax.set_axis_off()
 
-        from base64 import b64decode  # local import to avoid overhead if not needed
-        from PIL import Image  # pillow dependency
+        domain_type = session.get("domain", "image")
 
         for row_idx, (axis_name, cells, selected_value) in enumerate(rows):
             # y coordinate of the top-left corner of the row (invert because matplotlib's origin is bottom-left)
@@ -710,12 +714,12 @@ class Server:
             # Determine which column is selected (if any)
             selected_col_idx: int | None = None
             if selected_value is not None:
-                for c_idx, (lbl, _img) in enumerate(cells):
+                for c_idx, (lbl, _cell_content) in enumerate(cells):
                     if lbl.lower() == selected_value.lower():
                         selected_col_idx = c_idx
                         break
 
-            for col_idx, (label, image_b64) in enumerate(cells):
+            for col_idx, (label, cell_content) in enumerate(cells):
                 x = LEFT_MARGIN + col_idx * COL_SPACING
                 # Check if this cell's label matches the selected value
                 is_selected = (
@@ -740,29 +744,120 @@ class Server:
                 )
                 ax.add_patch(rect)
 
-                # Render image clipped to the rounded rectangle
-                img_bytes = b64decode(image_b64)
-                img = Image.open(BytesIO(img_bytes))
-                im = ax.imshow(
-                    img,
-                    extent=(
-                        x - 0.01,
-                        x + SQUARE_SIZE + 0.01,
-                        y - 0.01,
-                        y + SQUARE_SIZE + 0.01,
-                    ),
-                    zorder=1,
-                )
-                im.set_clip_path(rect)
+                if domain_type == "image":
+                    # Render image clipped to rounded rectangle
+                    from base64 import b64decode as _bd
+                    from PIL import Image  # type: ignore
 
-                # Overlay label on image with semi-transparent background
+                    img_bytes = _bd(cell_content)
+                    img = Image.open(BytesIO(img_bytes))
+                    im = ax.imshow(
+                        img,
+                        extent=(
+                            x - 0.01,
+                            x + SQUARE_SIZE + 0.01,
+                            y - 0.01,
+                            y + SQUARE_SIZE + 0.01,
+                        ),
+                        zorder=1,
+                    )
+                    im.set_clip_path(rect)
+                elif domain_type == "text":
+                    rect.set_facecolor("#e5e5e5")
+                    wrapped_raw = cell_content.strip().replace("\n", " ")
+                    if len(wrapped_raw) > 250:
+                        wrapped_raw = wrapped_raw[:247] + "..."
+                    snippet = textwrap.fill(wrapped_raw, width=29)
+                    ax.text(
+                        x + 0.12,
+                        y + SQUARE_SIZE - 0.12,
+                        snippet,
+                        ha="left",
+                        va="top",
+                        fontsize=8,
+                        family="serif",
+                        wrap=True,
+                        zorder=3,
+                    )
+                elif domain_type == "ui":
+                    try:
+                        from html2image import Html2Image  # type: ignore
+
+                        hti = Html2Image(
+                            output_path="/tmp/html2image",
+                            browser_executable="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+                        )
+                        size = 1024
+
+                        html_doc = (
+                            "<html><head>"
+                            '<script src="https://cdn.tailwindcss.com"></script>'
+                            "<style>body{margin:0;padding:0}</style>"
+                            "</head><body>"
+                            f'<div class="w-[{size}px] h-[{size}px]">{cell_content}</div>'
+                            "</body></html>"
+                        )
+
+                        # Screenshot after a short delay to ensure Tailwind is applied
+                        img_paths = hti.screenshot(
+                            html_str=html_doc,
+                            size=(size, size),
+                        )
+                        if img_paths:
+                            with open(img_paths[0], "rb") as _f:
+                                img_bytes = _f.read()
+                        else:
+                            raise RuntimeError("html2image failed")
+                    except Exception as e:
+                        # Fallback: render text-as-image
+                        print("html2image failed, falling back to text-as-image", e)
+                        from PIL import Image, ImageDraw, ImageFont  # type: ignore
+
+                        pil_img = Image.new("RGB", (512, 512), "white")
+                        draw = ImageDraw.Draw(pil_img)
+                        font = ImageFont.load_default()
+                        wrapped = textwrap.fill(
+                            cell_content.replace("\n", " ")[:400], width=40
+                        )
+                        draw.multiline_text((10, 10), wrapped, fill="black", font=font)
+
+                        _buf = BytesIO()
+                        pil_img.save(_buf, format="PNG")
+                        img_bytes = _buf.getvalue()
+
+                    # Display the rendered UI; downscale to improve sharpness
+                    from PIL import Image  # type: ignore
+
+                    pil_final = Image.open(BytesIO(img_bytes))
+                    if pil_final.width != 512:
+                        if hasattr(Image, "Resampling"):
+                            pil_final = pil_final.resize(
+                                (512, 512), Image.Resampling.LANCZOS
+                            )
+                        else:
+                            pil_final = pil_final.resize((512, 512), Image.LANCZOS)
+                    im = ax.imshow(
+                        pil_final,
+                        extent=(
+                            x - 0.01,
+                            x + SQUARE_SIZE + 0.01,
+                            y - 0.01,
+                            y + SQUARE_SIZE + 0.01,
+                        ),
+                        zorder=1,
+                    )
+                    im.set_clip_path(rect)
+                # Overlay label on image with semi-transparent background (for all domains)
+
+                label = textwrap.fill(label, width=24)
                 ax.text(
                     x + SQUARE_SIZE / 2,
                     y + 0.2,
                     label,
                     ha="center",
                     va="bottom",
-                    fontsize=12,
+                    fontsize=12 if domain_type != "image" else 9,
+                    wrap=True,
                     color="white",
                     fontweight="bold",
                     bbox=dict(
@@ -819,10 +914,10 @@ class Server:
 
         fig.tight_layout()
         buf = BytesIO()
-        fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+        fig.savefig(buf, format="pdf", bbox_inches="tight")
         plt.close(fig)
         buf.seek(0)
-        return StreamingResponse(buf, media_type="image/png")
+        return StreamingResponse(buf, media_type="application/pdf")
 
     def run(self, reload: bool = False, port: int = 8000):
         uvicorn.run(self.app, host="0.0.0.0", port=port, reload=reload)

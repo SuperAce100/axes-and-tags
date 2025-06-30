@@ -13,40 +13,6 @@ import re
 from rich.progress import track
 
 
-def extract_tags(
-    prompt: str, design_space: DesignSpace, model: str = text_model
-) -> list[Tag]:
-    design_space_str = "\n".join(
-        [
-            f"{axis.name}"
-            for axis in design_space.axes
-            if axis.status == "exploring" or axis.status == "unconstrained"
-        ]
-    )
-
-    tags_xml = llm_call(
-        extract_tags_prompt.format(prompt=prompt, design_space=design_space_str),
-        model=model,
-    )
-    tags = []
-
-    tags_parts = tags_xml.split("<tag")
-    if len(tags_parts) > 1:
-        for tag in tags_parts[1:]:
-            if "</tag>" in tag:
-                dimension_match = re.search(r'dimension="([^"]+)"', tag)
-                tag_value = tag.split(">", 1)[1].split("</tag>", 1)[0].strip()
-                if dimension_match:
-                    dimension = dimension_match.group(1)
-                    tags.append(Tag(dimension=dimension, value=tag_value.lower()))
-
-    for axis in design_space.axes:
-        if axis.value and not any(t.dimension == axis.name for t in tags):
-            tags.append(Tag(dimension=axis.name, value=axis.value.lower()))
-
-    return tags
-
-
 def generate(
     concept: str,
     design_space: DesignSpace,
@@ -99,7 +65,14 @@ def generate(
                     axis.value = exploration
 
         example = domain.generate_one(concept, design_space, model)
-        tags = extract_tags(example.prompt, design_space, model)
+        exploring_axis = next(
+            (axis for axis in design_space.axes if axis.status == "exploring"), None
+        )
+        tags = (
+            [Tag(dimension=exploring_axis.name, value=exploration.lower())]
+            if exploring_axis
+            else []
+        )
         return Example(prompt=example.prompt, content=example.content, tags=tags)
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
