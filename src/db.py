@@ -5,13 +5,17 @@ from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, db
 
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
 # Initialize Firebase Admin SDK
 cred = credentials.Certificate(
     {
         "type": "service_account",
         "project_id": os.getenv("FIREBASE_PROJECT_ID"),
         "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
-        "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace("\\n", "\n"),
+        "private_key": os.getenv("FIREBASE_PRIVATE_KEY"),
         "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
         "client_id": os.getenv("FIREBASE_CLIENT_ID"),
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
