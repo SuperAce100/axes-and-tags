@@ -71,7 +71,9 @@ async function startGeneration(concept) {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error at startGeneration ${response.status} status: ${response.statusText}`);
+      throw new Error(
+        `HTTP error at startGeneration ${response.status} status: ${response.statusText}`
+      );
     }
 
     const data = await response.json();
@@ -95,7 +97,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderDomains();
     });
 
-  const input = document.getElementById("generateInput");
+  const input = document.getElementById("conceptInput");
   const button = document.getElementById("generateButton");
   button.addEventListener("click", (e) => {
     const concept = input.value;

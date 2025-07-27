@@ -67,7 +67,7 @@ class Server:
         domains: List[Domain],
         n: int,
         model: str = text_model,
-        console: Console = None,
+        console: Console | None = None,
     ):
         self.app = FastAPI()
         self.domains = domains
@@ -190,7 +190,7 @@ class Server:
             for d in self.domains
         ]
 
-    async def generate(self, request: StartRequest) -> RedirectResponse:
+    async def generate(self, request: StartRequest) -> dict[str, str]:
         domain = next((d for d in self.domains if d.name == request.domain), None)
         if domain is None:
             raise HTTPException(status_code=404, detail="Domain not found")
