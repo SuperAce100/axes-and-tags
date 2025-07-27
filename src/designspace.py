@@ -26,11 +26,12 @@ class DesignSpace(BaseModel):
         )
 
     @staticmethod
-    def create(concept: str, domain: str, model: str = text_model):
-        response = llm_call(
-            create_design_space_prompt.format(concept=concept, domain=domain),
-            model=model,
-        )
+    def create(concept: str, domain: str, model: str = text_model, context: str | None = None):
+        prompt = create_design_space_prompt.format(concept=concept, domain=domain)
+        if context:
+            prompt += "\n\nHere is additional context to inform the design space:\n" + context
+
+        response = llm_call(prompt, model=model)
 
         axes = []
         axes_parts = response.split("<axis>")

@@ -3,7 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Design Galleries</title>
+    <title>Axes-and-Tags</title>
+    <link
+      href="https://api.fontshare.com/v2/css?f[]=sentient@200,201,300,301,400,401,500,501,700,701&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/static/tailwind.config.js"></script>
     <link rel="stylesheet" href="/static/styles.css" />
@@ -11,30 +15,38 @@
   </head>
   <body>
     <div id="app" class="container mx-auto h-screen w-screen">
-      <div class="flex flex-col gap-6 justify-center items-center h-full w-full mx-auto">
-        <h1 class="text-7xl font-light text-gray-900 mb-4 font-sans tracking-tighter">
-          Design Galleries
-        </h1>
+      <div class="flex flex-col gap-6 justify-center items-center h-full w-full mx-auto max-w-4xl">
         <div
-          class="relative w-3/5 transition-all hover:border-blue-500/50 border-2 border-gray-200 rounded-3xl overflow-hidden"
+          class="flex flex-col items-center justify-center bg-gradient-to-r from-rose-500 via-blue-600 to-rose-500 bg-clip-text bg-bottom-right text-transparent"
         >
-          <input
-            type="text"
-            class="transition-all w-full p-5 pb-20 text-lg pr-16 placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="What would you like to explore?"
-            id="generateInput"
-          />
+          <h1
+            class="text-8xl font-extralight tracking-tight"
+            style="font-family: var(--font-serif)"
+          >
+            Axes-and-Tags
+          </h1>
+          <h4 class="text-4xl italic" style="font-family: var(--font-serif)">
+            generative design galleries
+          </h4>
+        </div>
+        <div class="relative w-full transition-all max-h-fit rounded-3xl">
+          <textarea
+            id="conceptInput"
+            rows="8"
+            class="transition-all w-full h-32 p-5 pb-20 text-lg pr-16 mb-0 placeholder:text-gray-500 outline-none focus:ring-8 focus:ring-pink-500/30 border-2 focus:border-indigo-500 rounded-3xl hover:border-indigo-500/50 hover:ring-indigo-500/30"
+            placeholder="Describe what you'd like to explore..."
+          ></textarea>
           <button
             id="generateButton"
-            class="bg-blue-500 text-white text-lg p-2 px-4 rounded-xl absolute right-3 bottom-3 cursor-pointer transition-all hover:bg-blue-400 hover:scale-105 border"
+            class="bg-gradient-to-tl from-rose-400 to-indigo-600 text-white text-md p-2 px-4 rounded-3xl absolute right-1.5 bottom-3 cursor-pointer transition-all hover:scale-105 border"
           >
             Generate
           </button>
-          <div id="domains" class="flex flex-row gap-4 absolute bottom-0 left-0 w-fit"></div>
+          <div id="domains" class="flex flex-row gap-4 absolute bottom-1 left-0 w-fit"></div>
         </div>
         <a
           href="/tutorial"
-          class="bg-blue-200/30 text-blue-500 hover:bg-blue-100 transition-all duration-300 text-lg py-4 px-6 rounded-xl"
+          class="bg-indigo-200/30 text-indigo-500 hover:bg-indigo-100 transition-all duration-300 text-lg py-4 px-6 rounded-xl"
         >
           How does this work?
         </a>

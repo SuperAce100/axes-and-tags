@@ -98,7 +98,7 @@ def generate(
 
     save_path = os.path.join(
         domain.data_dir,
-        f"{concept.replace(' ', '_')}_{domain.display_name}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json",
+        f"{concept.replace(' ', '_')[:32]}_{domain.display_name}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json",
     )
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
