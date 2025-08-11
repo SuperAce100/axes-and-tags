@@ -108,16 +108,16 @@ class Server:
         # ------------------------------------------------------------------
         # Ablation routes
         # ------------------------------------------------------------------
-        self.app.get("/ablation")(self.ablation_start_page)
-        self.app.get("/ablation/{ablation_id}")(self.ablation_generation_page)
-        self.app.get("/ablation-completed")(self.ablation_completed_page)
+        # self.app.get("/ablation")(self.ablation_start_page)
+        # self.app.get("/ablation/{ablation_id}")(self.ablation_generation_page)
+        # self.app.get("/ablation-completed")(self.ablation_completed_page)
 
-        self.app.post("/api/ablation/create")(self.create_ablation)
-        self.app.get("/api/ablation/{ablation_id}")(self.get_ablation)
-        self.app.post("/api/ablation/{ablation_id}/regenerate")(
-            self.ablation_regenerate
-        )
-        self.app.post("/api/ablation/{ablation_id}/next")(self.ablation_next)
+        # self.app.post("/api/ablation/create")(self.create_ablation)
+        # self.app.get("/api/ablation/{ablation_id}")(self.get_ablation)
+        # self.app.post("/api/ablation/{ablation_id}/regenerate")(
+        #     self.ablation_regenerate
+        # )
+        # self.app.post("/api/ablation/{ablation_id}/next")(self.ablation_next)
 
         # ------------------------------------------------------------------
         # Tutorial route
